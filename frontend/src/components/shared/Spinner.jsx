@@ -5,7 +5,7 @@ const SIZE_MAP = {
 };
 
 export default function Spinner({ size = 'md' }) {
-  const dimension = SIZE_MAP[size] ?? SIZE_MAP.md;
+  const dimension = SIZE_MAP[size] ?? SIZE_MAP['md'];
 
   return (
     <div

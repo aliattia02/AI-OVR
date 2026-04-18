@@ -7,7 +7,7 @@ const SIZE_MAP = {
 };
 
 export default function Modal({ title, children, onClose, size = 'md' }) {
-  const width = SIZE_MAP[size] ?? SIZE_MAP.md;
+  const width = SIZE_MAP[size] ?? SIZE_MAP['md'];
   const dialogRef = useRef(null);
   const onCloseRef = useRef(onClose);
   const titleId = useId();
