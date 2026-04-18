@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
@@ -73,6 +74,7 @@ def create_refresh_token(user_id: str) -> str:
     now = datetime.now(tz=timezone.utc)
     payload = {
         "user_id": user_id,
+        "jti": str(uuid4()),
         "token_type": "refresh",
         "exp": now + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
         "iat": now,
@@ -130,39 +132,93 @@ async def get_current_user(
 
 async def store_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMotorDatabase) -> None:
     """Store a hashed refresh token in the user's refresh_tokens array."""
+    claims = decode_token(refresh_token)
+    if claims.get("token_type") != "refresh" or claims.get("user_id") != user_id:
+        raise _unauthorized_exception()
+
     hashed_token = hash_password(refresh_token)
+    token_entry = {
+        "jti": claims.get("jti"),
+        "token_hash": hashed_token,
+        "created_at": datetime.now(tz=timezone.utc),
+    }
     await db["users"].update_one(
         {"user_id": user_id},
-        {"$push": {"refresh_tokens": {"$each": [hashed_token], "$slice": -MAX_STORED_REFRESH_TOKENS}}},
+        {"$push": {"refresh_tokens": {"$each": [token_entry], "$slice": -MAX_STORED_REFRESH_TOKENS}}},
     )
 
 
 async def verify_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMotorDatabase) -> bool:
     """Return True if the provided refresh token matches any stored hashed token."""
+    try:
+        claims = decode_token(refresh_token)
+    except HTTPException:
+        return False
+    if claims.get("token_type") != "refresh":
+        return False
+
+    token_jti = claims.get("jti")
     user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 0, "refresh_tokens": 1})
     if not user_doc:
         return False
 
     stored_tokens = user_doc.get("refresh_tokens", [])
     for stored in stored_tokens:
-        if verify_password(refresh_token, stored):
+        if isinstance(stored, str):
+            if verify_password(refresh_token, stored):
+                return True
+            continue
+
+        if not isinstance(stored, dict):
+            continue
+
+        if token_jti and stored.get("jti") != token_jti:
+            continue
+
+        stored_hash = stored.get("token_hash")
+        if isinstance(stored_hash, str) and verify_password(refresh_token, stored_hash):
             return True
     return False
 
 
 async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMotorDatabase) -> bool:
     """Invalidate a refresh token by removing its matching hashed entry from storage."""
+    try:
+        claims = decode_token(refresh_token)
+    except HTTPException:
+        return False
+    if claims.get("token_type") != "refresh":
+        return False
+
+    token_jti = claims.get("jti")
     user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 0, "refresh_tokens": 1})
     if not user_doc:
         return False
 
     stored_tokens = user_doc.get("refresh_tokens", [])
-    remaining_tokens: list[str] = []
+    remaining_tokens: list[Any] = []
     match_found = False
     for stored in stored_tokens:
-        if verify_password(refresh_token, stored):
+        if isinstance(stored, str):
+            if verify_password(refresh_token, stored):
+                match_found = True
+                continue
+            remaining_tokens.append(stored)
+            continue
+
+        if not isinstance(stored, dict):
+            remaining_tokens.append(stored)
+            continue
+
+        if token_jti and stored.get("jti") != token_jti:
+            remaining_tokens.append(stored)
+            continue
+
+        stored_hash = stored.get("token_hash")
+        if isinstance(stored_hash, str) and verify_password(refresh_token, stored_hash):
             match_found = True
             continue
+
         remaining_tokens.append(stored)
 
     if not match_found:
