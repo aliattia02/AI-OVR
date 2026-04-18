@@ -3,7 +3,7 @@ import { ERROR_CLASSIFICATIONS, EVENT_TYPES } from '../../utils/enums';
 import { formatEnumLabel } from '../../utils/formatters';
 
 function formatConfidence(score) {
-  if (score == null || Number.isNaN(Number(score))) return '';
+  if (score === null || score === undefined || Number.isNaN(Number(score))) return '';
   const value = Number(score);
   const percent = value <= 1 ? value * 100 : value;
   return `${Math.round(percent)}% confidence`;
@@ -14,11 +14,8 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
   const [chosenClassification, setChosenClassification] = useState('');
   const [chosenEventType, setChosenEventType] = useState('');
 
-  const classificationOptions = ERROR_CLASSIFICATIONS;
-  const eventTypeOptions = EVENT_TYPES;
-
-  const defaultClassification = aiMetadata?.auto_classification ?? classificationOptions[0] ?? '';
-  const defaultEventType = aiMetadata?.auto_event_type ?? eventTypeOptions[0] ?? '';
+  const defaultClassification = aiMetadata?.auto_classification ?? ERROR_CLASSIFICATIONS[0] ?? '';
+  const defaultEventType = aiMetadata?.auto_event_type ?? EVENT_TYPES[0] ?? '';
 
   useEffect(() => {
     setChosenClassification(defaultClassification);
@@ -26,7 +23,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
     setShowOverrideForm(false);
   }, [defaultClassification, defaultEventType]);
 
-  if (!aiMetadata || aiMetadata.auto_classification == null) {
+  if (!aiMetadata || aiMetadata.auto_classification === null || aiMetadata.auto_classification === undefined) {
     return null;
   }
 
@@ -59,7 +56,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
     onOverride?.(chosenClassification, chosenEventType || null);
     setShowOverrideForm(false);
   };
-  const requiresEventType = eventTypeOptions.length > 0;
+  const requiresEventType = EVENT_TYPES.length > 0;
   const isOverrideDisabled = !chosenClassification || (requiresEventType && !chosenEventType);
 
   return (
@@ -168,14 +165,14 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                   backgroundColor: '#FFFFFF',
                 }}
               >
-                {classificationOptions.map((classification) => (
+                {ERROR_CLASSIFICATIONS.map((classification) => (
                   <option key={classification} value={classification}>
                     {formatEnumLabel(classification)}
                   </option>
                 ))}
               </select>
 
-              {eventTypeOptions.length > 0 && (
+              {EVENT_TYPES.length > 0 && (
                 <select
                   value={chosenEventType}
                   onChange={(event) => setChosenEventType(event.target.value)}
@@ -189,7 +186,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                     backgroundColor: '#FFFFFF',
                   }}
                 >
-                  {eventTypeOptions.map((eventType) => (
+                  {EVENT_TYPES.map((eventType) => (
                     <option key={eventType} value={eventType}>
                       {formatEnumLabel(eventType)}
                     </option>
