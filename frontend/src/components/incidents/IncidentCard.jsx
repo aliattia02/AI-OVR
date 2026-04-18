@@ -10,8 +10,7 @@ export default function IncidentCard({ incident, onClick }) {
   };
 
   const showAIPending =
-    incident?.ai_metadata?.auto_classification !== null &&
-    incident?.ai_metadata?.auto_classification !== undefined &&
+    incident?.ai_metadata?.auto_classification != null &&
     incident?.ai_metadata?.human_reviewed === false;
 
   return (

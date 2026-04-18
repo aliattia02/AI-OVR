@@ -81,6 +81,7 @@ export default function RiskMatrix({ severity, probability, onChange, readOnly =
                   opacity: clickable ? 1 : 0.95,
                 }}
               >
+                {selected && <div aria-hidden="true">✓</div>}
                 <div>{rowSeverity}</div>
                 <div>{colProbability}</div>
                 <div>{score}</div>
