@@ -39,7 +39,7 @@ export default function IncidentCard({ incident, onClick }) {
         display: 'grid',
         gap: 10,
       }}
-      aria-label={`Incident ${incident?.incident_id ?? ''}`.trim()}
+      aria-label={`Incident ${incident?.incident_id ?? incident?.facility_name ?? 'details'}`}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
         <div style={{ minWidth: 0 }}>
