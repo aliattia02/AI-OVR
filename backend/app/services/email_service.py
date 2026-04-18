@@ -24,8 +24,7 @@ def _sendgrid_enabled() -> bool:
     if (
         not SENDGRID_API_KEY
         or SENDGRID_API_KEY == "SG.xxxx"
-        or not SENDGRID_API_KEY.startswith("SG.")
-        or len(SENDGRID_API_KEY) < 50
+        or len(SENDGRID_API_KEY) < 20
     ):
         logger.warning("SendGrid is not configured (SENDGRID_API_KEY is empty or placeholder); skipping email send.")
         return False
