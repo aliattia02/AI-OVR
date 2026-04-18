@@ -1,2 +1,16 @@
-// frontend/src/components/shared/Spinner.jsx
-// Spinner component — full-screen or inline loading indicator used during async operations in E·OVR.
+export default function Spinner() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        width: 32,
+        height: 32,
+        border: '3px solid #e5e7eb',
+        borderTopColor: '#2563eb',
+        borderRadius: '50%',
+        animation: 'spin 0.8s linear infinite',
+      }}
+    />
+  );
+}
