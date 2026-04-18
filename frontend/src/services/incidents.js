@@ -37,12 +37,12 @@ export const incidentService = {
   },
 
   async submitFinal(id, text) {
-    const { data } = await api.post(`/incidents/${id}/final`, { text });
+    const { data } = await api.post(`/incidents/${id}/final`, { final_report: text });
     return data;
   },
 
   async submitAIFeedback(id, sug, chosen) {
-    const { data } = await api.post(`/incidents/${id}/ai-feedback`, { suggestion: sug, chosen });
+    const { data } = await api.post(`/incidents/${id}/ai-feedback`, { ai_suggested: sug, human_chose: chosen });
     return data;
   },
 
