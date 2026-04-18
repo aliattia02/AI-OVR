@@ -296,6 +296,8 @@ async def save_actions(
         ``True`` if the document was updated; ``False`` if not found.
     """
     audit_entry = build_audit_entry(user_id=user_id, action="actions_saved")
+    # pymongo does not support Python datetime.date objects natively; convert to
+    # an ISO-format string so that Pydantic can coerce it back to `date` on read.
     set_fields: dict = {
         "corrective_action": corrective,
         "preventive_action": preventive,
@@ -384,7 +386,8 @@ async def save_ai_feedback(
                 "ai_metadata.feedback.ai_suggested": ai_suggested,
                 "ai_metadata.feedback.human_chose": human_chose,
                 "ai_metadata.feedback.reviewer_id": reviewer_id,
-                "ai_metadata.feedback.reviewed_at": now,
+                # Store as ISO string for consistency with create_incident (mode="json")
+                "ai_metadata.feedback.reviewed_at": now.isoformat(),
                 "ai_metadata.human_reviewed": True,
             },
         },
