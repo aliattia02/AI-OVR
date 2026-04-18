@@ -22,7 +22,7 @@ export default function Modal({ title, children, onClose, size = 'md' }) {
 
   return (
     <div
-      onClick={onClose}
+      onClick={() => onClose?.()}
       style={{
         position: 'fixed',
         inset: 0,
@@ -63,7 +63,7 @@ export default function Modal({ title, children, onClose, size = 'md' }) {
           <h2 style={{ margin: 0, fontSize: 18, color: '#0C2340' }}>{title}</h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => onClose?.()}
             aria-label="Close modal"
             style={{
               width: 32,

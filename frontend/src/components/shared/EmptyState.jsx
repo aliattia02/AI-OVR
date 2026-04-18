@@ -23,7 +23,7 @@ export default function EmptyState({ icon = '📋', title, subtitle, action }) {
       {action && (
         <button
           type="button"
-          onClick={action.onClick}
+          onClick={() => action.onClick?.()}
           style={{
             marginTop: 6,
             padding: '10px 14px',
