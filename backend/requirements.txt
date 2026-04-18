@@ -1,4 +1,4 @@
-# Core
+# Core: fastapi, uvicorn[standard], motor, python-jose[cryptography], passlib[bcrypt], pydantic[email], python-multipart
 fastapi
 uvicorn[standard]
 motor
@@ -7,7 +7,7 @@ passlib[bcrypt]
 pydantic[email]
 python-multipart
 
-# Utilities
+# Utilities: openpyxl, reportlab, arabic-reshaper, python-bidi, sendgrid, python-dotenv
 openpyxl
 reportlab
 arabic-reshaper
@@ -15,11 +15,11 @@ python-bidi
 sendgrid
 python-dotenv
 
-# Testing
+# Testing: pytest, httpx
 pytest
 httpx
 
-# AI (commented out — uncomment when model is ready)
+# AI (commented out — uncomment when model is ready): openai, anthropic, google-generativeai
 # openai
 # anthropic
 # google-generativeai
