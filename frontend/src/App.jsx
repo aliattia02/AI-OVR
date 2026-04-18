@@ -11,6 +11,13 @@ import Reports from './pages/Reports';
 import WorkflowPage from './pages/WorkflowPage';
 
 const LoginForm = LoginFormModule.default || (() => null);
+const PATH_BY_VIEW = {
+  dashboard: '/dashboard',
+  reports: '/incidents',
+  'new-report': '/new',
+  analytics: '/analytics',
+  workflow: '/workflow',
+};
 
 function ProtectedRoute({ children, minTier }) {
   const { isAuthenticated, tier } = useAuth();
@@ -32,11 +39,10 @@ function AppLayout() {
     : pathname.startsWith('/new')
       ? 'new-report'
       : pathname.slice(1).split('/')[0] || 'dashboard';
-  const pathByView = { dashboard: '/dashboard', reports: '/incidents', 'new-report': '/new', analytics: '/analytics', workflow: '/workflow' };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar currentView={currentView} onNavigate={(view) => navigate(pathByView[view] || '/dashboard')} />
+      <Sidebar currentView={currentView} onNavigate={(view) => navigate(PATH_BY_VIEW[view] || '/dashboard')} />
       <main style={{ flex: 1, overflow: 'auto', padding: 16 }}>
         <Outlet />
       </main>
