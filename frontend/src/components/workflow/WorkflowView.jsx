@@ -60,7 +60,7 @@ const TIMELINE_STEPS = [
 
 const RISK_SCORE_GUIDE = [
   { scores: [9], level: 'Critical', color: '#DC2626' },
-  { scores: [6, 4], level: 'High', color: '#D97706' },
+  { scores: [4, 6], level: 'High', color: '#D97706' },
   { scores: [3], level: 'Medium', color: '#1B6CA8' },
   { scores: [2, 1], level: 'Low', color: '#059669' },
 ];
@@ -142,7 +142,7 @@ export default function WorkflowView() {
                   display: 'grid',
                   placeItems: 'center',
                   fontWeight: 700,
-                  fontSize: 18,
+                  fontSize: 14,
                   flexShrink: 0,
                 }}
                 aria-label="More Info Needed branch"
