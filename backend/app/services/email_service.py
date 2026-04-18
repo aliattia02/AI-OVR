@@ -15,6 +15,7 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 SENDGRID_API_KEY: str = os.getenv("SENDGRID_API_KEY", "")
+# Backward-compatible fallback for older env files that still use EMAIL_FROM.
 SENDGRID_FROM_EMAIL: str = os.getenv("SENDGRID_FROM_EMAIL", os.getenv("EMAIL_FROM", ""))
 
 
