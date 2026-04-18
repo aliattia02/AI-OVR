@@ -18,11 +18,11 @@ load_dotenv()
 # ── Configuration ─────────────────────────────────────────────────────────────
 # Loaded once at module import.  If AI_PROVIDER is "none" or AI_API_KEY is
 # blank, _ENABLED is False and every public function returns None immediately.
-AI_PROVIDER: str = os.getenv("AI_PROVIDER", AIProvider.none).lower()
+AI_PROVIDER: str = os.getenv("AI_PROVIDER", AIProvider.none.value).lower()
 AI_API_KEY: str = os.getenv("AI_API_KEY", "")
 AI_MODEL: str = os.getenv("AI_MODEL", "")
 
-_ENABLED: bool = AI_PROVIDER != AIProvider.none and bool(AI_API_KEY)
+_ENABLED: bool = AI_PROVIDER != AIProvider.none.value and bool(AI_API_KEY)
 
 _VALID_CLASSIFICATIONS: frozenset[str] = frozenset(e.value for e in ErrorClassification)
 _VALID_EVENT_TYPES: frozenset[str] = frozenset(e.value for e in EventType)
@@ -236,11 +236,11 @@ async def classify_incident(description: str, facility_context: str) -> AIMetada
         prompt = await get_classification_prompt(description, facility_context)
 
         data: dict[str, Any] | None = None
-        if AI_PROVIDER == AIProvider.openai:
+        if AI_PROVIDER == AIProvider.openai.value:
             data = await _call_openai(prompt)
-        elif AI_PROVIDER == AIProvider.anthropic:
+        elif AI_PROVIDER == AIProvider.anthropic.value:
             data = await _call_anthropic(prompt)
-        elif AI_PROVIDER == AIProvider.google:
+        elif AI_PROVIDER == AIProvider.google.value:
             data = await _call_google(prompt)
         else:
             return None
