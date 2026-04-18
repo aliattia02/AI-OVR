@@ -87,7 +87,7 @@ def main() -> None:
                     },
                     upsert=True,
                 )
-                if result.upserted_id is not None or result.modified_count > 0:
+                if result.upserted_id is not None:
                     upserted_count += 1
 
     print(f"total upserted: {upserted_count}")
