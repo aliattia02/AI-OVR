@@ -78,4 +78,4 @@ async def get_quality_admin_email(facility_name: str, db: AsyncIOMotorDatabase) 
         return None
 
     email = user_doc.get("email")
-    return str(email) if isinstance(email, str) and email else None
+    return email if isinstance(email, str) and email else None
