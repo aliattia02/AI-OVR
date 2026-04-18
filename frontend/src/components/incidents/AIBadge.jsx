@@ -14,10 +14,10 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
   const [chosenClassification, setChosenClassification] = useState('');
   const [chosenEventType, setChosenEventType] = useState('');
 
-  const classificationOptions = ERROR_CLASSIFICATIONS.length
+  const classificationOptions = ERROR_CLASSIFICATIONS?.length > 0
     ? ERROR_CLASSIFICATIONS
     : [aiMetadata?.auto_classification].filter(Boolean);
-  const eventTypeOptions = EVENT_TYPES.length ? EVENT_TYPES : [aiMetadata?.auto_event_type].filter(Boolean);
+  const eventTypeOptions = EVENT_TYPES?.length > 0 ? EVENT_TYPES : [aiMetadata?.auto_event_type].filter(Boolean);
 
   const defaultClassification = aiMetadata?.auto_classification ?? classificationOptions[0] ?? '';
   const defaultEventType = aiMetadata?.auto_event_type ?? eventTypeOptions[0] ?? '';
@@ -58,9 +58,6 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
   };
 
   const handleOverrideConfirm = () => {
-    if (!chosenClassification || !chosenEventType) {
-      return;
-    }
     onOverride?.(chosenClassification, chosenEventType);
     setShowOverrideForm(false);
   };
