@@ -16,7 +16,10 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
 def _require_tier(claims: dict[str, Any], min_tier: int) -> None:
-    tier = int(claims.get("tier") or 0)
+    try:
+        tier = int(claims.get("tier") or 0)
+    except (TypeError, ValueError):
+        tier = 0
     if tier < min_tier:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient tier permissions")
 
