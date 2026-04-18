@@ -11,21 +11,21 @@ body {
   background: #eef2f7;
 }
 
-* {
+body {
   scrollbar-width: thin;
   scrollbar-color: #0b7d6b transparent;
 }
 
-*::-webkit-scrollbar {
+body::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-*::-webkit-scrollbar-thumb {
+body::-webkit-scrollbar-thumb {
   background: #0b7d6b;
   border-radius: 999px;
 }
 
-*::-webkit-scrollbar-track {
+body::-webkit-scrollbar-track {
   background: transparent;
 }

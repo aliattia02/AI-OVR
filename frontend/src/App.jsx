@@ -34,11 +34,9 @@ function RoleRoute({ children, allowedRoles }) {
 function AppLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const currentView = pathname.startsWith('/incidents')
-    ? 'reports'
-    : pathname.startsWith('/new')
-      ? 'new-report'
-      : pathname.slice(1).split('/')[0] || 'dashboard';
+  let currentView = pathname.slice(1).split('/')[0] || 'dashboard';
+  if (pathname.startsWith('/incidents')) currentView = 'reports';
+  if (pathname.startsWith('/new')) currentView = 'new-report';
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -79,7 +77,14 @@ export default function App() {
           <Route path="/incidents" element={<Reports />} />
           <Route path="/incidents/:id" element={<IncidentDetailRoute />} />
           <Route path="/new" element={<NewIncidentForm />} />
-          <Route path="/analytics" element={<ProtectedRoute minTier={3}><Analytics /></ProtectedRoute>} />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute minTier={3}>
+                <Analytics />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/workflow"
             element={
