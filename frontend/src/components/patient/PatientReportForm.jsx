@@ -33,8 +33,9 @@ function resolveFacilityNameFromCascading(cascadingData, facilityUuid) {
   return '';
 }
 
-export default function PatientReportForm() {
-  const { facility_uuid: facilityUuid } = useParams();
+export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
+  const { facility_uuid: facilityUuidFromParams } = useParams();
+  const facilityUuid = facilityUuidProp || facilityUuidFromParams;
   const [facilityName, setFacilityName] = useState('');
   const [facilityLoadError, setFacilityLoadError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
