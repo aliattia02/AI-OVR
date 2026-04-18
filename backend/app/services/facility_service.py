@@ -20,7 +20,18 @@ def _coerce_facility_doc(doc: dict) -> dict:
 
 async def get_facilities(db: AsyncIOMotorDatabase) -> List[FacilityResponse]:
     """Return all facilities sorted by governorate, administration, and facility name."""
-    cursor = db["facilities"].find().sort(
+    cursor = db["facilities"].find(
+        {},
+        {
+            "_id": 0,
+            "governorate": 1,
+            "administration": 1,
+            "facility_name": 1,
+            "facility_type": 1,
+            "patient_link_uuid": 1,
+            "created_at": 1,
+        },
+    ).sort(
         [
             ("governorate", 1),
             ("administration", 1),
@@ -78,4 +89,4 @@ async def get_quality_admin_email(facility_name: str, db: AsyncIOMotorDatabase) 
         return None
 
     email = user_doc.get("email")
-    return email if isinstance(email, str) and email else None
+    return email if isinstance(email, str) and len(email) > 0 else None
