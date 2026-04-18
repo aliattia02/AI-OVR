@@ -18,6 +18,8 @@ load_dotenv()
 # ── Configuration ─────────────────────────────────────────────────────────────
 # Loaded once at module import.  If AI_PROVIDER is "none" or AI_API_KEY is
 # blank, _ENABLED is False and every public function returns None immediately.
+# .lower() makes the provider value case-insensitive; all AIProvider enum values
+# are already lowercase, so comparisons with .value are always valid.
 AI_PROVIDER: str = os.getenv("AI_PROVIDER", AIProvider.none.value).lower()
 AI_API_KEY: str = os.getenv("AI_API_KEY", "")
 AI_MODEL: str = os.getenv("AI_MODEL", "")
@@ -90,8 +92,13 @@ def _parse_ai_response(content: str) -> dict[str, Any] | None:
     """
     content = content.strip()
     if content.startswith("```"):
-        # Remove opening and closing fence lines (``` or ```json)
-        lines = [ln for ln in content.splitlines() if not ln.startswith("```")]
+        lines = content.splitlines()
+        # Remove the opening fence line (e.g. '```' or '```json')
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        # Remove the closing fence line if it is exactly '```'
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
         content = "\n".join(lines).strip()
     try:
         result = json.loads(content)
@@ -258,9 +265,19 @@ async def classify_incident(description: str, facility_context: str) -> AIMetada
             return None
 
         return _build_ai_metadata(data)
-    except Exception:  # noqa: BLE001
-        # Intentionally broad: any network error, timeout, or unexpected provider
-        # response must never propagate to the caller — incident creation must
-        # always succeed regardless of AI availability.  KeyboardInterrupt and
-        # SystemExit are NOT caught here because Exception does not cover them.
+    except (
+        # Network and HTTP failures
+        httpx.HTTPError,
+        httpx.TimeoutException,
+        # Response parsing
+        json.JSONDecodeError,
+        # Data access on unexpected payloads
+        KeyError,
+        IndexError,
+        TypeError,
+        ValueError,
+        AttributeError,
+        # Safety net: any remaining unexpected error must not block incident creation
+        Exception,  # noqa: BLE001
+    ):
         return None
