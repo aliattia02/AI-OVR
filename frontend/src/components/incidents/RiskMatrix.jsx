@@ -65,8 +65,8 @@ export default function RiskMatrix({ severity, probability, onChange, readOnly =
                 style={{
                   height: 54,
                   borderRadius: 10,
-                  border: selected ? '2px solid #FFFFFF' : '1px solid #E5E7EB',
-                  boxShadow: selected ? '0 0 0 2px rgba(255,255,255,0.85), 0 0 0 3px rgba(17,24,39,0.25)' : 'none',
+                  border: selected ? '3px solid #FFFFFF' : '1px solid #E5E7EB',
+                  boxShadow: selected ? '0 0 0 5px rgba(17,24,39,0.55)' : 'none',
                   backgroundColor: getRiskColor(score),
                   color: '#FFFFFF',
                   cursor: clickable ? 'pointer' : 'default',

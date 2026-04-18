@@ -2,7 +2,7 @@ import { useState } from 'react';
 import StatusBadge from './StatusBadge';
 import { formatDate, formatEnumLabel } from '../../utils/formatters';
 
-export default function IncidentCard({ incident, onClick, role }) {
+export default function IncidentCard({ incident, onClick }) {
   const [hovered, setHovered] = useState(false);
 
   const handleClick = () => {
@@ -39,7 +39,7 @@ export default function IncidentCard({ incident, onClick, role }) {
         display: 'grid',
         gap: 10,
       }}
-      aria-label={`Incident ${incident?.incident_id ?? ''} ${role ?? ''}`.trim()}
+      aria-label={`Incident ${incident?.incident_id ?? ''}`.trim()}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
         <div style={{ minWidth: 0 }}>

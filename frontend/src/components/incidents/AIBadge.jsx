@@ -13,9 +13,11 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
   const [showOverrideForm, setShowOverrideForm] = useState(false);
   const [chosenClassification, setChosenClassification] = useState('');
   const [chosenEventType, setChosenEventType] = useState('');
+  const classificationOptions = Array.isArray(ERROR_CLASSIFICATIONS) ? ERROR_CLASSIFICATIONS : [];
+  const eventTypeOptions = Array.isArray(EVENT_TYPES) ? EVENT_TYPES : [];
 
-  const defaultClassification = aiMetadata?.auto_classification ?? ERROR_CLASSIFICATIONS[0] ?? '';
-  const defaultEventType = aiMetadata?.auto_event_type ?? EVENT_TYPES[0] ?? '';
+  const defaultClassification = aiMetadata?.auto_classification ?? classificationOptions[0] ?? '';
+  const defaultEventType = aiMetadata?.auto_event_type ?? eventTypeOptions[0] ?? '';
 
   useEffect(() => {
     setChosenClassification(defaultClassification);
@@ -56,7 +58,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
     onOverride?.(chosenClassification, chosenEventType || null);
     setShowOverrideForm(false);
   };
-  const requiresEventType = EVENT_TYPES.length > 0;
+  const requiresEventType = eventTypeOptions.length > 0;
   const isOverrideDisabled = !chosenClassification || (requiresEventType && !chosenEventType);
 
   return (
@@ -165,14 +167,14 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                   backgroundColor: '#FFFFFF',
                 }}
               >
-                {ERROR_CLASSIFICATIONS.map((classification) => (
+                {classificationOptions.map((classification) => (
                   <option key={classification} value={classification}>
                     {formatEnumLabel(classification)}
                   </option>
                 ))}
               </select>
 
-              {EVENT_TYPES.length > 0 && (
+              {eventTypeOptions.length > 0 && (
                 <select
                   value={chosenEventType}
                   onChange={(event) => setChosenEventType(event.target.value)}
@@ -186,7 +188,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                     backgroundColor: '#FFFFFF',
                   }}
                 >
-                  {EVENT_TYPES.map((eventType) => (
+                  {eventTypeOptions.map((eventType) => (
                     <option key={eventType} value={eventType}>
                       {formatEnumLabel(eventType)}
                     </option>
