@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
 const SIZE_MAP = {
   sm: 420,
@@ -8,17 +8,59 @@ const SIZE_MAP = {
 
 export default function Modal({ title, children, onClose, size = 'md' }) {
   const width = SIZE_MAP[size] ?? SIZE_MAP.md;
+  const dialogRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  const titleId = useId();
 
   useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    const getFocusableElements = () => {
+      if (!dialogRef.current) {
+        return [];
+      }
+
+      return Array.from(
+        dialogRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((element) => !element.hasAttribute('disabled'));
+    };
+
+    const focusableElements = getFocusableElements();
+    (focusableElements[0] ?? dialogRef.current)?.focus();
+
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
-        onClose?.();
+        onCloseRef.current?.();
+      }
+
+      if (event.key !== 'Tab') {
+        return;
+      }
+
+      const elements = getFocusableElements();
+      const first = elements[0] ?? dialogRef.current;
+      const last = elements[elements.length - 1] ?? dialogRef.current;
+
+      if (!first || !last) {
+        return;
+      }
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
+  }, []);
 
   return (
     <div
@@ -37,8 +79,10 @@ export default function Modal({ title, children, onClose, size = 'md' }) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-labelledby={titleId}
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
+        ref={dialogRef}
         style={{
           width: '100%',
           maxWidth: width,
@@ -60,7 +104,9 @@ export default function Modal({ title, children, onClose, size = 'md' }) {
             gap: 12,
           }}
         >
-          <h2 style={{ margin: 0, fontSize: 18, color: '#0C2340' }}>{title}</h2>
+          <h2 id={titleId} style={{ margin: 0, fontSize: 18, color: '#0C2340' }}>
+            {title}
+          </h2>
           <button
             type="button"
             onClick={() => onClose?.()}
