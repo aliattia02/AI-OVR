@@ -14,10 +14,8 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
   const [chosenClassification, setChosenClassification] = useState('');
   const [chosenEventType, setChosenEventType] = useState('');
 
-  const classificationOptions = ERROR_CLASSIFICATIONS?.length > 0
-    ? ERROR_CLASSIFICATIONS
-    : [aiMetadata?.auto_classification].filter(Boolean);
-  const eventTypeOptions = EVENT_TYPES?.length > 0 ? EVENT_TYPES : [aiMetadata?.auto_event_type].filter(Boolean);
+  const classificationOptions = ERROR_CLASSIFICATIONS;
+  const eventTypeOptions = EVENT_TYPES;
 
   const defaultClassification = aiMetadata?.auto_classification ?? classificationOptions[0] ?? '';
   const defaultEventType = aiMetadata?.auto_event_type ?? eventTypeOptions[0] ?? '';
@@ -58,10 +56,11 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
   };
 
   const handleOverrideConfirm = () => {
-    onOverride?.(chosenClassification, chosenEventType);
+    onOverride?.(chosenClassification, chosenEventType || null);
     setShowOverrideForm(false);
   };
-  const isOverrideDisabled = !chosenClassification || !chosenEventType;
+  const requiresEventType = eventTypeOptions.length > 0;
+  const isOverrideDisabled = !chosenClassification || (requiresEventType && !chosenEventType);
 
   return (
     <div
@@ -176,25 +175,27 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                 ))}
               </select>
 
-              <select
-                value={chosenEventType}
-                onChange={(event) => setChosenEventType(event.target.value)}
-                style={{
-                  width: '100%',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: 6,
-                  padding: '7px 8px',
-                  fontSize: 12,
-                  color: '#1F2937',
-                  backgroundColor: '#FFFFFF',
-                }}
-              >
-                {eventTypeOptions.map((eventType) => (
-                  <option key={eventType} value={eventType}>
-                    {formatEnumLabel(eventType)}
-                  </option>
-                ))}
-              </select>
+              {eventTypeOptions.length > 0 && (
+                <select
+                  value={chosenEventType}
+                  onChange={(event) => setChosenEventType(event.target.value)}
+                  style={{
+                    width: '100%',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: 6,
+                    padding: '7px 8px',
+                    fontSize: 12,
+                    color: '#1F2937',
+                    backgroundColor: '#FFFFFF',
+                  }}
+                >
+                  {eventTypeOptions.map((eventType) => (
+                    <option key={eventType} value={eventType}>
+                      {formatEnumLabel(eventType)}
+                    </option>
+                  ))}
+                </select>
+              )}
 
               <div>
                 <button
