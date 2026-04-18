@@ -20,7 +20,11 @@ SENDGRID_FROM_EMAIL: str = os.getenv("SENDGRID_FROM_EMAIL", os.getenv("EMAIL_FRO
 
 def _sendgrid_enabled() -> bool:
     """Return True when SendGrid is configured with a real API key."""
-    if not SENDGRID_API_KEY or SENDGRID_API_KEY == "SG.xxxx":
+    if (
+        not SENDGRID_API_KEY
+        or SENDGRID_API_KEY == "SG.xxxx"
+        or (SENDGRID_API_KEY.startswith("SG.") and len(SENDGRID_API_KEY) < 20)
+    ):
         logger.warning("SendGrid is not configured (SENDGRID_API_KEY is empty or placeholder); skipping email send.")
         return False
     return True
