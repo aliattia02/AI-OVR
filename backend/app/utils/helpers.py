@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from app.utils.enums import Probability, Severity, UserRole
 
@@ -25,7 +25,7 @@ def generate_incident_id(count: int) -> str:
     Returns:
         A string of the form ``"OVR-{year}-{count:03d}"``, e.g. ``"OVR-2026-001"``.
     """
-    year = datetime.now(tz=timezone.utc).year
+    year = datetime.utcnow().year
     return f"OVR-{year}-{count:03d}"
 
 
@@ -101,10 +101,10 @@ def build_audit_entry(
                 "action":    "status_change",
                 "old_status": "Created",
                 "new_status": "InProgress",
-            }
+        }
     """
     return {
-        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+        "timestamp": datetime.utcnow().isoformat(),
         "user_id": user_id,
         "action": action,
         "old_status": old_status,
