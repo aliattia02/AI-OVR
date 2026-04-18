@@ -18,7 +18,9 @@ if not _mongo_url:
         "Copy .env.example to .env and provide a valid MongoDB connection string."
     )
 MONGO_URL: str = _mongo_url
-_db_name = os.getenv("DB_NAME") or os.getenv("MONGO_DB_NAME")
+_db_name = os.getenv("DB_NAME")
+if _db_name is None:
+    _db_name = os.getenv("MONGO_DB_NAME")
 if not _db_name:
     raise EnvironmentError(
         "DB_NAME environment variable is not set. "
