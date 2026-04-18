@@ -53,9 +53,7 @@ export default function RiskMatrix({ severity, probability, onChange, readOnly =
               <button
                 key={`${rowSeverity}-${colProbability}`}
                 type="button"
-                aria-label={`${rowSeverity} severity and ${colProbability} probability risk score ${score}${
-                  selected ? ', selected' : ''
-                }`}
+                aria-label={`${rowSeverity} severity, ${colProbability} probability${selected ? ', selected' : ''}`}
                 aria-current={selected ? 'true' : undefined}
                 onClick={() => {
                   if (!clickable) return;
