@@ -101,7 +101,7 @@ def build_audit_entry(
                 "action":    "status_change",
                 "old_status": "Created",
                 "new_status": "InProgress",
-            }
+        }
     """
     return {
         "timestamp": datetime.now(tz=timezone.utc).isoformat(),
