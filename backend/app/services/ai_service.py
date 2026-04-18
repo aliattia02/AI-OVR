@@ -9,6 +9,7 @@ from typing import Any
 
 import httpx
 from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.models.ai_metadata import AIMetadata
 from app.utils.enums import AIProvider, ErrorClassification, EventType
@@ -281,3 +282,61 @@ async def classify_incident(description: str, facility_context: str) -> AIMetada
         Exception,  # noqa: BLE001
     ):
         return None
+
+
+async def batch_classify_unprocessed(db: AsyncIOMotorDatabase) -> int:
+    """Classify incidents missing AI processing and return the number updated."""
+    if not _ENABLED:
+        return 0
+
+    cursor = db["incidents"].find(
+        {
+            "$or": [
+                {"ai_metadata.processed_at": None},
+                {"ai_metadata": {"$exists": False}},
+            ]
+        },
+        {
+            "_id": 0,
+            "incident_id": 1,
+            "description": 1,
+            "facility_name": 1,
+            "facility_type": 1,
+            "governorate": 1,
+        },
+    )
+    docs = await cursor.to_list(length=None)
+
+    processed = 0
+    for doc in docs:
+        incident_id = doc.get("incident_id")
+        if not incident_id:
+            continue
+
+        facility_context = (
+            f"{doc.get('facility_name', '')} "
+            f"({doc.get('facility_type', '')}), "
+            f"{doc.get('governorate', '')}"
+        ).strip()
+        result = await classify_incident(str(doc.get("description", "")), facility_context)
+        if result is None:
+            continue
+
+        update = await db["incidents"].update_one(
+            {"incident_id": incident_id},
+            {
+                "$set": {
+                    "ai_metadata.auto_classification": result.auto_classification,
+                    "ai_metadata.auto_event_type": result.auto_event_type,
+                    "ai_metadata.classification_score": result.classification_score,
+                    "ai_metadata.ai_risk_score": result.ai_risk_score,
+                    "ai_metadata.signal_flags": result.signal_flags,
+                    "ai_metadata.model_version": result.model_version,
+                    "ai_metadata.processed_at": result.processed_at.isoformat() if result.processed_at else None,
+                }
+            },
+        )
+        if update.modified_count > 0:
+            processed += 1
+
+    return processed
