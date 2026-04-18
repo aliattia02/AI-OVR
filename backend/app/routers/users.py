@@ -67,17 +67,7 @@ async def create_user(
     except DuplicateKeyError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists") from exc
 
-    return UserResponse(
-        user_id=user_id,
-        email=payload.email,
-        full_name=payload.full_name,
-        role=payload.role,
-        facility_name=payload.facility_name,
-        administration=payload.administration,
-        governorate=payload.governorate,
-        tier=payload.tier,
-        is_active=True,
-    )
+    return UserResponse.model_validate(doc)
 
 
 @router.patch("/{user_id}/deactivate", response_model=MessageResponse)

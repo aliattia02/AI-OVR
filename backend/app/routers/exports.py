@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from io import BytesIO
 import os
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
 import arabic_reshaper
@@ -27,6 +28,7 @@ router = APIRouter(prefix="/exports", tags=["exports"])
 
 _FONT_REGISTERED = False
 _FONT_NAME = "Helvetica"
+_FONT_LOCK = Lock()
 
 
 def _rtl_text(value: Any) -> str:
@@ -36,27 +38,28 @@ def _rtl_text(value: Any) -> str:
 
 def _ensure_font() -> str:
     global _FONT_REGISTERED, _FONT_NAME  # noqa: PLW0603
-    if _FONT_REGISTERED:
-        return _FONT_NAME
+    with _FONT_LOCK:
+        if _FONT_REGISTERED:
+            return _FONT_NAME
 
-    candidates: list[Path] = []
-    configured_font = os.getenv("PDF_ARABIC_FONT_PATH", "").strip()
-    if configured_font:
-        candidates.append(Path(configured_font))
-    candidates.extend(
-        [
-            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
-            Path("/usr/share/fonts/dejavu/DejaVuSans.ttf"),
-            Path("/Library/Fonts/Arial Unicode.ttf"),
-            Path("C:/Windows/Fonts/arial.ttf"),
-        ]
-    )
-    for font_path in candidates:
-        if font_path.exists():
-            pdfmetrics.registerFont(TTFont("DejaVuSans", str(font_path)))
-            _FONT_NAME = "DejaVuSans"
-            break
-    _FONT_REGISTERED = True
+        candidates: list[Path] = []
+        configured_font = os.getenv("PDF_ARABIC_FONT_PATH", "").strip()
+        if configured_font:
+            candidates.append(Path(configured_font))
+        candidates.extend(
+            [
+                Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+                Path("/usr/share/fonts/dejavu/DejaVuSans.ttf"),
+                Path("/Library/Fonts/Arial Unicode.ttf"),
+                Path("C:/Windows/Fonts/arial.ttf"),
+            ]
+        )
+        for font_path in candidates:
+            if font_path.exists():
+                pdfmetrics.registerFont(TTFont("DejaVuSans", str(font_path)))
+                _FONT_NAME = "DejaVuSans"
+                break
+        _FONT_REGISTERED = True
     return _FONT_NAME
 
 
