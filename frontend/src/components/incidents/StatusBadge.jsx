@@ -3,7 +3,7 @@ import { formatEnumLabel } from '../../utils/formatters';
 
 export default function StatusBadge({ status }) {
   const statusMeta = INCIDENT_STATUSES[status];
-  const label = statusMeta?.label ?? formatEnumLabel(status) || 'Unknown';
+  const label = statusMeta?.label || formatEnumLabel(status) || 'Unknown';
 
   return (
     <span

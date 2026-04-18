@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ERROR_CLASSIFICATIONS, EVENT_TYPES } from '../../utils/enums';
 import { formatEnumLabel } from '../../utils/formatters';
 
@@ -11,15 +11,22 @@ function formatConfidence(score) {
 
 export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = false }) {
   const [showOverrideForm, setShowOverrideForm] = useState(false);
+  const [chosenClassification, setChosenClassification] = useState('');
+  const [chosenEventType, setChosenEventType] = useState('');
 
-  const defaultClassification = useMemo(
-    () => aiMetadata?.auto_classification ?? ERROR_CLASSIFICATIONS[0],
-    [aiMetadata?.auto_classification]
-  );
-  const defaultEventType = useMemo(() => aiMetadata?.auto_event_type ?? EVENT_TYPES[0], [aiMetadata?.auto_event_type]);
+  const classificationOptions = ERROR_CLASSIFICATIONS.length
+    ? ERROR_CLASSIFICATIONS
+    : [aiMetadata?.auto_classification].filter(Boolean);
+  const eventTypeOptions = EVENT_TYPES.length ? EVENT_TYPES : [aiMetadata?.auto_event_type].filter(Boolean);
 
-  const [chosenClassification, setChosenClassification] = useState(defaultClassification);
-  const [chosenEventType, setChosenEventType] = useState(defaultEventType);
+  const defaultClassification = aiMetadata?.auto_classification ?? classificationOptions[0] ?? '';
+  const defaultEventType = aiMetadata?.auto_event_type ?? eventTypeOptions[0] ?? '';
+
+  useEffect(() => {
+    setChosenClassification(defaultClassification);
+    setChosenEventType(defaultEventType);
+    setShowOverrideForm(false);
+  }, [defaultClassification, defaultEventType]);
 
   if (!aiMetadata || aiMetadata.auto_classification == null) {
     return null;
@@ -51,6 +58,9 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
   };
 
   const handleOverrideConfirm = () => {
+    if (!chosenClassification || !chosenEventType) {
+      return;
+    }
     onOverride?.(chosenClassification, chosenEventType);
     setShowOverrideForm(false);
   };
@@ -161,7 +171,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                   backgroundColor: '#FFFFFF',
                 }}
               >
-                {ERROR_CLASSIFICATIONS.map((classification) => (
+                {classificationOptions.map((classification) => (
                   <option key={classification} value={classification}>
                     {formatEnumLabel(classification)}
                   </option>
@@ -181,7 +191,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                   backgroundColor: '#FFFFFF',
                 }}
               >
-                {EVENT_TYPES.map((eventType) => (
+                {eventTypeOptions.map((eventType) => (
                   <option key={eventType} value={eventType}>
                     {formatEnumLabel(eventType)}
                   </option>
@@ -192,6 +202,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                 <button
                   type="button"
                   onClick={handleOverrideConfirm}
+                  disabled={!chosenClassification || !chosenEventType}
                   style={{
                     border: 'none',
                     borderRadius: 8,
@@ -200,7 +211,8 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                     padding: '7px 12px',
                     fontSize: 12,
                     fontWeight: 600,
-                    cursor: 'pointer',
+                    cursor: !chosenClassification || !chosenEventType ? 'not-allowed' : 'pointer',
+                    opacity: !chosenClassification || !chosenEventType ? 0.6 : 1,
                   }}
                 >
                   Confirm Override
