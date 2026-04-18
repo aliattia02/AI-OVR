@@ -61,6 +61,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
     onOverride?.(chosenClassification, chosenEventType);
     setShowOverrideForm(false);
   };
+  const isOverrideDisabled = !chosenClassification || !chosenEventType;
 
   return (
     <div
@@ -199,7 +200,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                 <button
                   type="button"
                   onClick={handleOverrideConfirm}
-                  disabled={!chosenClassification || !chosenEventType}
+                  disabled={isOverrideDisabled}
                   style={{
                     border: 'none',
                     borderRadius: 8,
@@ -208,8 +209,8 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                     padding: '7px 12px',
                     fontSize: 12,
                     fontWeight: 600,
-                    cursor: !chosenClassification || !chosenEventType ? 'not-allowed' : 'pointer',
-                    opacity: !chosenClassification || !chosenEventType ? 0.6 : 1,
+                    cursor: isOverrideDisabled ? 'not-allowed' : 'pointer',
+                    opacity: isOverrideDisabled ? 0.6 : 1,
                   }}
                 >
                   Confirm Override
