@@ -2,7 +2,8 @@ import { useParams } from 'react-router-dom';
 import PatientReportForm from '../components/patient/PatientReportForm';
 
 export default function PatientReport() {
-  const { facility_uuid: facilityUuid } = useParams();
+  const { facility_uuid: facilityUuidLegacy, uuid } = useParams();
+  const facilityUuid = facilityUuidLegacy || uuid;
 
   return (
     <main
