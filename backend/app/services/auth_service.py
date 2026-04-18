@@ -14,6 +14,7 @@ from jose import JWTError, jwt
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from passlib.exc import UnknownHashError
 from passlib.context import CryptContext
+from pydantic import ValidationError
 
 from app.db.database import get_database
 from app.models.user import UserInDB
@@ -106,8 +107,10 @@ async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase)
 
     user_doc["last_login"] = now
     user_doc.pop("_id", None)
-    user_doc.setdefault("password", "")
-    return UserInDB(**user_doc)
+    try:
+        return UserInDB(**user_doc)
+    except ValidationError:
+        return None
 
 
 async def get_current_user(
@@ -184,9 +187,6 @@ async def verify_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMoto
         if not isinstance(stored, dict):
             continue
 
-        if token_jti and stored.get("jti") != token_jti:
-            continue
-
         stored_hash = stored.get("token_hash")
         if isinstance(stored_hash, str) and verify_password(refresh_token, stored_hash):
             return True
@@ -237,10 +237,6 @@ async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIO
     match_found = False
     for stored in stored_tokens:
         if not isinstance(stored, dict):
-            continue
-
-        if token_jti and stored.get("jti") != token_jti:
-            remaining_tokens.append(stored)
             continue
 
         stored_hash = stored.get("token_hash")
