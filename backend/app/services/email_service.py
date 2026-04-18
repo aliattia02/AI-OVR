@@ -50,7 +50,7 @@ async def _send_text_email(to_email: str, subject: str, body: str) -> None:
         client = SendGridAPIClient(SENDGRID_API_KEY)
         await asyncio.to_thread(client.send, message)
     except Exception:  # noqa: BLE001
-        logger.exception("Failed to send email to %s via SendGrid.", to_email)
+        logger.exception("Failed to send email via SendGrid (to=%s, subject=%s).", to_email, subject)
 
 
 async def send_submission_alert(to_email: str, incident_id: str, facility: str, severity: str) -> None:
