@@ -159,6 +159,22 @@ async def verify_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMoto
         return False
 
     token_jti = claims.get("jti")
+    if token_jti:
+        user_doc = await db["users"].find_one(
+            {"user_id": user_id, "refresh_tokens.jti": token_jti},
+            {"_id": 0, "refresh_tokens.$": 1},
+        )
+        if not user_doc:
+            return False
+        stored_tokens = user_doc.get("refresh_tokens", [])
+        if not stored_tokens:
+            return False
+        token_entry = stored_tokens[0]
+        if not isinstance(token_entry, dict):
+            return False
+        stored_hash = token_entry.get("token_hash")
+        return isinstance(stored_hash, str) and verify_password(refresh_token, stored_hash)
+
     user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 0, "refresh_tokens": 1})
     if not user_doc:
         return False
@@ -187,6 +203,31 @@ async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIO
         return False
 
     token_jti = claims.get("jti")
+    if token_jti:
+        user_doc = await db["users"].find_one(
+            {"user_id": user_id, "refresh_tokens.jti": token_jti},
+            {"_id": 0, "refresh_tokens.$": 1},
+        )
+        if not user_doc:
+            return False
+
+        stored_tokens = user_doc.get("refresh_tokens", [])
+        if not stored_tokens:
+            return False
+        token_entry = stored_tokens[0]
+        if not isinstance(token_entry, dict):
+            return False
+
+        stored_hash = token_entry.get("token_hash")
+        if not isinstance(stored_hash, str) or not verify_password(refresh_token, stored_hash):
+            return False
+
+        result = await db["users"].update_one(
+            {"user_id": user_id},
+            {"$pull": {"refresh_tokens": {"jti": token_jti}}},
+        )
+        return result.modified_count > 0
+
     user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 0, "refresh_tokens": 1})
     if not user_doc:
         return False
