@@ -11,7 +11,7 @@ from typing import Any
 
 import arabic_reshaper
 from bidi.algorithm import get_display
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from fastapi.responses import StreamingResponse
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from openpyxl import Workbook
@@ -105,12 +105,12 @@ async def export_excel(
 
 @router.get("/pdf/{id}")
 async def export_incident_pdf(
-    id: str,
+    incident_id: str = Path(alias="id"),
     claims: dict[str, Any] = Depends(auth_service.get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> StreamingResponse:
     scope = get_scope_filter(claims["role"], claims)
-    incident = await db["incidents"].find_one({"incident_id": id, **scope}, {"_id": 0})
+    incident = await db["incidents"].find_one({"incident_id": incident_id, **scope}, {"_id": 0})
     if incident is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found")
 
@@ -120,7 +120,7 @@ async def export_incident_pdf(
     width, height = A4
     y = height - 40
     pdf.setFont(font_name, 14)
-    pdf.drawRightString(width - 40, y, _rtl_text(f"تقرير حادثة: {incident.get('incident_id', id)}"))
+    pdf.drawRightString(width - 40, y, _rtl_text(f"تقرير حادثة: {incident.get('incident_id', incident_id)}"))
     y -= 28
 
     pdf.setFont(font_name, 11)
@@ -148,5 +148,5 @@ async def export_incident_pdf(
     pdf.save()
     output.seek(0)
 
-    headers = {"Content-Disposition": f'attachment; filename="EOVR_Incident_{id}.pdf"'}
+    headers = {"Content-Disposition": f'attachment; filename="EOVR_Incident_{incident_id}.pdf"'}
     return StreamingResponse(output, media_type="application/pdf", headers=headers)
