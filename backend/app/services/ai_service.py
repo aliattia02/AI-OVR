@@ -59,7 +59,7 @@ async def get_classification_prompt(description: str, facility_context: str) -> 
     return (
         "You are an expert clinical-quality analyst at a Saudi healthcare facility.\n"
         f"Facility context: {facility_context}\n\n"
-        "Analyse the incident description below and return ONLY a JSON object — "
+        "Analyze the incident description below and return ONLY a JSON object — "
         "no markdown, no explanation, no surrounding text — with this exact structure:\n"
         "{\n"
         f'  "error_classification": "<one of: {valid_classifications}>",\n'
@@ -162,7 +162,10 @@ async def _call_openai(prompt: str) -> dict[str, Any] | None:
         )
         response.raise_for_status()
         payload = response.json()
-        content: str = payload["choices"][0]["message"]["content"]
+        try:
+            content: str = payload["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError):
+            return None
         return _parse_ai_response(content)
 
 
@@ -185,7 +188,10 @@ async def _call_anthropic(prompt: str) -> dict[str, Any] | None:
         )
         response.raise_for_status()
         payload = response.json()
-        content: str = payload["content"][0]["text"]
+        try:
+            content: str = payload["content"][0]["text"]
+        except (KeyError, IndexError, TypeError):
+            return None
         return _parse_ai_response(content)
 
 
@@ -203,7 +209,10 @@ async def _call_google(prompt: str) -> dict[str, Any] | None:
         )
         response.raise_for_status()
         payload = response.json()
-        content: str = payload["candidates"][0]["content"]["parts"][0]["text"]
+        try:
+            content: str = payload["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError, TypeError):
+            return None
         return _parse_ai_response(content)
 
 
@@ -249,5 +258,9 @@ async def classify_incident(description: str, facility_context: str) -> AIMetada
             return None
 
         return _build_ai_metadata(data)
-    except Exception:  # noqa: BLE001 — never surface AI errors to callers
+    except Exception:  # noqa: BLE001
+        # Intentionally broad: any network error, timeout, or unexpected provider
+        # response must never propagate to the caller — incident creation must
+        # always succeed regardless of AI availability.  KeyboardInterrupt and
+        # SystemExit are NOT caught here because Exception does not cover them.
         return None
