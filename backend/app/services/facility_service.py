@@ -39,7 +39,7 @@ async def get_facilities(db: AsyncIOMotorDatabase) -> List[FacilityResponse]:
         ]
     )
     docs = await cursor.to_list(length=None)
-    return [FacilityResponse(**_coerce_facility_doc(doc)) for doc in docs]
+    return [FacilityResponse(**doc) for doc in docs]
 
 
 async def get_cascading_options(db: AsyncIOMotorDatabase) -> dict:
