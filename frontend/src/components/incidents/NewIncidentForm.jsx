@@ -118,7 +118,10 @@ export default function NewIncidentForm() {
 
     const result = await createIncident.mutateAsync(payload);
 
-    if (result?.ai_metadata?.auto_classification != null) {
+    if (
+      result?.ai_metadata?.auto_classification !== null &&
+      result?.ai_metadata?.auto_classification !== undefined
+    ) {
       setAiNotice(
         `AI Classification Applied: ${formatEnumLabel(result.ai_metadata.auto_classification)} — pending Quality Admin review.`
       );
