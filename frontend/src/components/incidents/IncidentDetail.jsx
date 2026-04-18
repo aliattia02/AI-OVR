@@ -195,13 +195,13 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
     await submitFinalMutation.mutateAsync(finalReportText.trim());
   };
 
-  const handleAiAccept = async () => {
+  const handleAiAccept = async (suggestedClassification) => {
     if (!incident?.incident_id) return;
-    const suggestion = incident?.ai_metadata?.auto_classification ?? null;
+    const suggestion = suggestedClassification ?? incident?.ai_metadata?.auto_classification ?? null;
     await aiFeedback.mutateAsync({ id: incident.incident_id, sug: suggestion, chosen: suggestion });
   };
 
-  const handleAiOverride = async (humanChoice) => {
+  const handleAiOverride = async (humanChoice, _eventType) => {
     if (!incident?.incident_id) return;
     await aiFeedback.mutateAsync({
       id: incident.incident_id,
