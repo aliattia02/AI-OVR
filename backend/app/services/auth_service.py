@@ -57,10 +57,13 @@ def verify_password(plain: str, hashed: str) -> bool:
 def create_access_token(data: dict[str, Any]) -> str:
     """Create a 15-minute JWT access token containing user scope claims."""
     now = datetime.now(tz=timezone.utc)
+    facility = data.get("facility")
+    if facility is None:
+        facility = data.get("facility_name")
     payload = {
         "user_id": data.get("user_id"),
         "role": data.get("role"),
-        "facility": data.get("facility"),
+        "facility": facility,
         "administration": data.get("administration"),
         "governorate": data.get("governorate"),
         "tier": data.get("tier"),
@@ -87,7 +90,10 @@ def create_refresh_token(user_id: str) -> str:
 def decode_token(token: str) -> dict[str, Any]:
     """Decode and validate a JWT token, raising 401 on invalid/expired tokens."""
     try:
-        return jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        claims = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        if not isinstance(claims, dict):
+            raise _unauthorized_exception()
+        return claims
     except JWTError as exc:
         raise _unauthorized_exception() from exc
 
@@ -106,6 +112,7 @@ async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase)
     await db["users"].update_one({"_id": user_doc["_id"]}, {"$set": {"last_login": now}})
 
     user_doc["last_login"] = now
+    user_doc.setdefault("password", "")
     user_doc.pop("_id", None)
     try:
         return UserInDB(**user_doc)
