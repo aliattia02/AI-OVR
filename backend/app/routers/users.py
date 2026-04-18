@@ -55,7 +55,7 @@ async def create_user(
     user_id = f"USR-{uuid4().hex[:12].upper()}"
     now = datetime.now(tz=timezone.utc)
 
-    doc = payload.model_dump()
+    doc = payload.model_dump(exclude={"password"})
     doc["user_id"] = user_id
     doc["hashed_password"] = auth_service.hash_password(payload.password)
     doc["is_active"] = True

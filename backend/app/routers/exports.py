@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from io import BytesIO
+import os
 from pathlib import Path
 from typing import Any
 
@@ -37,10 +38,24 @@ def _ensure_font() -> str:
     global _FONT_REGISTERED, _FONT_NAME  # noqa: PLW0603
     if _FONT_REGISTERED:
         return _FONT_NAME
-    font_path = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
-    if font_path.exists():
-        pdfmetrics.registerFont(TTFont("DejaVuSans", str(font_path)))
-        _FONT_NAME = "DejaVuSans"
+
+    candidates: list[Path] = []
+    configured_font = os.getenv("PDF_ARABIC_FONT_PATH", "").strip()
+    if configured_font:
+        candidates.append(Path(configured_font))
+    candidates.extend(
+        [
+            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+            Path("/usr/share/fonts/dejavu/DejaVuSans.ttf"),
+            Path("/Library/Fonts/Arial Unicode.ttf"),
+            Path("C:/Windows/Fonts/arial.ttf"),
+        ]
+    )
+    for font_path in candidates:
+        if font_path.exists():
+            pdfmetrics.registerFont(TTFont("DejaVuSans", str(font_path)))
+            _FONT_NAME = "DejaVuSans"
+            break
     _FONT_REGISTERED = True
     return _FONT_NAME
 
