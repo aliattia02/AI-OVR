@@ -12,6 +12,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from passlib.exc import UnknownHashError
 from passlib.context import CryptContext
 
 from app.db.database import get_database
@@ -48,7 +49,7 @@ def verify_password(plain: str, hashed: str) -> bool:
     """Verify a plain value against its bcrypt hash."""
     try:
         return pwd_context.verify(plain, hashed)
-    except Exception:
+    except (UnknownHashError, ValueError, TypeError):
         return False
 
 
@@ -164,11 +165,6 @@ async def verify_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMoto
 
     stored_tokens = user_doc.get("refresh_tokens", [])
     for stored in stored_tokens:
-        if isinstance(stored, str):
-            if verify_password(refresh_token, stored):
-                return True
-            continue
-
         if not isinstance(stored, dict):
             continue
 
@@ -196,18 +192,10 @@ async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIO
         return False
 
     stored_tokens = user_doc.get("refresh_tokens", [])
-    remaining_tokens: list[Any] = []
+    remaining_tokens: list[dict[str, Any]] = []
     match_found = False
     for stored in stored_tokens:
-        if isinstance(stored, str):
-            if verify_password(refresh_token, stored):
-                match_found = True
-                continue
-            remaining_tokens.append(stored)
-            continue
-
         if not isinstance(stored, dict):
-            remaining_tokens.append(stored)
             continue
 
         if token_jti and stored.get("jti") != token_jti:
