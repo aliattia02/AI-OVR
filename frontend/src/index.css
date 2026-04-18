@@ -1,1 +1,31 @@
-/* frontend/src/index.css — Global base styles and CSS custom properties for the E·OVR design system. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #eef2f7;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #0b7d6b transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #0b7d6b;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
