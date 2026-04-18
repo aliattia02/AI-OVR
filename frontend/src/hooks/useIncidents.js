@@ -44,7 +44,8 @@ export function useSaveAssessment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, sev, prob }) => incidentService.saveAssessment(id, sev, prob),
+    mutationFn: ({ id, severity, probability, sev, prob }) =>
+      incidentService.saveAssessment(id, severity ?? sev, probability ?? prob),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['incident', variables.id] });
     },
@@ -55,7 +56,8 @@ export function useAIFeedback() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, sug, chosen }) => incidentService.submitAIFeedback(id, sug, chosen),
+    mutationFn: ({ id, suggestion, sug, chosen }) =>
+      incidentService.submitAIFeedback(id, suggestion ?? sug, chosen),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['incident', variables.id] });
     },
