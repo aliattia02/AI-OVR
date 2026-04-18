@@ -14,7 +14,6 @@ from jose import JWTError, jwt
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from passlib.exc import UnknownHashError
 from passlib.context import CryptContext
-from pydantic import ValidationError
 
 from app.db.database import get_database
 from app.models.user import UserInDB
@@ -90,10 +89,7 @@ def create_refresh_token(user_id: str) -> str:
 def decode_token(token: str) -> dict[str, Any]:
     """Decode and validate a JWT token, raising 401 on invalid/expired tokens."""
     try:
-        claims = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        if not isinstance(claims, dict):
-            raise _unauthorized_exception()
-        return claims
+        return jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
     except JWTError as exc:
         raise _unauthorized_exception() from exc
 
@@ -112,12 +108,11 @@ async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase)
     await db["users"].update_one({"_id": user_doc["_id"]}, {"$set": {"last_login": now}})
 
     user_doc["last_login"] = now
-    user_doc.setdefault("password", "")
+    user_doc.pop("password", None)
     user_doc.pop("_id", None)
-    try:
-        return UserInDB(**user_doc)
-    except ValidationError:
-        return None
+    # UserInDB currently requires a plain `password` field in its schema; use
+    # model_construct to avoid re-inserting or exposing plaintext credentials.
+    return UserInDB.model_construct(**user_doc)
 
 
 async def get_current_user(
