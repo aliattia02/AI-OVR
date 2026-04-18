@@ -26,8 +26,8 @@ export const incidentService = {
     return data;
   },
 
-  async saveAssessment(id, severity, probability) {
-    const { data } = await api.patch(`/incidents/${id}/assessment`, { severity, probability });
+  async saveAssessment(id, sev, prob) {
+    const { data } = await api.patch(`/incidents/${id}/assessment`, { severity: sev, probability: prob });
     return data;
   },
 
@@ -41,8 +41,8 @@ export const incidentService = {
     return data;
   },
 
-  async submitAIFeedback(id, suggestion, chosen) {
-    const { data } = await api.post(`/incidents/${id}/ai-feedback`, { suggestion, chosen });
+  async submitAIFeedback(id, sug, chosen) {
+    const { data } = await api.post(`/incidents/${id}/ai-feedback`, { suggestion: sug, chosen });
     return data;
   },
 
