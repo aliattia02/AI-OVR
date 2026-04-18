@@ -19,9 +19,12 @@ from app.models.user import UserInDB
 load_dotenv()
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")
+if not JWT_SECRET_KEY:
+    raise EnvironmentError("JWT_SECRET_KEY environment variable is required for token signing.")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 30
+MAX_STORED_REFRESH_TOKENS = 10
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -130,7 +133,7 @@ async def store_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMotor
     hashed_token = hash_password(refresh_token)
     await db["users"].update_one(
         {"user_id": user_id},
-        {"$push": {"refresh_tokens": hashed_token}},
+        {"$push": {"refresh_tokens": {"$each": [hashed_token], "$slice": -MAX_STORED_REFRESH_TOKENS}}},
     )
 
 
