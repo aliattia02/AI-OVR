@@ -59,10 +59,10 @@ const TIMELINE_STEPS = [
 ];
 
 const RISK_SCORE_GUIDE = [
-  { score: '9', level: 'Critical', color: '#DC2626' },
-  { score: '6, 4', level: 'High', color: '#D97706' },
-  { score: '3', level: 'Medium', color: '#1B6CA8' },
-  { score: '2, 1', level: 'Low', color: '#059669' },
+  { scores: [9], level: 'Critical', color: '#DC2626' },
+  { scores: [6, 4], level: 'High', color: '#D97706' },
+  { scores: [3], level: 'Medium', color: '#1B6CA8' },
+  { scores: [2, 1], level: 'Low', color: '#059669' },
 ];
 
 function StepCard({ step, isLast }) {
@@ -191,8 +191,19 @@ export default function WorkflowView() {
           <div style={{ fontWeight: 700, color: '#111827', marginBottom: 8 }}>Score Reference Guide</div>
           <ul style={{ margin: 0, paddingLeft: 20, color: '#4B5563' }}>
             {RISK_SCORE_GUIDE.map((entry) => (
-              <li key={entry.score}>
-                <span style={{ fontWeight: 700, color: entry.color }}>Score {entry.score}</span> — {entry.level}
+              <li key={entry.level}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    display: 'inline-block',
+                    width: 10,
+                    height: 10,
+                    borderRadius: '50%',
+                    backgroundColor: entry.color,
+                    marginRight: 8,
+                  }}
+                />
+                <strong>{entry.level}</strong> — Scores: {entry.scores.join(', ')}
               </li>
             ))}
           </ul>
