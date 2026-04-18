@@ -15,12 +15,11 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const nextConfig = { ...config };
   if (_token) {
-    nextConfig.headers = nextConfig.headers ?? {};
-    nextConfig.headers.Authorization = `Bearer ${_token}`;
+    config.headers = config.headers ?? {};
+    config.headers.Authorization = `Bearer ${_token}`;
   }
-  return nextConfig;
+  return config;
 });
 
 api.interceptors.response.use(
