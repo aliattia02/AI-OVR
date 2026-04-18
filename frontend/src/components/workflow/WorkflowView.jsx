@@ -106,7 +106,7 @@ function StepCard({ step, isLast }) {
         <div style={{ marginTop: 6, color: '#374151', fontSize: 14 }}>{step.description}</div>
         <ul style={{ marginTop: 10, marginBottom: 0, paddingLeft: 20, color: '#4B5563', fontSize: 14 }}>
           {step.actions.map((action, index) => (
-            <li key={`${step.number}-action-${index}`} style={{ marginBottom: 4 }}>
+            <li key={`${step.number}-${action}-${index}`} style={{ marginBottom: 4 }}>
               {action}
             </li>
           ))}
@@ -145,7 +145,8 @@ export default function WorkflowView() {
                   fontSize: 14,
                   flexShrink: 0,
                 }}
-                aria-label="More Info Needed branch"
+                aria-label="More Info Needed branch loop"
+                role="img"
               >
                 ↺
               </div>
@@ -189,6 +190,9 @@ export default function WorkflowView() {
 
         <div style={{ marginTop: 12 }}>
           <div style={{ fontWeight: 700, color: '#111827', marginBottom: 8 }}>Score Reference Guide</div>
+          <p style={{ marginTop: 0, marginBottom: 8, color: '#6B7280', fontSize: 13 }}>
+            Guide reflects matrix outcomes only; scores 5, 7, and 8 are not produced by this 3x3 model.
+          </p>
           <ul style={{ margin: 0, paddingLeft: 20, color: '#4B5563' }}>
             {RISK_SCORE_GUIDE.map((entry, index) => (
               <li key={`risk-level-${index}`}>
