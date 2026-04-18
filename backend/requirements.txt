@@ -1,0 +1,25 @@
+# Core
+fastapi
+uvicorn[standard]
+motor
+python-jose[cryptography]
+passlib[bcrypt]
+pydantic[email]
+python-multipart
+
+# Utilities
+openpyxl
+reportlab
+arabic-reshaper
+python-bidi
+sendgrid
+python-dotenv
+
+# Testing
+pytest
+httpx
+
+# AI (commented out — uncomment when model is ready)
+# openai
+# anthropic
+# google-generativeai
