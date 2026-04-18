@@ -159,11 +159,10 @@ async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIO
     stored_tokens = user_doc.get("refresh_tokens", [])
     remaining_tokens: list[str] = []
     match_found = False
-    for index, stored in enumerate(stored_tokens):
-        if not match_found and verify_password(refresh_token, stored):
+    for stored in stored_tokens:
+        if verify_password(refresh_token, stored):
             match_found = True
-            remaining_tokens.extend(stored_tokens[index + 1 :])
-            break
+            continue
         remaining_tokens.append(stored)
 
     if not match_found:
