@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mustChangePassword, setMustChangePassword] = useState(false);
-  const restoredRef = useRef(false);
+  const restorePromiseRef = useRef(null); // stores the promise, not a boolean
 
   const navigateTo = useCallback((path) => {
     if (typeof window === 'undefined') return;
@@ -17,25 +17,28 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (restoredRef.current) return;
-    restoredRef.current = true;
-
     let isMounted = true;
 
-    const initializeSession = async () => {
-      try {
-        const me = await authService.restoreSession();
-        if (isMounted) {
-          setUser(me);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
+    // Only kick off the restore once across StrictMode double-mount.
+    // Run #1 creates and stores the promise.
+    // Run #2 reuses the same promise and attaches a fresh .then() with its own isMounted guard.
+    if (!restorePromiseRef.current) {
+      restorePromiseRef.current = authService.restoreSession();
+    }
 
-    initializeSession();
+    restorePromiseRef.current
+      .then(me => {
+        if (!isMounted) return;
+        setUser(me);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setUser(null);
+      })
+      .finally(() => {
+        if (!isMounted) return;
+        setLoading(false);
+      });
 
     return () => {
       isMounted = false;

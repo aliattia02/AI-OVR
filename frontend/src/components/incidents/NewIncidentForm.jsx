@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import { useCreateIncident } from '../../hooks/useIncidents';
 import {
   ERROR_CLASSIFICATIONS,
@@ -19,33 +20,40 @@ function getCurrentTimeString() {
 }
 
 export default function NewIncidentForm() {
+  const { user } = useAuth();
+
+  // Staff and quality_admin belong to exactly one facility — pre-fill and lock
+  // their location fields so they cannot submit on behalf of another facility.
+  const isFacilityUser = user?.role === 'staff' || user?.role === 'quality_admin';
+
   const {
     register,
     handleSubmit,
     watch,
     resetField,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      governorate: '',
-      administration: '',
-      facility_name: '',
-      facility_type: '',
-      reporter_role: '',
-      involved_person: '',
-      occurrence_date: '',
-      occurrence_time: '',
-      occurrence_location: '',
-      responsible_manager: '',
+      governorate:          isFacilityUser ? (user?.governorate   || '') : '',
+      administration:       isFacilityUser ? (user?.administration || '') : '',
+      facility_name:        isFacilityUser ? (user?.facility_name  || '') : '',
+      facility_type:        '',
+      reporter_role:        '',
+      involved_person:      '',
+      occurrence_date:      '',
+      occurrence_time:      '',
+      occurrence_location:  '',
+      responsible_manager:  '',
       reporting_department: '',
-      description: '',
+      description:          '',
       error_classification: '',
-      specific_error: '',
-      event_type: '',
-      severity: '',
-      recommendations: '',
-      notes: '',
-      medical_file_number: '',
+      specific_error:       '',
+      event_type:           '',
+      severity:             '',
+      recommendations:      '',
+      notes:                '',
+      medical_file_number:  '',
     },
   });
 
@@ -92,15 +100,31 @@ export default function NewIncidentForm() {
     };
   }, []);
 
+  // For facility-level users, fetch the facility_type from the facilities list
+  // because it is not stored on the user document.
   useEffect(() => {
+    if (!isFacilityUser || !user?.facility_name) return;
+    let mounted = true;
+
+    api.get('/facilities/').then(({ data }) => {
+      if (!mounted) return;
+      const match = data.find((f) => f.facility_name === user.facility_name);
+      if (match?.facility_type) setValue('facility_type', match.facility_type);
+    }).catch(() => {/* non-critical — user can still select manually */});
+
+    return () => { mounted = false; };
+  }, [isFacilityUser, user?.facility_name, setValue]);
+
+  useEffect(() => {
+    if (isFacilityUser) return; // locked fields must not be reset
     resetField('administration');
     resetField('facility_name');
-  }, [selectedGovernorate, resetField]);
+  }, [selectedGovernorate, resetField, isFacilityUser]);
 
   useEffect(() => {
+    if (isFacilityUser) return;
     resetField('facility_name');
-  }, [selectedAdministration, resetField]);
-
+  }, [selectedAdministration, resetField, isFacilityUser]);
   const onSubmit = async (values) => {
     setAiNotice('');
 
@@ -138,62 +162,104 @@ export default function NewIncidentForm() {
     backgroundColor: '#FFFFFF',
   };
 
+  const lockedFieldStyle = {
+    ...fieldStyle,
+    backgroundColor: '#F3F4F6',
+    color: '#6B7280',
+    cursor: 'not-allowed',
+  };
+
   const labelStyle = { fontSize: 13, fontWeight: 600, color: '#111827' };
   const errorStyle = { fontSize: 12, color: '#B91C1C' };
+
+  // Renders a field that is either a locked text display or a live select/input
+  const LockedOrSelect = ({ name, label, options, required, locked }) => {
+    if (locked) {
+      const val = name === 'governorate' ? user?.governorate
+                : name === 'administration' ? user?.administration
+                : name === 'facility_name' ? user?.facility_name
+                : watch(name);
+      return (
+        <label style={labelStyle}>
+          {label}
+          <div style={{ position: 'relative' }}>
+            <input
+              style={lockedFieldStyle}
+              value={val || ''}
+              readOnly
+              tabIndex={-1}
+              {...register(name, required ? { required: `${label} is required` } : {})}
+            />
+            <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: '#9CA3AF' }}>
+              🔒
+            </span>
+          </div>
+        </label>
+      );
+    }
+    return (
+      <label style={labelStyle}>
+        {label}
+        <select style={fieldStyle} {...register(name, required ? { required: `${label} is required` } : {})}>
+          <option value="">Select {label.toLowerCase()}</option>
+          {options.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+        {errors[name] && <div style={errorStyle}>{errors[name].message}</div>}
+      </label>
+    );
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'grid', gap: 14 }}>
       {cascadingError && <div style={{ ...errorStyle, fontWeight: 600 }}>{cascadingError}</div>}
 
-      <label style={labelStyle}>
-        Governorate
-        <select style={fieldStyle} {...register('governorate', { required: 'Governorate is required' })}>
-          <option value="">Select governorate</option>
-          {cascading.governorates.map((gov) => (
-            <option key={gov} value={gov}>
-              {gov}
-            </option>
-          ))}
-        </select>
-        {errors.governorate && <div style={errorStyle}>{errors.governorate.message}</div>}
-      </label>
+      <LockedOrSelect
+        name="governorate"
+        label="Governorate"
+        options={cascading.governorates}
+        required
+        locked={isFacilityUser}
+      />
 
-      <label style={labelStyle}>
-        Administration
-        <select style={fieldStyle} {...register('administration', { required: 'Administration is required' })}>
-          <option value="">Select administration</option>
-          {administrationOptions.map((admin) => (
-            <option key={admin} value={admin}>
-              {admin}
-            </option>
-          ))}
-        </select>
-        {errors.administration && <div style={errorStyle}>{errors.administration.message}</div>}
-      </label>
+      <LockedOrSelect
+        name="administration"
+        label="Administration"
+        options={administrationOptions}
+        required
+        locked={isFacilityUser}
+      />
 
-      <label style={labelStyle}>
-        Facility
-        <select style={fieldStyle} {...register('facility_name', { required: 'Facility is required' })}>
-          <option value="">Select facility</option>
-          {facilityOptions.map((facility) => (
-            <option key={facility} value={facility}>
-              {facility}
-            </option>
-          ))}
-        </select>
-        {errors.facility_name && <div style={errorStyle}>{errors.facility_name.message}</div>}
-      </label>
+      <LockedOrSelect
+        name="facility_name"
+        label="Facility"
+        options={facilityOptions}
+        required
+        locked={isFacilityUser}
+      />
 
       <label style={labelStyle}>
         Facility Type
-        <select style={fieldStyle} {...register('facility_type', { required: 'Facility type is required' })}>
-          <option value="">Select type</option>
-          {FACILITY_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
+        {isFacilityUser ? (
+          <div style={{ position: 'relative' }}>
+            <input
+              style={lockedFieldStyle}
+              value={watch('facility_type') || ''}
+              readOnly
+              tabIndex={-1}
+              {...register('facility_type', { required: 'Facility type is required' })}
+            />
+            <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: '#9CA3AF' }}>
+              🔒
+            </span>
+          </div>
+        ) : (
+          <select style={fieldStyle} {...register('facility_type', { required: 'Facility type is required' })}>
+            <option value="">Select type</option>
+            {FACILITY_TYPES.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        )}
         {errors.facility_type && <div style={errorStyle}>{errors.facility_type.message}</div>}
       </label>
 

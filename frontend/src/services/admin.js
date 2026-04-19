@@ -19,3 +19,8 @@ export const provisionTierUser = async (payload) => {
   const { data } = await api.post('/users/provision/tier', payload);
   return data;
 };
+
+export const fetchFacilitiesFull = async () => {
+  const { data } = await api.get('/facilities/full');
+  return data; // FacilityResponse[] — includes facility_id, governorate, administration, facility_name
+};

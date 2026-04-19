@@ -34,8 +34,13 @@ export default function LoginForm() {
     }
     setLoading(true);
     try {
-      await login(email.trim(), password);
-      navigate("/", { replace: true });
+      const me = await login(email.trim(), password);
+      // login() returns null when must_change_password is true —
+      // AuthContext already navigated to /change-password in that case,
+      // so only navigate here when we actually got a user back.
+      if (me) {
+        navigate("/", { replace: true });
+      }
     } catch (err) {
       const msg =
         err?.response?.data?.detail ||
