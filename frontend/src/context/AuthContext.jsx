@@ -10,6 +10,12 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [mustChangePassword, setMustChangePassword] = useState(false);
 
+  const navigateTo = useCallback((path) => {
+    if (typeof window === 'undefined') return;
+    window.history.pushState({}, '', path);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -36,16 +42,15 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
     setToken(data?.access_token ?? null);
-    api.setToken?.(data?.access_token ?? null);
     if (data.must_change_password) {
       setMustChangePassword(true);
-      window.location.assign('/change-password');
+      navigateTo('/change-password');
       return null;
     }
     const me = await authService.getMe();
     setUser(me ?? null);
     return me;
-  }, []);
+  }, [navigateTo]);
 
   const logout = useCallback(async () => {
     try {
@@ -59,8 +64,8 @@ export function AuthProvider({ children }) {
     setMustChangePassword(false);
     const me = await authService.getMe();
     setUser(me);
-    window.location.assign('/');
-  }, []);
+    navigateTo('/');
+  }, [navigateTo]);
 
   const value = useMemo(
     () => ({
