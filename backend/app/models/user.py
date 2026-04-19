@@ -33,6 +33,7 @@ class UserInDB(UserCreate):
     user_id: str
     hashed_password: str
     is_active: bool = True
+    must_change_password: bool = True
     created_at: datetime
     last_login: Optional[datetime] = None
 
@@ -49,3 +50,4 @@ class UserResponse(BaseModel):
     governorate: str
     tier: int
     is_active: bool
+    must_change_password: bool = False

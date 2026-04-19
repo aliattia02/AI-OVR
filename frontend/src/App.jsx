@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
+import ForcedPasswordChange from './components/auth/ForcedPasswordChange';
 import LoginForm from './components/auth/LoginForm';
 import IncidentDetail from './components/incidents/IncidentDetail';
 import NewIncidentForm from './components/incidents/NewIncidentForm';
@@ -19,8 +20,15 @@ const PATH_BY_VIEW = {
 };
 
 function ProtectedRoute({ children, minTier }) {
-  const { isAuthenticated, tier } = useAuth();
+  const { isAuthenticated, tier, mustChangePassword } = useAuth();
+  const location = useLocation();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (mustChangePassword && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
+  }
+  if (!mustChangePassword && location.pathname === '/change-password') {
+    return <Navigate to="/dashboard" replace />;
+  }
   if (typeof minTier === 'number' && tier < minTier) return <Navigate to="/dashboard" replace />;
   return children;
 }
@@ -73,6 +81,7 @@ export default function App() {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/change-password" element={<ForcedPasswordChange />} />
           <Route path="/incidents" element={<Reports />} />
           <Route path="/incidents/:id" element={<IncidentDetailRoute />} />
           <Route path="/new" element={<NewIncidentForm />} />

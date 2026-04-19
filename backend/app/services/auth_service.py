@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import os
+import secrets
+import string
 from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import uuid4
@@ -60,6 +62,48 @@ def verify_password(plain: str, hashed: str) -> bool:
         return pwd_context.verify(plain, hashed)
     except (UnknownHashError, ValueError, TypeError):
         return False
+
+
+def generate_temp_password(length: int = 12) -> str:
+    """Generate a temporary password with mixed character classes."""
+    alphabet = string.ascii_letters + string.digits + "!@#$%"
+    password = (
+        secrets.choice(string.ascii_uppercase)
+        + secrets.choice(string.ascii_lowercase)
+        + secrets.choice(string.digits)
+        + secrets.choice("!@#$%")
+        + "".join(secrets.choice(alphabet) for _ in range(length - 4))
+    )
+    chars = list(password)
+    secrets.SystemRandom().shuffle(chars)
+    return "".join(chars)
+
+
+async def change_password(db, user_id: str, old_password: str, new_password: str) -> dict:
+    """Change a user's password after validating the current password."""
+    from bson import ObjectId  # noqa: PLC0415
+    from fastapi import HTTPException  # noqa: PLC0415
+
+    users = db["users"]
+    query = {"_id": user_id}
+    if ObjectId.is_valid(user_id):
+        query = {"_id": ObjectId(user_id)}
+
+    user_doc = await users.find_one(query)
+    if not user_doc:
+        user_doc = await users.find_one({"user_id": user_id})
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not verify_password(old_password, user_doc["hashed_password"]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    await users.update_one(
+        {"_id": user_doc["_id"]},
+        {"$set": {
+            "hashed_password": hash_password(new_password),
+            "must_change_password": False,
+        }},
+    )
+    return {"message": "Password changed successfully"}
 
 
 def create_access_token(data: dict[str, Any]) -> str:

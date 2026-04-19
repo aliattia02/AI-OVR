@@ -6,6 +6,7 @@ const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,6 +17,7 @@ export function AuthProvider({ children }) {
         const me = await auth.getMe();
         if (isMounted) {
           setUser(me);
+          setMustChangePassword(Boolean(me?.must_change_password));
         }
       } finally {
         if (isMounted) {
@@ -32,9 +34,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
-    const loggedInUser = await auth.login(email, password);
-    setUser(loggedInUser ?? null);
-    return loggedInUser;
+    const result = await auth.login(email, password);
+    const loggedInUser = result?.user ?? null;
+    setUser(loggedInUser);
+    setMustChangePassword(Boolean(result?.must_change_password));
+    return result;
   }, []);
 
   const logout = useCallback(async () => {
@@ -42,7 +46,13 @@ export function AuthProvider({ children }) {
       await auth.logout();
     } finally {
       setUser(null);
+      setMustChangePassword(false);
     }
+  }, []);
+
+  const markPasswordChanged = useCallback(() => {
+    setMustChangePassword(false);
+    setUser((prev) => (prev ? { ...prev, must_change_password: false } : prev));
   }, []);
 
   const value = useMemo(
@@ -51,11 +61,13 @@ export function AuthProvider({ children }) {
       loading,
       login,
       logout,
+      mustChangePassword,
+      markPasswordChanged,
       isAuthenticated: Boolean(user),
       tier: user?.tier ?? 0,
       role: user?.role ?? null,
     }),
-    [user, loading, login, logout]
+    [user, loading, login, logout, mustChangePassword, markPasswordChanged]
   );
 
   if (loading) {

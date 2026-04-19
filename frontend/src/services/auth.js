@@ -3,7 +3,10 @@ import api, { setToken } from './api';
 export async function login(email, password) {
   const { data } = await api.post('/auth/login', { email, password });
   setToken(data?.access_token ?? null);
-  return data?.user;
+  return {
+    user: data?.user ?? null,
+    must_change_password: Boolean(data?.must_change_password),
+  };
 }
 
 export async function logout() {

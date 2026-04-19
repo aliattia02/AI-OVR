@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, constr
 
 from app.db.database import get_database
 from app.models.user import UserResponse
@@ -32,6 +32,7 @@ class LoginResponse(BaseModel):
 
     access_token: str
     token_type: str
+    must_change_password: bool
     user: UserResponse
 
 
@@ -45,6 +46,11 @@ class MessageResponse(BaseModel):
     """Generic message response payload."""
 
     message: str
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: constr(min_length=8)
 
 
 def _unauthorized() -> HTTPException:
@@ -82,6 +88,7 @@ def _to_user_response(user_doc: dict[str, Any]) -> UserResponse:
         governorate=user_doc["governorate"],
         tier=user_doc["tier"],
         is_active=user_doc.get("is_active", True),
+        must_change_password=user_doc.get("must_change_password", False),
     )
 
 
@@ -133,7 +140,13 @@ async def login(
         tier=user.tier,
         is_active=user.is_active,
     )
-    return LoginResponse(access_token=access_token, token_type="bearer", user=user_response)
+    must_change_password = bool(getattr(user, "must_change_password", False))
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        must_change_password=must_change_password,
+        user=user_response,
+    )
 
 
 @router.post("/refresh", response_model=AccessTokenResponse)
@@ -191,3 +204,17 @@ async def me(
     if not user_doc:
         raise _unauthorized()
     return _to_user_response(user_doc)
+
+
+@router.post("/change-password")
+async def change_password_endpoint(
+    body: ChangePasswordRequest,
+    current_user=Depends(auth_service.get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+):
+    return await auth_service.change_password(
+        db,
+        user_id=str(current_user["user_id"]),
+        old_password=body.old_password,
+        new_password=body.new_password,
+    )
