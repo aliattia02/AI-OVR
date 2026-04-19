@@ -30,7 +30,7 @@ class UserCreate(BaseModel):
         The class check keeps this enforcement scoped to creation payloads only,
         so DB-backed models can represent users after they have changed passwords.
         """
-        if self.__class__ is UserCreate:
+        if type(self) is UserCreate:
             self.must_change_password = True
         return self
 
