@@ -7,7 +7,7 @@ const ROLE_VIEWS = {
   patient: [{ id: 'report-incident', label: 'Report Incident' }],
   staff: [
     { id: 'new-report', label: 'New Report' },
-    { id: 'my-reports', label: 'My Reports' },
+    { id: 'reports', label: 'My Reports' },
   ],
   quality_admin: [
     { id: 'dashboard', label: 'Dashboard' },

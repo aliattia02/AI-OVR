@@ -28,10 +28,14 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error?.config;
     const isUnauthorized = error?.response?.status === 401;
-    const isAuthRoute = originalRequest?.url?.includes('/auth/');
+    const requestUrl = originalRequest?.url || '';
+    const isNonRetryAuthRoute =
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/refresh') ||
+      requestUrl.includes('/auth/logout');
 
-    // Don't retry auth routes (login, refresh, me) — prevents the infinite loop
-    if (!isUnauthorized || !originalRequest || originalRequest._retry || isAuthRoute) {
+    // Don't retry login/refresh/logout requests to prevent loops
+    if (!isUnauthorized || !originalRequest || originalRequest._retry || isNonRetryAuthRoute) {
       return Promise.reject(error);
     }
 
@@ -49,7 +53,9 @@ api.interceptors.response.use(
       return api(originalRequest);
     } catch (refreshError) {
       setToken(null);
-      // Just reject — let React Router / protected routes handle the redirect
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.replace('/login');
+      }
       return Promise.reject(refreshError);
     }
   }
