@@ -61,6 +61,22 @@ def _no_model_configured() -> AIProviderDisabledResponse:
 
 
 @router.post(
+    "/classify/batch",
+    response_model=BatchClassifyResponse | AIProviderDisabledResponse,
+)
+async def classify_batch(
+    claims: dict[str, Any] = Depends(require_role(UserRole.top_management)),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> BatchClassifyResponse | AIProviderDisabledResponse:
+    _ = claims
+    if ai_service.AI_PROVIDER == "none":
+        return _no_model_configured()
+
+    processed = await ai_service.batch_classify_unprocessed(db)
+    return BatchClassifyResponse(processed=processed)
+
+
+@router.post(
     "/classify/{incident_id}",
     response_model=AIMetadata | AIProviderDisabledResponse,
 )
@@ -108,22 +124,6 @@ async def classify_incident_now(
     if updated_doc is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found")
     return AIMetadata.model_validate(updated_doc.get("ai_metadata", {}))
-
-
-@router.post(
-    "/classify/batch",
-    response_model=BatchClassifyResponse | AIProviderDisabledResponse,
-)
-async def classify_batch(
-    claims: dict[str, Any] = Depends(require_role(UserRole.top_management)),
-    db: AsyncIOMotorDatabase = Depends(get_database),
-) -> BatchClassifyResponse | AIProviderDisabledResponse:
-    _ = claims
-    if ai_service.AI_PROVIDER == "none":
-        return _no_model_configured()
-
-    processed = await ai_service.batch_classify_unprocessed(db)
-    return BatchClassifyResponse(processed=processed)
 
 
 @router.post("/feedback/{incident_id}", response_model=MessageResponse)
