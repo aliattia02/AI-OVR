@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel, EmailStr, model_validator
+from pydantic import BaseModel, EmailStr
 
 from app.utils.enums import UserRole
 
@@ -21,13 +21,7 @@ class UserCreate(BaseModel):
     administration: str
     governorate: str
     tier: int                     # 1–5
-    must_change_password: bool = True
-
-    @model_validator(mode="after")
-    def enforce_must_change_password(self) -> UserCreate:
-        """Provisioned users must always be forced to change the initial password."""
-        self.must_change_password = True
-        return self
+    must_change_password: Literal[True] = True
 
 
 class UserInDB(UserCreate):
