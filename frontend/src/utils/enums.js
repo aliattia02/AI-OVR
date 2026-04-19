@@ -27,6 +27,7 @@ export const EVENT_TYPES = [
   'SentinelEvent',
 ];
 export const ACTION_STATUSES = ['Pending', 'InProgress', 'Completed'];
+export const REPORTER_TYPES = ['patient', 'staff'];
 export const REPORTER_ROLES = [
   'Patient',
   'Staff/Doctor',

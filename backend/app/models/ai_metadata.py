@@ -33,8 +33,8 @@ class AIMetadata(BaseModel):
     auto_event_type: Optional[str] = None             # AI-suggested EventType; null until model integrated
     classification_score: Optional[float] = None     # Model confidence 0.0–1.0
     ai_risk_score: Optional[int] = None              # AI risk — never overwrites human risk_score
-    similar_incident_ids: List[str] = Field(default_factory=list)
-    signal_flags: List[str] = Field(default_factory=list)
+    similar_incident_ids: Optional[List[str]] = None
+    signal_flags: Optional[List[str]] = None
     embedding_vector: Optional[List[float]] = None   # 1536-dim, Atlas Vector Search
     embedding_id: Optional[str] = None
     model_version: Optional[str] = None
