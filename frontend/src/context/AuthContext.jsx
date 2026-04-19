@@ -42,7 +42,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
     setToken(data?.access_token ?? null);
-    if (data.must_change_password) {
+    if (data?.must_change_password) {
       setMustChangePassword(true);
       navigateTo('/change-password');
       return null;
