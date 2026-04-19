@@ -5,6 +5,8 @@ import NewIncidentForm from './components/incidents/NewIncidentForm';
 import Sidebar from './components/shared/Sidebar';
 import { useAuth } from './context/AuthContext';
 import Analytics from './pages/Analytics';
+import AdminProvision from './pages/AdminProvision';
+import ChangePassword from './pages/ChangePassword';
 import Dashboard from './pages/Dashboard';
 import PatientReport from './pages/PatientReport';
 import Reports from './pages/Reports';
@@ -16,6 +18,7 @@ const PATH_BY_VIEW = {
   'new-report': '/new',
   analytics: '/analytics',
   workflow: '/workflow',
+  'admin-provision': '/admin/provision',
 };
 
 function ProtectedRoute({ children, minTier }) {
@@ -36,6 +39,7 @@ function AppLayout() {
   let currentView = pathname.slice(1).split('/')[0] || 'dashboard';
   if (pathname.startsWith('/incidents')) currentView = 'reports';
   if (pathname.startsWith('/new')) currentView = 'new-report';
+  if (pathname.startsWith('/admin/provision')) currentView = 'admin-provision';
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -65,6 +69,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/report/:uuid" element={<PatientReport />} />
+        <Route path="/change-password" element={<ChangePassword />} />
         <Route
           element={
             <ProtectedRoute minTier={2}>
@@ -89,6 +94,14 @@ export default function App() {
             element={
               <RoleRoute allowedRoles={['quality_admin', 'top_management']}>
                 <WorkflowPage />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/admin/provision"
+            element={
+              <RoleRoute allowedRoles={['top_management']}>
+                <AdminProvision />
               </RoleRoute>
             }
           />

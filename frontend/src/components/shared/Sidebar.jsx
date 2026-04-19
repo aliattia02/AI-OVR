@@ -30,6 +30,7 @@ const ROLE_VIEWS = {
     { id: 'reports', label: 'Reports' },
     { id: 'analytics', label: 'Analytics' },
     { id: 'workflow', label: 'Workflow' },
+    { id: 'admin-provision', label: 'User Provisioning' },
   ],
 };
 
