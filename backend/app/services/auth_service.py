@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import os
+import random
+import secrets
+import string
 from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import uuid4
@@ -62,6 +65,23 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
+def generate_temporary_password(length: int = 12) -> str:
+    """Generate a temporary password with mixed-case letters and digits."""
+    if length < 8:
+        raise ValueError("Temporary password length must be at least 8 characters")
+
+    required_chars = [
+        secrets.choice(string.ascii_lowercase),
+        secrets.choice(string.ascii_uppercase),
+        secrets.choice(string.digits),
+    ]
+    charset = string.ascii_letters + string.digits
+    remaining = [secrets.choice(charset) for _ in range(length - len(required_chars))]
+    password_chars = required_chars + remaining
+    random.SystemRandom().shuffle(password_chars)
+    return "".join(password_chars)
+
+
 def create_access_token(data: dict[str, Any]) -> str:
     """Create a JWT access token containing user scope claims."""
     now = datetime.now(tz=timezone.utc)
@@ -118,6 +138,39 @@ async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase)
     user_doc.pop("password", None)
     user_doc.pop("_id", None)
     return UserInDB.model_construct(**user_doc)
+
+
+async def change_user_password(
+    user_id: str,
+    current_password: str,
+    new_password: str,
+    db: AsyncIOMotorDatabase,
+) -> bool:
+    """Change a user's password after validating the current password."""
+    if not new_password:
+        return False
+
+    user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 1, "hashed_password": 1})
+    if not user_doc:
+        return False
+
+    stored_hash = user_doc.get("hashed_password")
+    if not isinstance(stored_hash, str) or not verify_password(current_password, stored_hash):
+        return False
+
+    if verify_password(new_password, stored_hash):
+        return False
+
+    result = await db["users"].update_one(
+        {"_id": user_doc["_id"]},
+        {
+            "$set": {
+                "hashed_password": hash_password(new_password),
+                "must_change_password": False,
+            }
+        },
+    )
+    return result.modified_count > 0
 
 
 async def get_current_user(
