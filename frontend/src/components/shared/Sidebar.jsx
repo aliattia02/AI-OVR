@@ -34,7 +34,7 @@ const ROLE_VIEWS = {
   ],
 };
 
-export default function Sidebar({ onNavigate, currentView }) {
+export default function Sidebar({ onNavigate, currentView, onSignOut }) {
   const { role, tier } = useAuth();
   const roleMeta = USER_ROLES[role] || { label: 'Unknown Role', tier: tier || 0 };
   const navItems = ROLE_VIEWS[role] || [];
@@ -141,6 +141,24 @@ export default function Sidebar({ onNavigate, currentView }) {
         >
           {aiNotConfigured ? 'AI: Not configured' : `AI: ${aiModelName}`}
         </div>
+
+        <button
+          type="button"
+          onClick={() => onSignOut?.()}
+          style={{
+            textAlign: 'left',
+            border: '1px solid rgba(255,255,255,0.25)',
+            borderRadius: 10,
+            backgroundColor: 'transparent',
+            color: '#FFFFFF',
+            padding: '9px 10px',
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          Sign out
+        </button>
       </div>
     </aside>
   );

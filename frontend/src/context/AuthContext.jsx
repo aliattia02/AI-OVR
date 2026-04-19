@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import Spinner from '../components/shared/Spinner';
 import * as authService from '../services/auth';
 
@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mustChangePassword, setMustChangePassword] = useState(false);
+  const restoredRef = useRef(false);
 
   const navigateTo = useCallback((path) => {
     if (typeof window === 'undefined') return;
@@ -16,11 +17,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+
     let isMounted = true;
 
-    const restoreSession = async () => {
+    const initializeSession = async () => {
       try {
-        const me = await authService.getMe();
+        const me = await authService.restoreSession();
         if (isMounted) {
           setUser(me);
         }
@@ -31,7 +35,7 @@ export function AuthProvider({ children }) {
       }
     };
 
-    restoreSession();
+    initializeSession();
 
     return () => {
       isMounted = false;

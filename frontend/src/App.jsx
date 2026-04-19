@@ -35,15 +35,25 @@ function RoleRoute({ children, allowedRoles }) {
 
 function AppLayout() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const { pathname } = useLocation();
   let currentView = pathname.slice(1).split('/')[0] || 'dashboard';
   if (pathname.startsWith('/incidents')) currentView = 'reports';
   if (pathname.startsWith('/new')) currentView = 'new-report';
   if (pathname.startsWith('/admin/provision')) currentView = 'admin-provision';
 
+  const handleSignOut = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar currentView={currentView} onNavigate={(view) => navigate(PATH_BY_VIEW[view] || '/dashboard')} />
+      <Sidebar
+        currentView={currentView}
+        onNavigate={(view) => navigate(PATH_BY_VIEW[view] || '/dashboard')}
+        onSignOut={handleSignOut}
+      />
       <main style={{ flex: 1, overflow: 'auto', padding: 16 }}>
         <Outlet />
       </main>

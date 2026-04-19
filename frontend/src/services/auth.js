@@ -31,6 +31,25 @@ export async function getMe() {
   }
 }
 
+export async function restoreSession() {
+  try {
+    const { data } = await api.post('/auth/refresh');
+    const accessToken = data?.access_token ?? null;
+    if (!accessToken) {
+      setToken(null);
+      return null;
+    }
+    setToken(accessToken);
+    return await getMe();
+  } catch (error) {
+    if (error?.response?.status !== 401 && typeof console !== 'undefined' && typeof console.warn === 'function') {
+      console.warn('Session restore failed unexpectedly.', error);
+    }
+    setToken(null);
+    return null;
+  }
+}
+
 export const changePassword = async (oldPassword, newPassword) => {
   if (!oldPassword || !newPassword) {
     throw new Error('oldPassword and newPassword are required');
