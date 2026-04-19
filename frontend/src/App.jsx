@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-import * as LoginFormModule from './components/auth/LoginForm';
+import LoginForm from './components/auth/LoginForm';
 import IncidentDetail from './components/incidents/IncidentDetail';
 import NewIncidentForm from './components/incidents/NewIncidentForm';
 import Sidebar from './components/shared/Sidebar';
@@ -10,7 +10,6 @@ import PatientReport from './pages/PatientReport';
 import Reports from './pages/Reports';
 import WorkflowPage from './pages/WorkflowPage';
 
-const LoginForm = LoginFormModule.default || (() => null);
 const PATH_BY_VIEW = {
   dashboard: '/dashboard',
   reports: '/incidents',

@@ -76,14 +76,18 @@ async def create_incident(
     Returns:
         The newly created :class:`IncidentInDB` with its assigned ``_id``.
     """
-    # Step 1 — Denormalise facility fields
+    # ✅ Fixed — reject if facility not found; never trust form-supplied governorate
+    from fastapi import HTTPException, status
+
     facility_doc = await db["facilities"].find_one({"facility_name": data.facility_name})
-    if facility_doc:
-        administration: str = facility_doc.get("administration", "")
-        governorate: str = facility_doc.get("governorate", data.governorate)
-    else:
-        administration = ""
-        governorate = data.governorate
+    if facility_doc is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Facility '{data.facility_name}' not found. "
+                   "Submit a valid facility name from the approved list.",
+        )
+    administration: str = facility_doc.get("administration", "")
+    governorate: str = facility_doc.get("governorate", "")
 
     # Steps 2–3
     registration_date = datetime.now(tz=timezone.utc)

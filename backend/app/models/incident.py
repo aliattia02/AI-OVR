@@ -74,8 +74,7 @@ class IncidentInDB(IncidentCreate):
     action_time: Optional[str] = None
     action_status: ActionStatus = ActionStatus.Pending
     final_report: Optional[str] = None
-    ai_metadata: AIMetadata = Field(default_factory=AIMetadata)
-
+    ai_metadata: AIMetadata = Field(default_factory=AIMetadata.empty)
 
 class IncidentResponse(IncidentInDB):
     """Incident document serialised for API responses.
