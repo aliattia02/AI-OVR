@@ -53,6 +53,9 @@ api.interceptors.response.use(
       return api(originalRequest);
     } catch (refreshError) {
       setToken(null);
+      if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+        console.warn('Authentication refresh failed; user session has expired.');
+      }
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         window.location.replace('/login');
       }

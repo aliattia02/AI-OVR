@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -58,7 +59,7 @@ def _build_auto_encryption_opts() -> AutoEncryptionOpts | None:
 
     try:
         master_key = base64.b64decode(master_key_b64)
-    except Exception as exc:  # noqa: BLE001
+    except (binascii.Error, ValueError) as exc:
         raise EnvironmentError("CSFLE_LOCAL_MASTER_KEY must be valid base64.") from exc
 
     if len(master_key) != 96:
