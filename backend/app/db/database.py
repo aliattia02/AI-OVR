@@ -55,7 +55,7 @@ def _build_auto_encryption_opts() -> AutoEncryptionOpts | None:
 
     master_key_b64 = os.getenv("CSFLE_LOCAL_MASTER_KEY", "").strip()
     if not master_key_b64:
-        raise EnvironmentError("CSFLE_ENABLED is true but CSFLE_LOCAL_MASTER_KEY is not set.")
+        raise EnvironmentError("Required encryption configuration is missing.")
 
     try:
         master_key = base64.b64decode(master_key_b64)

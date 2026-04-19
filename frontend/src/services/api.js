@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 let _token = null;
+let _redirectingToLogin = false;
 
 export function setToken(token) {
   _token = token;
@@ -56,7 +57,12 @@ api.interceptors.response.use(
       if (typeof console !== 'undefined' && typeof console.warn === 'function') {
         console.warn('Authentication refresh failed; user session has expired.');
       }
-      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      if (
+        typeof window !== 'undefined' &&
+        window.location.pathname !== '/login' &&
+        !_redirectingToLogin
+      ) {
+        _redirectingToLogin = true;
         window.location.replace('/login');
       }
       return Promise.reject(refreshError);
