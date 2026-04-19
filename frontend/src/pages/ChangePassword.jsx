@@ -2,6 +2,8 @@ import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { changePassword } from '../services/auth';
 
+const MIN_PASSWORD_LENGTH = 8;
+
 const styles = {
   page: {
     maxWidth: 400,
@@ -73,8 +75,8 @@ export default function ChangePassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (newPw.length < 8) {
-      setError('New password must be at least 8 characters.');
+    if (newPw.length < MIN_PASSWORD_LENGTH) {
+      setError(`New password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
       return;
     }
     if (newPw !== confirmPw) {
