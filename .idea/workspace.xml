@@ -4,22 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/backend/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/db/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/db/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/facility.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/facility.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/facilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/facilities.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/incidents.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/incidents.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/services/auth_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/auth_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/services/facility_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/facility_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/auth/LoginForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/auth/LoginForm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/services/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
-    </list>
+    <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -88,7 +73,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1776552998263</updated>
-      <workItem from="1776552999891" duration="5578000" />
+      <workItem from="1776552999891" duration="5952000" />
     </task>
     <servers />
   </component>
