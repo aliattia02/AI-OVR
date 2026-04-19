@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
 
     let isMounted = true;
 
-    const restoreSession = async () => {
+    const initializeSession = async () => {
       try {
         const me = await authService.restoreSession();
         if (isMounted) {
@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
       }
     };
 
-    restoreSession();
+    initializeSession();
 
     return () => {
       isMounted = false;
