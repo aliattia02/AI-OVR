@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import random
 import secrets
 import string
 from datetime import datetime, timedelta, timezone
@@ -78,7 +77,7 @@ def generate_temporary_password(length: int = 12) -> str:
     charset = string.ascii_letters + string.digits
     remaining = [secrets.choice(charset) for _ in range(length - len(required_chars))]
     password_chars = required_chars + remaining
-    random.SystemRandom().shuffle(password_chars)
+    secrets.SystemRandom().shuffle(password_chars)
     return "".join(password_chars)
 
 
