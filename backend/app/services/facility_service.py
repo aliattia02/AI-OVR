@@ -23,7 +23,7 @@ async def get_facilities(db: AsyncIOMotorDatabase) -> List[FacilityResponse]:
     cursor = db["facilities"].find(
         {},
         {
-            "_id": 0,
+            "_id": 1,
             "governorate": 1,
             "administration": 1,
             "facility_name": 1,
@@ -39,7 +39,13 @@ async def get_facilities(db: AsyncIOMotorDatabase) -> List[FacilityResponse]:
         ]
     )
     docs = await cursor.to_list(length=None)
-    return [FacilityResponse(**doc) for doc in docs]
+    return [
+        FacilityResponse(
+            facility_id=str(doc["_id"]),
+            **{k: v for k, v in doc.items() if k != "_id"},
+        )
+        for doc in docs
+    ]
 
 
 async def get_facilities_safe(db: AsyncIOMotorDatabase) -> list[FacilitySafeResponse]:

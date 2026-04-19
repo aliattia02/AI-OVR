@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import re
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 from uuid import uuid4
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
@@ -20,6 +23,8 @@ from app.services.auth_service import generate_temp_password, hash_password
 from app.utils.enums import UserRole
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+EMAIL_DOMAIN = "uhic.ovr"
 
 
 class MessageResponse(BaseModel):
@@ -52,7 +57,58 @@ class TierUserResult(BaseModel):
     must_change_password: bool
 
 
-@router.get("/", response_model=list[UserResponse])
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _slugify(value: str) -> str:
+    """Strip characters that are unsafe in usernames/email local-parts.
+
+    Keeps alphanumeric characters and underscores; replaces spaces and hyphens
+    with underscores; removes everything else.
+    """
+    value = value.strip()
+    value = re.sub(r"[\s\-]+", "_", value)
+    value = re.sub(r"[^\w]", "", value)       # \w = [a-zA-Z0-9_]
+    return value
+
+
+async def _resolve_actor_id(db: AsyncIOMotorDatabase, current_user: dict[str, Any]) -> str:
+    """Return a string representation of the acting user's DB identity.
+
+    Tries three strategies in order so the endpoint works regardless of whether
+    the logged-in top-management account was created via ``create_user``
+    (has a ``user_id`` field) or via ``provision_tier_user`` (only has ``_id``):
+
+    1. Look up by the ``user_id`` application field.
+    2. Look up by ``_id`` directly (using the ``sub`` claim if present).
+    3. Fall back to a stringified snapshot of the claims — keeps an audit trail
+       even when the exact DB document cannot be resolved.
+    """
+    # Strategy 1: application-level user_id field (created via create_user)
+    app_user_id = current_user.get("user_id")
+    if app_user_id:
+        doc = await db["users"].find_one({"user_id": app_user_id}, {"_id": 1})
+        if doc:
+            return str(doc["_id"])
+
+    # Strategy 2: _id lookup via JWT sub / username claim
+    for claim_key in ("sub", "username", "email"):
+        claim_val = current_user.get(claim_key)
+        if not claim_val:
+            continue
+        doc = await db["users"].find_one(
+            {"$or": [{"_id": claim_val}, {"username": claim_val}, {"email": claim_val}]},
+            {"_id": 1},
+        )
+        if doc:
+            return str(doc["_id"])
+
+    # Strategy 3: graceful fallback — never block the provision just for audit
+    return f"claims:{current_user.get('sub') or current_user.get('username') or 'unknown'}"
+
+
+# ── Routes ────────────────────────────────────────────────────────────────────
+
+@router.get("", response_model=list[UserResponse])
 async def list_users(
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
@@ -91,7 +147,10 @@ async def create_user(
     try:
         await db["users"].insert_one(doc)
     except DuplicateKeyError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists") from exc
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with this email already exists",
+        ) from exc
 
     return UserResponse.model_validate(doc)
 
@@ -115,46 +174,88 @@ async def provision_facility_users(
     current_user: dict[str, Any] = Depends(require_role(UserRole.top_management)),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> FacilityProvisionResult:
-    actor_doc = await db["users"].find_one({"user_id": current_user.get("user_id")}, {"_id": 1})
-    if not actor_doc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    current_user["_id"] = actor_doc["_id"]
+    # Resolve actor — never raises; falls back gracefully so provision is never
+    # blocked solely because of an audit-trail lookup failure.
+    actor_id = await _resolve_actor_id(db, current_user)
 
-    facility = await db["facilities"].find_one({"_id": facility_id})
+    try:
+        oid = ObjectId(facility_id)
+    except InvalidId:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid facility ID format",
+        )
+
+    facility = await db["facilities"].find_one({"_id": oid})
     if not facility:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Facility not found")
 
+    # Derive a clean slug from the English facility name.
+    # Falls back to the first 8 characters of the facility_id if the field is absent.
+    raw_name_en: str = facility.get("facility_name_en") or ""
+    name_slug = _slugify(raw_name_en) if raw_name_en else facility_id[:8]
+
+    now = datetime.now(tz=timezone.utc)
+
+    # role_label is what appears in the email address and username
+    role_configs = [
+        ("staff",         "staff", UserRole.staff),
+        ("quality_admin", "QC",    UserRole.quality_admin),
+    ]
+
     results: dict[str, dict[str, str]] = {}
-    for suffix, role_enum in [("staff", UserRole.staff), ("quality_admin", UserRole.quality_admin)]:
-        username = f"{facility_id[:8]}_{suffix}"
+    for result_key, email_suffix, role_enum in role_configs:
+        username = f"{name_slug}_{email_suffix}"
+        email    = f"{username}@{EMAIL_DOMAIN}"
+
         existing_user = await db["users"].find_one({"username": username})
         if existing_user:
-            results[suffix] = {
+            results[result_key] = {
                 "username": username,
+                "email": email,
                 "temp_password": "(already set — use reset if needed)",
                 "user_id": str(existing_user.get("user_id") or existing_user.get("_id")),
             }
             continue
 
         temp_pw = generate_temp_password()
-        user_id = str(uuid.uuid4())
-        await db["users"].insert_one(
-            {
-                "_id": user_id,
-                "username": username,
-                "full_name": f"{facility['facility_name']} — {suffix}",
-                "hashed_password": hash_password(temp_pw),
-                "role": role_enum.value,
-                "tier": "facility",
-                "facility_id": facility_id,
-                "governorate": facility["governorate"],
-                "administration": facility["administration"],
-                "is_active": True,
-                "must_change_password": True,
-                "created_by": str(current_user["_id"]),
-            }
-        )
-        results[suffix] = {"username": username, "temp_password": temp_pw, "user_id": user_id}
+        new_user_id = str(uuid.uuid4())
+        app_user_id = f"USR-{uuid4().hex[:12].upper()}"
+
+        try:
+            await db["users"].insert_one(
+                {
+                    "_id": new_user_id,
+                    "user_id": app_user_id,   # required by auth.py login handler
+                    "username": username,
+                    "email": email,
+                    "full_name": f"{facility['facility_name']} — {result_key.replace('_', ' ').title()}",
+                    "hashed_password": hash_password(temp_pw),
+                    "role": role_enum.value,
+                    "tier": 2,                # matches frontend enums.js: staff/quality_admin = tier 2
+                    "facility_id": facility_id,
+                    "facility_name": facility["facility_name"],
+                    "governorate": facility["governorate"],
+                    "administration": facility["administration"],
+                    "is_active": True,
+                    "must_change_password": True,
+                    "created_at": now,
+                    "last_login": None,
+                    "created_by": actor_id,
+                }
+            )
+        except DuplicateKeyError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"User '{username}' or email '{email}' already exists.",
+            ) from exc
+
+        results[result_key] = {
+            "username": username,
+            "email": email,
+            "temp_password": temp_pw,
+            "user_id": new_user_id,
+        }
 
     return FacilityProvisionResult(
         facility_id=facility_id,
@@ -181,35 +282,51 @@ async def provision_tier_user(
     if existing_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
 
-    actor_doc = await db["users"].find_one({"user_id": current_user.get("user_id")}, {"_id": 1})
-    if not actor_doc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    current_user["_id"] = actor_doc["_id"]
+    actor_id = await _resolve_actor_id(db, current_user)
 
     tier_map = {
         UserRole.governorate_manager: "governorate",
         UserRole.administration_manager: "administration",
         UserRole.top_management: "national",
     }
+    tier_int_map = {
+        UserRole.governorate_manager: 3,
+        UserRole.administration_manager: 2,
+        UserRole.top_management: 4,
+    }
     tier = tier_map[body.role]
+    tier_int = tier_int_map[body.role]
     temp_pw = generate_temp_password()
-    await db["users"].insert_one(
-        {
-            "_id": str(uuid.uuid4()),
-            "username": body.username,
-            "full_name": body.full_name,
-            "email": body.email,
-            "hashed_password": hash_password(temp_pw),
-            "role": body.role.value,
-            "tier": tier,
-            "governorate": body.governorate,
-            "administration": body.administration,
-            "facility_id": None,
-            "is_active": True,
-            "must_change_password": True,
-            "created_by": str(current_user["_id"]),
-        }
-    )
+    now = datetime.now(tz=timezone.utc)
+    app_user_id = f"USR-{uuid4().hex[:12].upper()}"
+
+    try:
+        await db["users"].insert_one(
+            {
+                "_id": str(uuid.uuid4()),
+                "user_id": app_user_id,       # required by auth.py login handler
+                "username": body.username,
+                "full_name": body.full_name,
+                "email": body.email,
+                "hashed_password": hash_password(temp_pw),
+                "role": body.role.value,
+                "tier": tier_int,             # UserInDB.tier is int
+                "tier_label": tier,           # keep the human-readable label too
+                "governorate": body.governorate,
+                "administration": body.administration,
+                "facility_id": None,
+                "is_active": True,
+                "must_change_password": True,
+                "created_at": now,
+                "last_login": None,
+                "created_by": actor_id,
+            }
+        )
+    except DuplicateKeyError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A user with this email already exists.",
+        ) from exc
 
     return TierUserResult(
         username=body.username,

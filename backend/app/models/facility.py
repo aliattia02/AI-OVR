@@ -34,6 +34,7 @@ class FacilityResponse(BaseModel):
     Never returned on public endpoints.
     """
 
+    facility_id: str          # MongoDB _id as string — used by AdminProvision dropdown
     governorate: str
     facility_type: FacilityType
     administration: str

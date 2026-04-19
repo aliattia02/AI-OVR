@@ -1,4 +1,10 @@
-"""Import facilities CSV into MongoDB with upsert behavior."""
+"""Import facilities CSV into MongoDB with upsert behavior.
+
+Supports the original Arabic-only CSV as well as the updated CSV that includes
+English name columns (Facility_Type_EN, Administration_EN, Facility_Name_EN).
+The English fields are written via $set so existing documents are updated in-place
+without touching patient_link_uuid or created_at.
+"""
 
 from __future__ import annotations
 
@@ -58,6 +64,8 @@ def main() -> None:
     db_name = _resolve_db_name(mongo_url)
 
     upserted_count = 0
+    updated_count = 0
+
     with MongoClient(mongo_url) as client:
         facilities = client[db_name]["facilities"]
         with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
@@ -66,20 +74,37 @@ def main() -> None:
                 governorate = _pick(row, ("governorate", "المحافظة"))
                 administration = _pick(row, ("administration", "الإدارة", "الادارة"))
                 facility_name = _pick(row, ("facility_name", "facility", "اسم المنشأة", "اسم المنشاه"))
-                facility_type = _normalise_facility_type(_pick(row, ("facility_type", "type", "نوع المنشأة", "نوع المنشاه")))
+                facility_type = _normalise_facility_type(
+                    _pick(row, ("facility_type", "type", "نوع المنشأة", "نوع المنشاه"))
+                )
+
+                # English name columns (present in updated CSV, blank-safe)
+                facility_type_en = _pick(row, ("facility_type_en",))
+                administration_en = _pick(row, ("administration_en",))
+                facility_name_en = _pick(row, ("facility_name_en",))
 
                 if not governorate or not facility_name:
                     continue
 
+                set_fields: dict = {
+                    "governorate": governorate,
+                    "administration": administration,
+                    "facility_name": facility_name,
+                    "facility_type": facility_type,
+                }
+
+                # Only write EN fields when the CSV actually provides them
+                if facility_type_en:
+                    set_fields["facility_type_en"] = facility_type_en
+                if administration_en:
+                    set_fields["administration_en"] = administration_en
+                if facility_name_en:
+                    set_fields["facility_name_en"] = facility_name_en
+
                 result = facilities.update_one(
                     {"governorate": governorate, "facility_name": facility_name},
                     {
-                        "$set": {
-                            "governorate": governorate,
-                            "administration": administration,
-                            "facility_name": facility_name,
-                            "facility_type": facility_type,
-                        },
+                        "$set": set_fields,
                         "$setOnInsert": {
                             "patient_link_uuid": str(uuid4()),
                             "created_at": datetime.now(tz=timezone.utc),
@@ -87,10 +112,14 @@ def main() -> None:
                     },
                     upsert=True,
                 )
+
                 if result.upserted_id is not None:
                     upserted_count += 1
+                elif result.modified_count:
+                    updated_count += 1
 
-    print(f"total upserted: {upserted_count}")
+    print(f"New documents inserted : {upserted_count}")
+    print(f"Existing documents updated: {updated_count}")
 
 
 if __name__ == "__main__":

@@ -98,13 +98,16 @@ async def create_incident(
     ai_metadata = AIMetadata.empty()
     audit_entry = build_audit_entry(user_id=user_id or "", action="Created")
 
+    # Exclude `governorate` from the form payload so it can be supplied
+    # from the DB-authoritative facility lookup below without causing a
+    # "multiple values for keyword argument" TypeError (→ 500).
     incident = IncidentInDB(
-        **data.model_dump(),
+        **data.model_dump(exclude={"governorate"}),
         incident_id=incident_id,
         reporter_type=reporter_type,
         reporter_user_id=user_id,
         administration=administration,
-        governorate=governorate,
+        governorate=governorate,          # DB-authoritative value
         registration_date=registration_date,
         ai_metadata=ai_metadata,
         audit_trail=[audit_entry],
