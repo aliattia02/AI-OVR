@@ -41,7 +41,10 @@ export async function restoreSession() {
     }
     setToken(accessToken);
     return await getMe();
-  } catch {
+  } catch (error) {
+    if (error?.response?.status !== 401 && typeof console !== 'undefined' && typeof console.warn === 'function') {
+      console.warn('Session restore failed unexpectedly.', error);
+    }
     setToken(null);
     return null;
   }
