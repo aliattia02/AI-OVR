@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import os
+import secrets
+import string
 from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import uuid4
@@ -36,6 +38,7 @@ JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 MAX_STORED_REFRESH_TOKENS = 10
+SECURE_RANDOM = secrets.SystemRandom()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -60,6 +63,53 @@ def verify_password(plain: str, hashed: str) -> bool:
         return pwd_context.verify(plain, hashed)
     except (UnknownHashError, ValueError, TypeError):
         return False
+
+
+def generate_temporary_password(length: int = 12) -> str:
+    """Generate a temporary password with mixed-case letters and digits."""
+    if length < 8:
+        raise ValueError("Temporary password length must be at least 8 characters")
+
+    required_chars = [
+        secrets.choice(string.ascii_lowercase),
+        secrets.choice(string.ascii_uppercase),
+        secrets.choice(string.digits),
+    ]
+    charset = string.ascii_letters + string.digits
+    remaining = [secrets.choice(charset) for _ in range(length - len(required_chars))]
+    password_chars = required_chars + remaining
+    SECURE_RANDOM.shuffle(password_chars)
+    return "".join(password_chars)
+
+
+def generate_temp_password(length: int = 12) -> str:
+    """Generate a temporary password using uppercase, lowercase, digits, and symbols."""
+    if length < 4:
+        raise ValueError("Temporary password length must be at least 4 characters")
+
+    uppercase = string.ascii_uppercase
+    lowercase = string.ascii_lowercase
+    digits = string.digits
+    symbols = "!@#$%"
+    alphabet = uppercase + lowercase + digits + symbols
+
+    password_chars = [
+        secrets.choice(uppercase),
+        secrets.choice(lowercase),
+        secrets.choice(digits),
+        secrets.choice(symbols),
+    ]
+    password_chars.extend(secrets.choice(alphabet) for _ in range(length - 4))
+    secrets.SystemRandom().shuffle(password_chars)
+    return "".join(password_chars)
+
+
+def build_login_response(access_token: str, user_doc: dict[str, Any]) -> dict[str, Any]:
+    """Build login payload that includes token and password-change requirement."""
+    return {
+        "access_token": access_token,
+        "must_change_password": user_doc.get("must_change_password", False),
+    }
 
 
 def create_access_token(data: dict[str, Any]) -> str:
@@ -118,6 +168,61 @@ async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase)
     user_doc.pop("password", None)
     user_doc.pop("_id", None)
     return UserInDB.model_construct(**user_doc)
+
+
+async def change_user_password(
+    user_id: str,
+    current_password: str,
+    new_password: str,
+    db: AsyncIOMotorDatabase,
+) -> bool:
+    """Change a user's password after validating the current password."""
+    if not new_password:
+        return False
+
+    user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 1, "hashed_password": 1})
+    if not user_doc:
+        return False
+
+    stored_hash = user_doc.get("hashed_password")
+    if not isinstance(stored_hash, str) or not verify_password(current_password, stored_hash):
+        return False
+
+    if verify_password(new_password, stored_hash):
+        return False
+
+    result = await db["users"].update_one(
+        {"_id": user_doc["_id"]},
+        {
+            "$set": {
+                "hashed_password": hash_password(new_password),
+                "must_change_password": False,
+            }
+        },
+    )
+    return result.modified_count > 0
+
+
+async def change_password(
+    db: AsyncIOMotorDatabase,
+    user_id: str,
+    old_password: str,
+    new_password: str,
+) -> dict[str, str]:
+    """Change password for a user and clear must_change_password on success."""
+    user_doc = await db["users"].find_one({"_id": user_id})
+    if not user_doc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if not verify_password(old_password, user_doc["hashed_password"]):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+
+    new_hash = hash_password(new_password)
+    await db["users"].update_one(
+        {"_id": user_id},
+        {"$set": {"hashed_password": new_hash, "must_change_password": False}},
+    )
+    return {"message": "Password changed successfully"}
 
 
 async def get_current_user(

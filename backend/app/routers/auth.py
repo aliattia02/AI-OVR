@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, constr
 
 from app.db.database import get_database
 from app.models.user import UserResponse
@@ -45,6 +45,11 @@ class MessageResponse(BaseModel):
     """Generic message response payload."""
 
     message: str
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: constr(min_length=8)
 
 
 def _unauthorized() -> HTTPException:
@@ -191,3 +196,20 @@ async def me(
     if not user_doc:
         raise _unauthorized()
     return _to_user_response(user_doc)
+
+
+@router.post("/change-password")
+async def change_password(
+    body: ChangePasswordRequest,
+    current_user: dict[str, Any] = Depends(auth_service.get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> dict[str, str]:
+    current_user_doc = await db["users"].find_one({"user_id": current_user.get("user_id")}, {"_id": 1})
+    if not current_user_doc:
+        raise _unauthorized()
+    return await auth_service.change_password(
+        db,
+        str(current_user_doc["_id"]),
+        body.old_password,
+        body.new_password,
+    )

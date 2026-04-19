@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, model_validator
 
 from app.utils.enums import UserRole
 
@@ -21,6 +21,18 @@ class UserCreate(BaseModel):
     administration: str
     governorate: str
     tier: int                     # 1–5
+    must_change_password: bool = True
+
+    @model_validator(mode="after")
+    def enforce_must_change_password(self) -> UserCreate:
+        """Force must_change_password=True for provisioning payloads.
+
+        The class check keeps this enforcement scoped to creation payloads only,
+        so DB-backed models can represent users after they have changed passwords.
+        """
+        if type(self) is UserCreate:
+            self.must_change_password = True
+        return self
 
 
 class UserInDB(UserCreate):
@@ -32,6 +44,7 @@ class UserInDB(UserCreate):
 
     user_id: str
     hashed_password: str
+    must_change_password: bool = True
     is_active: bool = True
     created_at: datetime
     last_login: Optional[datetime] = None
