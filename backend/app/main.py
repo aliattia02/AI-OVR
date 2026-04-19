@@ -49,7 +49,7 @@ async def health_check() -> dict[str, str]:
     return {
         "status": "ok",
         "version": APP_VERSION,
-        "ai_provider": os.getenv("AI_PROVIDER", ""),
+        "ai_provider": os.getenv("AI_PROVIDER", "none"),
     }
 
 

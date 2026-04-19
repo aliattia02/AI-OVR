@@ -18,9 +18,8 @@ if not _mongo_url:
         "Copy .env.example to .env and provide a valid MongoDB connection string."
     )
 MONGO_URL: str = _mongo_url
-_db_name = os.getenv("DB_NAME")
-if _db_name is None:
-    _db_name = os.getenv("MONGO_DB_NAME")
+
+_db_name = os.getenv("DB_NAME") or os.getenv("MONGO_DB_NAME")
 if not _db_name:
     raise EnvironmentError(
         "DB_NAME environment variable is not set. "
@@ -30,19 +29,20 @@ if not _db_name:
 DB_NAME: str = _db_name
 
 # Module-level client, populated by the lifespan context manager.
-# A module-level reference is necessary because Motor clients are not
-# thread-local and must be shared across the entire application process.
 _client: AsyncIOMotorClient | None = None
 
 
 def get_database() -> AsyncIOMotorDatabase:
     """Return the Motor database instance.
 
-    Must be called after the lifespan context manager has started (i.e. after
-    application startup).  Raises ``RuntimeError`` if called before startup.
+    Must be called after the lifespan context manager has started.
+    Raises RuntimeError if called before startup.
     """
     if _client is None:
-        raise RuntimeError("Database client is not initialised. Ensure the lifespan context manager has started.")
+        raise RuntimeError(
+            "Database client is not initialised. "
+            "Ensure the lifespan context manager has started."
+        )
     return _client[DB_NAME]
 
 
@@ -74,18 +74,19 @@ def get_model_registry_col():
 async def lifespan(app) -> AsyncGenerator[None, None]:  # noqa: ANN001
     """FastAPI lifespan context manager.
 
-    Creates a Motor client on application startup and closes it cleanly on
-    shutdown.  Wire into ``FastAPI(lifespan=lifespan)`` in main.py.
-
-    Example::
-
-        from fastapi import FastAPI
-        from app.db.database import lifespan
-
-        app = FastAPI(lifespan=lifespan)
+    Creates a Motor client on startup, runs create_indexes(), then closes
+    cleanly on shutdown. Wire into FastAPI(lifespan=lifespan) in main.py.
     """
     global _client  # noqa: PLW0603
+
+    # Import here to avoid circular imports at module load time
+    from app.db.indexes import create_indexes  # noqa: PLC0415
+
     _client = AsyncIOMotorClient(MONGO_URL)
+    db = _client[DB_NAME]
+
+    await create_indexes(db)
+
     try:
         yield
     finally:

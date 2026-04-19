@@ -6,7 +6,7 @@ from typing import Dict, List
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.models.facility import FacilityInDB, FacilityResponse
+from app.models.facility import FacilityInDB, FacilityResponse, FacilitySafeResponse
 from app.utils.enums import UserRole
 
 
@@ -40,6 +40,25 @@ async def get_facilities(db: AsyncIOMotorDatabase) -> List[FacilityResponse]:
     )
     docs = await cursor.to_list(length=None)
     return [FacilityResponse(**doc) for doc in docs]
+
+
+async def get_facilities_safe(db: AsyncIOMotorDatabase) -> list[FacilitySafeResponse]:
+    """Return all facilities WITHOUT patient_link_uuid.
+
+    Used by the public GET /facilities/ endpoint so anonymous users and
+    dropdown consumers cannot harvest submission UUIDs.
+    """
+    cursor = db["facilities"].find(
+        {},
+        # Explicitly exclude patient_link_uuid from projection
+        {"patient_link_uuid": 0, "_id": 0},
+    ).sort([
+        ("governorate", 1),
+        ("administration", 1),
+        ("facility_name", 1),
+    ])
+    docs = await cursor.to_list(length=None)
+    return [FacilitySafeResponse(**doc) for doc in docs]
 
 
 async def get_cascading_options(db: AsyncIOMotorDatabase) -> dict:

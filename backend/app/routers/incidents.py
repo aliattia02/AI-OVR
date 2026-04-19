@@ -1,91 +1,26 @@
-"""backend/app/routers/incidents.py — API routes for creating, reading, updating, and deleting incident reports in E·OVR."""
+"""backend/app/routers/incidents.py — API routes for incident creation, retrieval, and workflow management in E·OVR."""
 
 from __future__ import annotations
 
-from datetime import date
-from typing import Any
-
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from pydantic import BaseModel
 
 from app.db.database import get_database
 from app.middleware.auth_middleware import require_role
 from app.models.incident import IncidentCreate, IncidentResponse
-from app.services import email_service, incident_service
-from app.utils.enums import ActionStatus, IncidentStatus, Probability, ReporterType, Severity, UserRole
+from app.services import email_service, facility_service, incident_service
+from app.utils.enums import ActionStatus, IncidentStatus, Probability, Severity, UserRole
 
 router = APIRouter(prefix="/incidents", tags=["incidents"])
 
 
-class StatusUpdateRequest(BaseModel):
-    """Payload for incident status transition."""
+# ── List incidents ────────────────────────────────────────────────────────────
 
-    status: IncidentStatus
-
-
-class AssessmentUpdateRequest(BaseModel):
-    """Payload for quality assessment data."""
-
-    severity: Severity
-    probability: Probability
-
-
-class ActionsUpdateRequest(BaseModel):
-    """Payload for corrective and preventive actions."""
-
-    corrective_action: str | None = None
-    preventive_action: str | None = None
-    action_date: date | None = None
-    action_time: str | None = None
-    action_status: ActionStatus
-
-
-class FinalReportRequest(BaseModel):
-    """Payload for final report submission."""
-
-    final_report: str
-
-
-class AIFeedbackRequest(BaseModel):
-    """Payload for AI classification feedback."""
-
-    ai_suggested: str | None = None
-    human_chose: str | None = None
-
-
-class MessageResponse(BaseModel):
-    """Generic response message payload."""
-
-    message: str
-
-
-def _not_found() -> HTTPException:
-    return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found")
-
-
-def _bad_request(detail: str) -> HTTPException:
-    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
-
-
-async def _get_quality_admin_email(db: AsyncIOMotorDatabase, facility_name: str) -> str | None:
-    quality_admin_doc = await db["users"].find_one(
-        {"role": UserRole.quality_admin.value, "facility_name": facility_name, "is_active": True},
-        {"_id": 0, "email": 1},
-    )
-    if quality_admin_doc and quality_admin_doc.get("email"):
-        return str(quality_admin_doc["email"])
-    return None
-
-
-@router.get(
-    "/",
-    response_model=list[IncidentResponse],
-)
+@router.get("/", response_model=list[IncidentResponse])
 async def list_incidents(
-    skip: int = Query(default=0, ge=0),
-    limit: int = Query(default=50, ge=1, le=200),
-    claims: dict[str, Any] = Depends(
+    skip: int = 0,
+    limit: int = 50,
+    claims: dict = Depends(
         require_role(
             UserRole.staff,
             UserRole.quality_admin,
@@ -96,6 +31,7 @@ async def list_incidents(
     ),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> list[IncidentResponse]:
+    """Return incidents scoped automatically to the caller's access tier."""
     return await incident_service.get_incidents(
         role=claims["role"],
         claims=claims,
@@ -105,45 +41,50 @@ async def list_incidents(
     )
 
 
-@router.post(
-    "/",
-    response_model=IncidentResponse,
-    status_code=status.HTTP_201_CREATED,
-)
+# ── Create incident ───────────────────────────────────────────────────────────
+
+@router.post("/", response_model=IncidentResponse, status_code=status.HTTP_201_CREATED)
 async def create_incident(
-    payload: IncidentCreate,
-    claims: dict[str, Any] = Depends(require_role(UserRole.staff, UserRole.quality_admin)),
+    data: IncidentCreate,
+    claims: dict = Depends(require_role(UserRole.staff, UserRole.quality_admin)),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> IncidentResponse:
-    # on-submit AI classification hook is inside incident_service.create_incident() — not in the router.
+    """Create a new incident.
+
+    Note: the on-submit AI classification hook is inside
+    incident_service.create_incident() — not in this router.
+    It fires before the MongoDB insert and writes into ai_metadata if a model
+    is configured. If AI_PROVIDER=none, ai_metadata fields remain null silently.
+    """
+    from app.utils.enums import ReporterType
+
     incident = await incident_service.create_incident(
-        data=payload,
+        data=data,
         reporter_type=ReporterType.staff,
         user_id=claims.get("user_id"),
         db=db,
     )
 
-    quality_admin_email = await _get_quality_admin_email(db=db, facility_name=incident.facility_name)
-    if quality_admin_email:
+    # Notify Quality Admin by email — fails silently if SendGrid key is missing.
+    qa_email = await facility_service.get_quality_admin_email(incident.facility_name, db)
+    if qa_email:
         await email_service.send_submission_alert(
-            to_email=quality_admin_email,
+            to_email=qa_email,
             incident_id=incident.incident_id,
             facility=incident.facility_name,
             severity=incident.severity.value,
         )
 
-    return IncidentResponse.model_validate(incident)
+    return incident
 
 
-@router.get(
-    "/{incident_id}",
-    response_model=IncidentResponse,
-)
+# ── Get single incident ───────────────────────────────────────────────────────
+
+@router.get("/{incident_id}", response_model=IncidentResponse)
 async def get_incident(
     incident_id: str,
-    claims: dict[str, Any] = Depends(
+    claims: dict = Depends(
         require_role(
-            UserRole.patient,
             UserRole.staff,
             UserRole.quality_admin,
             UserRole.administration_manager,
@@ -153,6 +94,7 @@ async def get_incident(
     ),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> IncidentResponse:
+    """Return a single incident scoped to the caller's access tier."""
     incident = await incident_service.get_incident_by_id(
         incident_id=incident_id,
         role=claims["role"],
@@ -160,146 +102,170 @@ async def get_incident(
         db=db,
     )
     if incident is None:
-        raise _not_found()
-    return IncidentResponse.model_validate(incident)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+    return incident
 
 
-@router.patch("/{incident_id}/status", response_model=MessageResponse)
-async def update_incident_status(
+# ── Status update ─────────────────────────────────────────────────────────────
+
+class _StatusBody(IncidentCreate):
+    """Reuse pydantic for the simple status body."""
+    pass
+
+
+from pydantic import BaseModel  # noqa: E402
+
+
+class StatusUpdateBody(BaseModel):
+    new_status: IncidentStatus
+
+
+@router.patch("/{incident_id}/status", response_model=dict)
+async def update_status(
     incident_id: str,
-    payload: StatusUpdateRequest,
-    claims: dict[str, Any] = Depends(require_role(UserRole.quality_admin)),
+    body: StatusUpdateBody,
+    claims: dict = Depends(require_role(UserRole.quality_admin)),
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> MessageResponse:
-    incident = await incident_service.get_incident_by_id(
-        incident_id=incident_id,
-        role=claims["role"],
-        claims=claims,
-        db=db,
-    )
-    if incident is None:
-        raise _not_found()
-
+) -> dict:
+    """Advance the incident workflow status. Only legal transitions are accepted."""
     updated = await incident_service.update_status(
         incident_id=incident_id,
-        new_status=payload.status,
+        new_status=body.new_status,
         user_id=claims["user_id"],
         db=db,
     )
     if not updated:
-        raise _bad_request("Invalid status transition")
-    return MessageResponse(message="Status updated")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid status transition or incident not found.",
+        )
+
+    # Email notification for status changes
+    incident = await incident_service.get_incident_by_id(incident_id, claims["role"], claims, db)
+    if incident:
+        qa_email = await facility_service.get_quality_admin_email(incident.facility_name, db)
+        if qa_email:
+            await email_service.send_status_change_alert(
+                to_email=qa_email,
+                incident_id=incident_id,
+                old_status="",
+                new_status=body.new_status.value,
+            )
+
+    return {"updated": True, "new_status": body.new_status.value}
 
 
-@router.patch("/{incident_id}/assessment", response_model=MessageResponse)
-async def update_assessment(
+# ── Risk assessment ───────────────────────────────────────────────────────────
+
+class AssessmentBody(BaseModel):
+    severity: Severity
+    probability: Probability
+
+
+@router.patch("/{incident_id}/assessment", response_model=dict)
+async def save_assessment(
     incident_id: str,
-    payload: AssessmentUpdateRequest,
-    claims: dict[str, Any] = Depends(require_role(UserRole.quality_admin)),
+    body: AssessmentBody,
+    claims: dict = Depends(require_role(UserRole.quality_admin)),
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> MessageResponse:
-    incident = await incident_service.get_incident_by_id(
-        incident_id=incident_id,
-        role=claims["role"],
-        claims=claims,
-        db=db,
-    )
-    if incident is None:
-        raise _not_found()
-
+) -> dict:
+    """Set severity and probability; risk_score is computed server-side."""
     updated = await incident_service.save_assessment(
         incident_id=incident_id,
-        severity=payload.severity,
-        probability=payload.probability,
+        severity=body.severity,
+        probability=body.probability,
         user_id=claims["user_id"],
         db=db,
     )
     if not updated:
-        raise _not_found()
-    return MessageResponse(message="Assessment updated")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+    return {"updated": True}
 
 
-@router.patch("/{incident_id}/actions", response_model=MessageResponse)
-async def update_actions(
+# ── CAPA actions ──────────────────────────────────────────────────────────────
+
+class ActionsBody(BaseModel):
+    corrective_action: str
+    preventive_action: str
+    action_date: str | None = None
+    action_time: str | None = None
+    action_status: ActionStatus = ActionStatus.InProgress
+
+
+@router.patch("/{incident_id}/actions", response_model=dict)
+async def save_actions(
     incident_id: str,
-    payload: ActionsUpdateRequest,
-    claims: dict[str, Any] = Depends(require_role(UserRole.quality_admin)),
+    body: ActionsBody,
+    claims: dict = Depends(require_role(UserRole.quality_admin)),
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> MessageResponse:
-    incident = await incident_service.get_incident_by_id(
-        incident_id=incident_id,
-        role=claims["role"],
-        claims=claims,
-        db=db,
-    )
-    if incident is None:
-        raise _not_found()
-
+) -> dict:
+    """Save corrective and preventive action details."""
     updated = await incident_service.save_actions(
         incident_id=incident_id,
-        corrective=payload.corrective_action,
-        preventive=payload.preventive_action,
-        action_date=payload.action_date,
-        action_time=payload.action_time,
-        action_status=payload.action_status,
+        corrective=body.corrective_action,
+        preventive=body.preventive_action,
+        action_date=body.action_date,
+        action_time=body.action_time,
+        action_status=body.action_status,
         user_id=claims["user_id"],
         db=db,
     )
     if not updated:
-        raise _not_found()
-    return MessageResponse(message="Actions updated")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+    return {"updated": True}
 
 
-@router.post("/{incident_id}/final", response_model=MessageResponse)
+# ── Final report ──────────────────────────────────────────────────────────────
+
+class FinalReportBody(BaseModel):
+    final_report: str
+
+
+@router.post("/{incident_id}/final", response_model=dict)
 async def submit_final_report(
     incident_id: str,
-    payload: FinalReportRequest,
-    claims: dict[str, Any] = Depends(require_role(UserRole.quality_admin)),
+    body: FinalReportBody,
+    claims: dict = Depends(require_role(UserRole.quality_admin)),
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> MessageResponse:
-    incident = await incident_service.get_incident_by_id(
-        incident_id=incident_id,
-        role=claims["role"],
-        claims=claims,
-        db=db,
-    )
-    if incident is None:
-        raise _not_found()
-
+) -> dict:
+    """Submit the final report and mark the incident as Completed."""
     updated = await incident_service.save_final_report(
         incident_id=incident_id,
-        report_text=payload.final_report,
+        report_text=body.final_report,
         user_id=claims["user_id"],
         db=db,
     )
     if not updated:
-        raise _not_found()
-    return MessageResponse(message="Final report submitted")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+    return {"updated": True, "status": IncidentStatus.Completed.value}
 
 
-@router.post("/{incident_id}/ai-feedback", response_model=MessageResponse)
+# ── AI feedback ───────────────────────────────────────────────────────────────
+
+class AIFeedbackBody(BaseModel):
+    ai_suggested: str
+    human_chose: str
+
+
+@router.post("/{incident_id}/ai-feedback", response_model=dict)
 async def submit_ai_feedback(
     incident_id: str,
-    payload: AIFeedbackRequest,
-    claims: dict[str, Any] = Depends(require_role(UserRole.quality_admin)),
+    body: AIFeedbackBody,
+    claims: dict = Depends(require_role(UserRole.quality_admin)),
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> MessageResponse:
-    incident = await incident_service.get_incident_by_id(
-        incident_id=incident_id,
-        role=claims["role"],
-        claims=claims,
-        db=db,
-    )
-    if incident is None:
-        raise _not_found()
+) -> dict:
+    """Log Quality Admin accept/override decision on AI suggestion.
 
+    This feedback is stored in ai_metadata.feedback and is the primary
+    source of labelled training data for future model fine-tuning.
+    """
     updated = await incident_service.save_ai_feedback(
         incident_id=incident_id,
-        ai_suggested=payload.ai_suggested,
-        human_chose=payload.human_chose,
+        ai_suggested=body.ai_suggested,
+        human_chose=body.human_chose,
         reviewer_id=claims["user_id"],
         db=db,
     )
     if not updated:
-        raise _not_found()
-    return MessageResponse(message="AI feedback saved")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+    return {"updated": True, "human_reviewed": True}

@@ -24,16 +24,32 @@ class FacilityInDB(BaseModel):
     facility_type: FacilityType
     administration: str
     facility_name: str
-    patient_link_uuid: str        # UUID v4
+    patient_link_uuid: str        # UUID v4 — never expose on public endpoints
     created_at: datetime
 
 
 class FacilityResponse(BaseModel):
-    """Facility document serialised for API responses (no raw ``_id``)."""
+    """Full facility response including patient_link_uuid.
+    Only returned to top_management via /facilities/full.
+    Never returned on public endpoints.
+    """
 
     governorate: str
     facility_type: FacilityType
     administration: str
     facility_name: str
     patient_link_uuid: str
+    created_at: datetime
+
+
+class FacilitySafeResponse(BaseModel):
+    """Safe facility response for public endpoints — patient_link_uuid excluded.
+    Used by GET /facilities/ and GET /facilities/cascading.
+    The UUID is only accessible via GET /patients/token/{facility_id} (top_management only).
+    """
+
+    governorate: str
+    facility_type: FacilityType
+    administration: str
+    facility_name: str
     created_at: datetime

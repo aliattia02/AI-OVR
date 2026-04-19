@@ -11,9 +11,8 @@ export async function logout() {
     await api.post('/auth/logout');
   } finally {
     setToken(null);
-    if (typeof window !== 'undefined') {
-      window.location.assign('/login');
-    }
+    // No window.location here — AuthContext sets user to null,
+    // which lets the protected route redirect via React Router (no page reload)
   }
 }
 

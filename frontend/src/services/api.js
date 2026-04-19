@@ -12,6 +12,7 @@ export function getToken() {
 
 const api = axios.create({
   baseURL: '/api',
+  withCredentials: true, // ensures the refresh cookie is sent automatically
 });
 
 api.interceptors.request.use((config) => {
@@ -27,21 +28,20 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error?.config;
     const isUnauthorized = error?.response?.status === 401;
-    const isRefreshRequest = originalRequest?.url === '/auth/refresh';
+    const isAuthRoute = originalRequest?.url?.includes('/auth/');
 
-    if (!isUnauthorized || !originalRequest || originalRequest._retry || isRefreshRequest) {
+    // Don't retry auth routes (login, refresh, me) — prevents the infinite loop
+    if (!isUnauthorized || !originalRequest || originalRequest._retry || isAuthRoute) {
       return Promise.reject(error);
     }
 
     originalRequest._retry = true;
 
     try {
-      const refreshResponse = await axios.post('/api/auth/refresh', null, { withCredentials: true });
-      const nextToken = refreshResponse?.data?.access_token ?? null;
+      const { data } = await axios.post('/api/auth/refresh', null, { withCredentials: true });
+      const nextToken = data?.access_token ?? null;
 
-      if (!nextToken) {
-        throw new Error('Refresh response missing access token');
-      }
+      if (!nextToken) throw new Error('No token in refresh response');
 
       setToken(nextToken);
       originalRequest.headers = originalRequest.headers ?? {};
@@ -49,9 +49,7 @@ api.interceptors.response.use(
       return api(originalRequest);
     } catch (refreshError) {
       setToken(null);
-      if (typeof window !== 'undefined') {
-        window.location.assign('/login');
-      }
+      // Just reject — let React Router / protected routes handle the redirect
       return Promise.reject(refreshError);
     }
   }

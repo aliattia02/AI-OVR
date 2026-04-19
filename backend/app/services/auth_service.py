@@ -20,12 +20,21 @@ from app.models.user import UserInDB
 
 load_dotenv()
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")
-if not JWT_SECRET_KEY:
-    raise EnvironmentError("JWT_SECRET_KEY environment variable is required for token operations.")
+# JWT_SECRET is the canonical name used in .env.example and the system design.
+# JWT_SECRET_KEY is accepted as a fallback for backwards compatibility.
+JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("JWT_SECRET_KEY", "")
+if not JWT_SECRET:
+    raise EnvironmentError(
+        "JWT_SECRET environment variable is required. "
+        "Set it in your .env file (see .env.example)."
+    )
+
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
-REFRESH_TOKEN_EXPIRE_DAYS = 30
+
+# Read expiry from env so staging/production can override without code changes.
+# Defaults match the system design: 15 min access, 30 day refresh.
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 MAX_STORED_REFRESH_TOKENS = 10
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -54,11 +63,9 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def create_access_token(data: dict[str, Any]) -> str:
-    """Create a 15-minute JWT access token containing user scope claims."""
+    """Create a JWT access token containing user scope claims."""
     now = datetime.now(tz=timezone.utc)
-    facility = data.get("facility")
-    if facility is None:
-        facility = data.get("facility_name")
+    facility = data.get("facility") or data.get("facility_name")
     payload = {
         "user_id": data.get("user_id"),
         "role": data.get("role"),
@@ -70,11 +77,11 @@ def create_access_token(data: dict[str, Any]) -> str:
         "exp": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
         "iat": now,
     }
-    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
 def create_refresh_token(user_id: str) -> str:
-    """Create a 30-day JWT refresh token for the given user."""
+    """Create a refresh token for the given user."""
     now = datetime.now(tz=timezone.utc)
     payload = {
         "user_id": user_id,
@@ -83,13 +90,13 @@ def create_refresh_token(user_id: str) -> str:
         "exp": now + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
         "iat": now,
     }
-    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
 def decode_token(token: str) -> dict[str, Any]:
     """Decode and validate a JWT token, raising 401 on invalid/expired tokens."""
     try:
-        return jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
     except JWTError as exc:
         raise _unauthorized_exception() from exc
 
@@ -110,8 +117,6 @@ async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase)
     user_doc["last_login"] = now
     user_doc.pop("password", None)
     user_doc.pop("_id", None)
-    # UserInDB currently requires a plain `password` field in its schema; use
-    # model_construct to avoid re-inserting or exposing plaintext credentials.
     return UserInDB.model_construct(**user_doc)
 
 
@@ -183,12 +188,9 @@ async def verify_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMoto
     user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 0, "refresh_tokens": 1})
     if not user_doc:
         return False
-
-    stored_tokens = user_doc.get("refresh_tokens", [])
-    for stored in stored_tokens:
+    for stored in user_doc.get("refresh_tokens", []):
         if not isinstance(stored, dict):
             continue
-
         stored_hash = stored.get("token_hash")
         if isinstance(stored_hash, str) and verify_password(refresh_token, stored_hash):
             return True
@@ -212,18 +214,15 @@ async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIO
         )
         if not user_doc:
             return False
-
         stored_tokens = user_doc.get("refresh_tokens", [])
         if not stored_tokens:
             return False
         token_entry = stored_tokens[0]
         if not isinstance(token_entry, dict):
             return False
-
         stored_hash = token_entry.get("token_hash")
         if not isinstance(stored_hash, str) or not verify_password(refresh_token, stored_hash):
             return False
-
         result = await db["users"].update_one(
             {"user_id": user_id},
             {"$pull": {"refresh_tokens": {"jti": token_jti}}},
@@ -233,26 +232,21 @@ async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIO
     user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 0, "refresh_tokens": 1})
     if not user_doc:
         return False
-
-    stored_tokens = user_doc.get("refresh_tokens", [])
-    remaining_tokens: list[dict[str, Any]] = []
+    remaining: list[dict[str, Any]] = []
     match_found = False
-    for stored in stored_tokens:
+    for stored in user_doc.get("refresh_tokens", []):
         if not isinstance(stored, dict):
             continue
-
         stored_hash = stored.get("token_hash")
         if isinstance(stored_hash, str) and verify_password(refresh_token, stored_hash):
             match_found = True
             continue
-
-        remaining_tokens.append(stored)
+        remaining.append(stored)
 
     if not match_found:
         return False
-
     await db["users"].update_one(
         {"user_id": user_id},
-        {"$set": {"refresh_tokens": remaining_tokens}},
+        {"$set": {"refresh_tokens": remaining}},
     )
     return True
