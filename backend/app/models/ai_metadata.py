@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AIFeedback(BaseModel):
@@ -33,14 +33,14 @@ class AIMetadata(BaseModel):
     auto_event_type: Optional[str] = None             # AI-suggested EventType; null until model integrated
     classification_score: Optional[float] = None     # Model confidence 0.0–1.0
     ai_risk_score: Optional[int] = None              # AI risk — never overwrites human risk_score
-    similar_incident_ids: List[str] = []
-    signal_flags: List[str] = []
+    similar_incident_ids: List[str] = Field(default_factory=list)
+    signal_flags: List[str] = Field(default_factory=list)
     embedding_vector: Optional[List[float]] = None   # 1536-dim, Atlas Vector Search
     embedding_id: Optional[str] = None
     model_version: Optional[str] = None
     processed_at: Optional[datetime] = None
     human_reviewed: bool = False
-    feedback: AIFeedback = AIFeedback()
+    feedback: AIFeedback = Field(default_factory=AIFeedback)
 
     @classmethod
     def empty(cls) -> "AIMetadata":

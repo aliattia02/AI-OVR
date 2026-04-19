@@ -56,8 +56,8 @@ def _unauthorized() -> HTTPException:
 
 
 def _is_production() -> bool:
-    app_env = (os.getenv("APP_ENV") or os.getenv("ENV") or "").strip().lower()
-    return app_env in {"prod", "production"}
+    app_env = (os.getenv("ENVIRONMENT") or "").strip().lower()
+    return app_env == "production"
 
 
 def _claims_from_user_doc(user_doc: dict[str, Any]) -> dict[str, Any]:

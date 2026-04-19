@@ -25,6 +25,7 @@ async def create_indexes(db: AsyncIOMotorDatabase) -> None:
 
     # Full-text search on free-text description field
     await incidents.create_index([("description", pymongo.TEXT)], name="incidents_description_text")
+    await incidents.create_index([("incident_id", pymongo.ASCENDING)], unique=True, name="incidents_incident_id_unique")
 
     # Filtering / aggregation indexes
     await incidents.create_index([("governorate", pymongo.ASCENDING)], name="incidents_governorate")

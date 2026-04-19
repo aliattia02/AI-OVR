@@ -22,7 +22,7 @@ export const incidentService = {
   },
 
   async updateStatus(id, newStatus) {
-    const { data } = await api.patch(`/incidents/${id}/status`, { status: newStatus });
+    const { data } = await api.patch(`/incidents/${id}/status`, { new_status: newStatus });
     return data;
   },
 

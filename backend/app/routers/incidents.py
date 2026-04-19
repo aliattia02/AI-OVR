@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -187,7 +189,7 @@ async def save_assessment(
 class ActionsBody(BaseModel):
     corrective_action: str
     preventive_action: str
-    action_date: str | None = None
+    action_date: date | None = None
     action_time: str | None = None
     action_status: ActionStatus = ActionStatus.InProgress
 
