@@ -6,6 +6,12 @@ export async function login(email, password) {
   return data?.user;
 }
 
+export async function loginWithMeta(email, password) {
+  const { data } = await api.post('/auth/login', { email, password });
+  setToken(data?.access_token ?? null);
+  return data;
+}
+
 export async function logout() {
   try {
     await api.post('/auth/logout');
@@ -24,3 +30,14 @@ export async function getMe() {
     return null;
   }
 }
+
+export const changePassword = async (oldPassword, newPassword) => {
+  if (!oldPassword || !newPassword) {
+    throw new Error('oldPassword and newPassword are required');
+  }
+  const { data } = await api.post('/auth/change-password', {
+    old_password: oldPassword,
+    new_password: newPassword,
+  });
+  return data;
+};
