@@ -2,19 +2,22 @@
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 
 from app.db.database import get_database
 from app.middleware.auth_middleware import require_role
 from app.models.user import UserCreate, UserResponse
 from app.services import auth_service
+from app.services.auth_service import generate_temp_password, hash_password
 from app.utils.enums import UserRole
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -26,78 +29,28 @@ class MessageResponse(BaseModel):
     message: str
 
 
-class ProvisionedCredential(BaseModel):
-    user_id: str
-    email: EmailStr
-    role: UserRole
-    temporary_password: str
-    must_change_password: bool = True
-
-
-class FacilityProvisionRequest(BaseModel):
-    facility_name: str
-    staff_email: EmailStr
-    staff_full_name: str = "Facility Reporter"
-    quality_admin_email: EmailStr
-    quality_admin_full_name: str = "Facility Quality Admin"
-
-
-class FacilityProvisionResponse(BaseModel):
-    facility_name: str
+class FacilityProvisionResult(BaseModel):
+    facility_id: str
     patient_link_uuid: str
-    staff_reporter: ProvisionedCredential
-    quality_admin: ProvisionedCredential
+    staff_reporter: dict
+    quality_admin: dict
+    note: str
 
 
-class TierProvisionRequest(BaseModel):
-    email: EmailStr
+class TierUserRequest(BaseModel):
+    username: str
     full_name: str
     role: UserRole
-    facility_name: str = ""
-    administration: str = ""
-    governorate: str = ""
+    governorate: Optional[str] = None
+    administration: Optional[str] = None
+    email: Optional[str] = None
 
 
-_TIER_BY_ROLE: dict[UserRole, int] = {
-    UserRole.staff: 2,
-    UserRole.quality_admin: 2,
-    UserRole.administration_manager: 3,
-    UserRole.governorate_manager: 4,
-    UserRole.top_management: 5,
-}
-
-_PROVISIONABLE_TIER_ROLES = {
-    UserRole.administration_manager,
-    UserRole.governorate_manager,
-    UserRole.top_management,
-}
-
-
-def _make_user_doc(
-    *,
-    email: str,
-    full_name: str,
-    role: UserRole,
-    facility_name: str,
-    administration: str,
-    governorate: str,
-    temporary_password: str,
-) -> dict[str, Any]:
-    return {
-        "user_id": f"USR-{uuid4().hex[:12].upper()}",
-        "email": email,
-        "full_name": full_name,
-        "role": role.value,
-        "facility_name": facility_name,
-        "administration": administration,
-        "governorate": governorate,
-        "tier": _TIER_BY_ROLE[role],
-        "hashed_password": auth_service.hash_password(temporary_password),
-        "is_active": True,
-        "must_change_password": True,
-        "created_at": datetime.now(tz=timezone.utc),
-        "last_login": None,
-    }
+class TierUserResult(BaseModel):
+    username: str
+    role: str
+    temp_password: str
+    must_change_password: bool
 
 
 @router.get("/", response_model=list[UserResponse])
@@ -157,107 +110,124 @@ async def deactivate_user(
     return MessageResponse(message="User deactivated")
 
 
-@router.post("/provision/facility", response_model=FacilityProvisionResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/provision/facility/{facility_id}",
+    response_model=FacilityProvisionResult,
+    dependencies=[Depends(require_role(UserRole.top_management))],
+)
 async def provision_facility_users(
-    payload: FacilityProvisionRequest,
-    claims: dict[str, Any] = Depends(require_role(UserRole.top_management)),
+    facility_id: str,
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> FacilityProvisionResponse:
-    _ = claims
-    facility_doc = await db["facilities"].find_one(
-        {"facility_name": payload.facility_name},
-        {"_id": 0, "facility_name": 1, "administration": 1, "governorate": 1, "patient_link_uuid": 1},
-    )
-    if not facility_doc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Facility not found")
-    if not facility_doc.get("patient_link_uuid"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Facility has no patient link UUID")
+    current_user=Depends(auth_service.get_current_user),
+) -> FacilityProvisionResult:
+    """Create facility staff and quality admin accounts and return patient UUID credential."""
+    facility_query: dict[str, Any] = {"_id": facility_id}
+    if ObjectId.is_valid(facility_id):
+        facility_query = {"_id": ObjectId(facility_id)}
 
-    administration = str(facility_doc.get("administration", ""))
-    governorate = str(facility_doc.get("governorate", ""))
-    facility_name = str(facility_doc.get("facility_name", payload.facility_name))
+    facility = await db["facilities"].find_one(facility_query)
+    if not facility:
+        facility = await db["facilities"].find_one({"facility_name": facility_id})
+    if not facility:
+        raise HTTPException(status_code=404, detail="Facility not found")
 
-    staff_temp_password = auth_service.generate_temp_password()
-    qa_temp_password = auth_service.generate_temp_password()
+    facility_name = str(facility.get("facility_name", facility_id))
+    normalized_facility_id = str(facility.get("_id", facility_id))
+    created: dict[str, dict[str, str]] = {}
+    for suffix, role in [("staff", UserRole.staff), ("quality_admin", UserRole.quality_admin)]:
+        username = f"{normalized_facility_id[:8]}_{suffix}"
+        existing = await db["users"].find_one({"username": username})
+        if existing:
+            created[suffix] = {
+                "username": username,
+                "temp_password": "(already set — use reset endpoint if needed)",
+                "user_id": str(existing.get("_id", existing.get("user_id", ""))),
+            }
+            continue
 
-    staff_doc = _make_user_doc(
-        email=str(payload.staff_email),
-        full_name=payload.staff_full_name,
-        role=UserRole.staff,
-        facility_name=facility_name,
-        administration=administration,
-        governorate=governorate,
-        temporary_password=staff_temp_password,
-    )
-    qa_doc = _make_user_doc(
-        email=str(payload.quality_admin_email),
-        full_name=payload.quality_admin_full_name,
-        role=UserRole.quality_admin,
-        facility_name=facility_name,
-        administration=administration,
-        governorate=governorate,
-        temporary_password=qa_temp_password,
-    )
+        temp_pw = generate_temp_password()
+        synthetic_email = f"{username}@provisioned.local"
+        doc = {
+            "_id": str(uuid.uuid4()),
+            "user_id": f"USR-{uuid4().hex[:12].upper()}",
+            "username": username,
+            "email": synthetic_email,
+            "full_name": f"{facility_name} — {role.value}",
+            "hashed_password": hash_password(temp_pw),
+            "role": role.value,
+            "tier": 2,
+            "facility_id": normalized_facility_id,
+            "facility_name": facility_name,
+            "governorate": facility.get("governorate"),
+            "administration": facility.get("administration"),
+            "is_active": True,
+            "must_change_password": True,
+            "created_by": str(current_user.get("user_id", "")),
+            "created_at": datetime.now(tz=timezone.utc),
+            "last_login": None,
+        }
+        await db["users"].insert_one(doc)
+        created[suffix] = {"username": username, "temp_password": temp_pw, "user_id": doc["_id"]}
 
-    try:
-        await db["users"].insert_many([staff_doc, qa_doc], ordered=True)
-    except DuplicateKeyError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="One or more user emails already exist") from exc
-
-    return FacilityProvisionResponse(
-        facility_name=facility_name,
-        patient_link_uuid=str(facility_doc["patient_link_uuid"]),
-        staff_reporter=ProvisionedCredential(
-            user_id=staff_doc["user_id"],
-            email=staff_doc["email"],
-            role=UserRole.staff,
-            temporary_password=staff_temp_password,
-            must_change_password=True,
-        ),
-        quality_admin=ProvisionedCredential(
-            user_id=qa_doc["user_id"],
-            email=qa_doc["email"],
-            role=UserRole.quality_admin,
-            temporary_password=qa_temp_password,
-            must_change_password=True,
-        ),
+    return FacilityProvisionResult(
+        facility_id=normalized_facility_id,
+        patient_link_uuid=str(facility.get("patient_link_uuid", "")),
+        staff_reporter=created["staff"],
+        quality_admin=created["quality_admin"],
+        note="Temp passwords are shown ONCE. Users must change password on first login.",
     )
 
 
-@router.post("/provision/tier", response_model=ProvisionedCredential, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/provision/tier",
+    response_model=TierUserResult,
+    dependencies=[Depends(require_role(UserRole.top_management))],
+)
 async def provision_tier_user(
-    payload: TierProvisionRequest,
-    claims: dict[str, Any] = Depends(require_role(UserRole.top_management)),
+    body: TierUserRequest,
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> ProvisionedCredential:
-    _ = claims
-    if payload.role not in _PROVISIONABLE_TIER_ROLES:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Role must be administration_manager, governorate_manager, or top_management")
+    current_user=Depends(auth_service.get_current_user),
+) -> TierUserResult:
+    """Create a single governorate/administration/top-management account."""
+    facility_roles = {UserRole.staff, UserRole.quality_admin}
+    if body.role in facility_roles:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Use POST /users/provision/facility/{id} for facility-level roles.",
+        )
+    if await db["users"].find_one({"username": body.username}):
+        raise HTTPException(status_code=409, detail="Username already exists")
 
-    if payload.role == UserRole.administration_manager and not payload.administration:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="administration is required for administration_manager")
-    if payload.role == UserRole.governorate_manager and not payload.governorate:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="governorate is required for governorate_manager")
-
-    temp_password = auth_service.generate_temp_password()
-    user_doc = _make_user_doc(
-        email=str(payload.email),
-        full_name=payload.full_name,
-        role=payload.role,
-        facility_name=payload.facility_name or "",
-        administration=payload.administration or "",
-        governorate=payload.governorate or "",
-        temporary_password=temp_password,
-    )
-    try:
-        await db["users"].insert_one(user_doc)
-    except DuplicateKeyError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists") from exc
-
-    return ProvisionedCredential(
-        user_id=user_doc["user_id"],
-        email=user_doc["email"],
-        role=payload.role,
-        temporary_password=temp_password,
+    tier_map = {
+        UserRole.governorate_manager: 4,
+        UserRole.administration_manager: 3,
+        UserRole.top_management: 5,
+    }
+    temp_pw = generate_temp_password()
+    email = body.email or f"{body.username}@provisioned.local"
+    doc = {
+        "_id": str(uuid.uuid4()),
+        "user_id": f"USR-{uuid4().hex[:12].upper()}",
+        "username": body.username,
+        "full_name": body.full_name,
+        "email": email,
+        "hashed_password": hash_password(temp_pw),
+        "role": body.role.value,
+        "tier": tier_map.get(body.role, 5),
+        "governorate": body.governorate,
+        "administration": body.administration,
+        "facility_id": None,
+        "facility_name": "",
+        "is_active": True,
+        "must_change_password": True,
+        "created_by": str(current_user.get("user_id", "")),
+        "created_at": datetime.now(tz=timezone.utc),
+        "last_login": None,
+    }
+    await db["users"].insert_one(doc)
+    return TierUserResult(
+        username=body.username,
+        role=body.role.value,
+        temp_password=temp_pw,
         must_change_password=True,
     )

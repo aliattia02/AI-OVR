@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import Spinner from '../components/shared/Spinner';
 import * as auth from '../services/auth';
 
-const AuthContext = createContext(undefined);
+export const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -33,12 +33,17 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const login = useCallback(async (email, password) => {
-    const result = await auth.login(email, password);
-    const loggedInUser = result?.user ?? null;
-    setUser(loggedInUser);
-    setMustChangePassword(Boolean(result?.must_change_password));
-    return result;
+  const login = useCallback(async (username, password) => {
+    const data = await auth.login(username, password);
+    setUser(data?.user ?? null);
+    if (data?.must_change_password) {
+      setMustChangePassword(true);
+      return data;
+    }
+    setMustChangePassword(false);
+    const me = await auth.getMe();
+    setUser(me);
+    return data;
   }, []);
 
   const logout = useCallback(async () => {
@@ -50,9 +55,10 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const markPasswordChanged = useCallback(() => {
+  const onPasswordChanged = useCallback(async () => {
     setMustChangePassword(false);
-    setUser((prev) => (prev ? { ...prev, must_change_password: false } : prev));
+    const me = await auth.getMe();
+    setUser(me);
   }, []);
 
   const value = useMemo(
@@ -62,12 +68,12 @@ export function AuthProvider({ children }) {
       login,
       logout,
       mustChangePassword,
-      markPasswordChanged,
+      onPasswordChanged,
       isAuthenticated: Boolean(user),
       tier: user?.tier ?? 0,
       role: user?.role ?? null,
     }),
-    [user, loading, login, logout, mustChangePassword, markPasswordChanged]
+    [user, loading, login, logout, mustChangePassword, onPasswordChanged]
   );
 
   if (loading) {

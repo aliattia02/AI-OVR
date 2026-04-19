@@ -1,11 +1,11 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-import ForcedPasswordChange from './components/auth/ForcedPasswordChange';
 import LoginForm from './components/auth/LoginForm';
 import IncidentDetail from './components/incidents/IncidentDetail';
 import NewIncidentForm from './components/incidents/NewIncidentForm';
 import Sidebar from './components/shared/Sidebar';
 import { useAuth } from './context/AuthContext';
 import Analytics from './pages/Analytics';
+import ChangePassword from './pages/ChangePassword';
 import Dashboard from './pages/Dashboard';
 import PatientReport from './pages/PatientReport';
 import Reports from './pages/Reports';
@@ -81,7 +81,7 @@ export default function App() {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/change-password" element={<ForcedPasswordChange />} />
+          <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/incidents" element={<Reports />} />
           <Route path="/incidents/:id" element={<IncidentDetailRoute />} />
           <Route path="/new" element={<NewIncidentForm />} />
