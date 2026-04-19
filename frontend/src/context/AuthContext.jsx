@@ -1,19 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import Spinner from '../components/shared/Spinner';
-import * as auth from '../services/auth';
+import * as authService from '../services/auth';
+import api, { setToken } from '../services/api';
 
 const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
     const restoreSession = async () => {
       try {
-        const me = await auth.getMe();
+        const me = await authService.getMe();
         if (isMounted) {
           setUser(me);
         }
@@ -32,30 +34,47 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
-    const loggedInUser = await auth.login(email, password);
-    setUser(loggedInUser ?? null);
-    return loggedInUser;
+    const { data } = await api.post('/auth/login', { email, password });
+    setToken(data?.access_token ?? null);
+    api.setToken?.(data?.access_token ?? null);
+    if (data.must_change_password) {
+      setMustChangePassword(true);
+      window.location.assign('/change-password');
+      return null;
+    }
+    const me = await authService.getMe();
+    setUser(me ?? null);
+    return me;
   }, []);
 
   const logout = useCallback(async () => {
     try {
-      await auth.logout();
+      await authService.logout();
     } finally {
       setUser(null);
     }
+  }, []);
+
+  const onPasswordChanged = useCallback(async () => {
+    setMustChangePassword(false);
+    const me = await authService.getMe();
+    setUser(me);
+    window.location.assign('/');
   }, []);
 
   const value = useMemo(
     () => ({
       user,
       loading,
+      mustChangePassword,
       login,
       logout,
+      onPasswordChanged,
       isAuthenticated: Boolean(user),
       tier: user?.tier ?? 0,
       role: user?.role ?? null,
     }),
-    [user, loading, login, logout]
+    [user, loading, mustChangePassword, login, logout, onPasswordChanged]
   );
 
   if (loading) {

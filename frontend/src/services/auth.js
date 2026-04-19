@@ -24,3 +24,11 @@ export async function getMe() {
     return null;
   }
 }
+
+export const changePassword = async (oldPassword, newPassword) => {
+  const { data } = await api.post('/auth/change-password', {
+    old_password: oldPassword,
+    new_password: newPassword,
+  });
+  return data;
+};
