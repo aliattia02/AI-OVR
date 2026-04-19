@@ -38,6 +38,7 @@ JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 MAX_STORED_REFRESH_TOKENS = 10
+SECURE_RANDOM = secrets.SystemRandom()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -77,7 +78,7 @@ def generate_temporary_password(length: int = 12) -> str:
     charset = string.ascii_letters + string.digits
     remaining = [secrets.choice(charset) for _ in range(length - len(required_chars))]
     password_chars = required_chars + remaining
-    secrets.SystemRandom().shuffle(password_chars)
+    SECURE_RANDOM.shuffle(password_chars)
     return "".join(password_chars)
 
 

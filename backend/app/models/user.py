@@ -25,7 +25,11 @@ class UserCreate(BaseModel):
 
     @model_validator(mode="after")
     def enforce_must_change_password(self) -> UserCreate:
-        """Force must_change_password=True for provisioning payloads."""
+        """Force must_change_password=True for provisioning payloads.
+
+        The class check keeps this enforcement scoped to creation payloads only,
+        so DB-backed models can represent users after they have changed passwords.
+        """
         if self.__class__ is UserCreate:
             self.must_change_password = True
         return self
