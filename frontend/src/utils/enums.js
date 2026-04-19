@@ -28,6 +28,7 @@ export const EVENT_TYPES = [
 ];
 export const ACTION_STATUSES = ['Pending', 'InProgress', 'Completed'];
 export const REPORTER_TYPES = ['patient', 'staff'];
+export const ReporterType = { patient: 'patient', staff: 'staff' };
 export const REPORTER_ROLES = [
   'Patient',
   'Staff/Doctor',
