@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import Spinner from '../components/shared/Spinner';
 import * as authService from '../services/auth';
-import api, { setToken } from '../services/api';
 
 const AuthContext = createContext(undefined);
 
@@ -40,8 +39,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
-    const { data } = await api.post('/auth/login', { email, password });
-    setToken(data?.access_token ?? null);
+    const data = await authService.loginWithMeta(email, password);
     if (data?.must_change_password) {
       setMustChangePassword(true);
       navigateTo('/change-password');
