@@ -17,7 +17,6 @@ export default function ChangePassword() {
     setError('');
     if (newPw.length < 8) return setError('New password must be at least 8 characters.');
     if (newPw !== confirmPw) return setError('Passwords do not match.');
-    if (newPw === oldPw) return setError('New password must differ from the temporary password.');
     setLoading(true);
     try {
       await changePassword(oldPw, newPw);

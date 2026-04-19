@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { changePassword } from '../../services/auth';
 
 export default function ForcedPasswordChange() {
   const navigate = useNavigate();
-  const { markPasswordChanged } = useAuth();
+  const { onPasswordChanged } = useAuth();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -26,11 +26,8 @@ export default function ForcedPasswordChange() {
 
     setLoading(true);
     try {
-      await api.post('/auth/change-password', {
-        old_password: oldPassword,
-        new_password: newPassword,
-      });
-      markPasswordChanged();
+      await changePassword(oldPassword, newPassword);
+      await onPasswordChanged();
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err?.response?.data?.detail || 'Failed to change password.');
