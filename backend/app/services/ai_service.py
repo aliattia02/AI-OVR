@@ -330,7 +330,7 @@ async def batch_classify_unprocessed(db: AsyncIOMotorDatabase) -> int:
                     "ai_metadata.auto_event_type": result.auto_event_type,
                     "ai_metadata.classification_score": result.classification_score,
                     "ai_metadata.ai_risk_score": result.ai_risk_score,
-                    "ai_metadata.signal_flags": result.signal_flags,
+                    "ai_metadata.signal_flags": result.signal_flags or [],
                     "ai_metadata.model_version": result.model_version,
                     "ai_metadata.processed_at": result.processed_at.isoformat() if result.processed_at else None,
                 }

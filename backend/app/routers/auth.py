@@ -32,6 +32,7 @@ class LoginResponse(BaseModel):
 
     access_token: str
     token_type: str
+    must_change_password: bool
     user: UserResponse
 
 
@@ -138,7 +139,12 @@ async def login(
         tier=user.tier,
         is_active=user.is_active,
     )
-    return LoginResponse(access_token=access_token, token_type="bearer", user=user_response)
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        must_change_password=bool(user.model_dump().get("must_change_password", False)),
+        user=user_response,
+    )
 
 
 @router.post("/refresh", response_model=AccessTokenResponse)
@@ -209,7 +215,7 @@ async def change_password(
         raise _unauthorized()
     return await auth_service.change_password(
         db,
-        str(current_user_doc["_id"]),
+        current_user_doc["_id"],
         body.old_password,
         body.new_password,
     )

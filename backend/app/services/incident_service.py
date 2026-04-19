@@ -118,7 +118,7 @@ async def create_incident(
         incident.ai_metadata.auto_event_type = ai_result.auto_event_type
         incident.ai_metadata.classification_score = ai_result.classification_score
         incident.ai_metadata.ai_risk_score = ai_result.ai_risk_score
-        incident.ai_metadata.signal_flags = ai_result.signal_flags
+        incident.ai_metadata.signal_flags = ai_result.signal_flags or []
         incident.ai_metadata.model_version = ai_result.model_version
         incident.ai_metadata.processed_at = ai_result.processed_at
 

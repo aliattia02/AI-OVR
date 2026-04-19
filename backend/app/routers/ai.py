@@ -113,7 +113,7 @@ async def classify_incident_now(
                 "ai_metadata.auto_event_type": ai_result.auto_event_type,
                 "ai_metadata.classification_score": ai_result.classification_score,
                 "ai_metadata.ai_risk_score": ai_result.ai_risk_score,
-                "ai_metadata.signal_flags": ai_result.signal_flags,
+                "ai_metadata.signal_flags": ai_result.signal_flags or [],
                 "ai_metadata.model_version": ai_result.model_version,
                 "ai_metadata.processed_at": ai_result.processed_at.isoformat() if ai_result.processed_at else None,
             }

@@ -16,6 +16,7 @@ from jose import JWTError, jwt
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from passlib.exc import UnknownHashError
 from passlib.context import CryptContext
+from bson import ObjectId
 
 from app.db.database import get_database
 from app.models.user import UserInDB
@@ -205,21 +206,28 @@ async def change_user_password(
 
 async def change_password(
     db: AsyncIOMotorDatabase,
-    user_id: str,
+    user_id: Any,
     old_password: str,
     new_password: str,
 ) -> dict[str, str]:
     """Change password for a user and clear must_change_password on success."""
-    user_doc = await db["users"].find_one({"_id": user_id})
+    query: dict[str, Any]
+    if isinstance(user_id, str) and ObjectId.is_valid(user_id):
+        query = {"_id": {"$in": [user_id, ObjectId(user_id)]}}
+    else:
+        query = {"_id": user_id}
+
+    user_doc = await db["users"].find_one(query)
     if not user_doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    if not verify_password(old_password, user_doc["hashed_password"]):
+    stored_hash = user_doc.get("hashed_password")
+    if not isinstance(stored_hash, str) or not verify_password(old_password, stored_hash):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
 
     new_hash = hash_password(new_password)
     await db["users"].update_one(
-        {"_id": user_id},
+        {"_id": user_doc["_id"]},
         {"$set": {"hashed_password": new_hash, "must_change_password": False}},
     )
     return {"message": "Password changed successfully"}
