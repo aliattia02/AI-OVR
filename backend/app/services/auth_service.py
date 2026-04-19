@@ -82,6 +82,36 @@ def generate_temporary_password(length: int = 12) -> str:
     return "".join(password_chars)
 
 
+def generate_temp_password(length: int = 12) -> str:
+    """Generate a temporary password using uppercase, lowercase, digits, and symbols."""
+    if length < 4:
+        raise ValueError("Temporary password length must be at least 4 characters")
+
+    uppercase = string.ascii_uppercase
+    lowercase = string.ascii_lowercase
+    digits = string.digits
+    symbols = "!@#$%"
+    alphabet = uppercase + lowercase + digits + symbols
+
+    password_chars = [
+        secrets.choice(uppercase),
+        secrets.choice(lowercase),
+        secrets.choice(digits),
+        secrets.choice(symbols),
+    ]
+    password_chars.extend(secrets.choice(alphabet) for _ in range(length - 4))
+    secrets.SystemRandom().shuffle(password_chars)
+    return "".join(password_chars)
+
+
+def build_login_response(access_token: str, user_doc: dict[str, Any]) -> dict[str, Any]:
+    """Build login payload that includes token and password-change requirement."""
+    return {
+        "access_token": access_token,
+        "must_change_password": user_doc.get("must_change_password", False),
+    }
+
+
 def create_access_token(data: dict[str, Any]) -> str:
     """Create a JWT access token containing user scope claims."""
     now = datetime.now(tz=timezone.utc)
@@ -171,6 +201,28 @@ async def change_user_password(
         },
     )
     return result.modified_count > 0
+
+
+async def change_password(
+    db: AsyncIOMotorDatabase,
+    user_id: str,
+    old_password: str,
+    new_password: str,
+) -> dict[str, str]:
+    """Change password for a user and clear must_change_password on success."""
+    user_doc = await db["users"].find_one({"_id": user_id})
+    if not user_doc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if not verify_password(old_password, user_doc["hashed_password"]):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+
+    new_hash = hash_password(new_password)
+    await db["users"].update_one(
+        {"_id": user_id},
+        {"$set": {"hashed_password": new_hash, "must_change_password": False}},
+    )
+    return {"message": "Password changed successfully"}
 
 
 async def get_current_user(

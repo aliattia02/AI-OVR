@@ -44,6 +44,7 @@ class UserInDB(UserCreate):
 
     user_id: str
     hashed_password: str
+    must_change_password: bool = True
     is_active: bool = True
     created_at: datetime
     last_login: Optional[datetime] = None
