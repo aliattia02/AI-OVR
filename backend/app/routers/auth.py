@@ -142,7 +142,7 @@ async def login(
     return LoginResponse(
         access_token=access_token,
         token_type="bearer",
-        must_change_password=bool(user.model_dump().get("must_change_password", False)),
+        must_change_password=bool(getattr(user, "must_change_password", False)),
         user=user_response,
     )
 

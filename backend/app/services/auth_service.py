@@ -206,18 +206,20 @@ async def change_user_password(
 
 async def change_password(
     db: AsyncIOMotorDatabase,
-    user_id: Any,
+    user_id: str | ObjectId,
     old_password: str,
     new_password: str,
 ) -> dict[str, str]:
     """Change password for a user and clear must_change_password on success."""
-    query: dict[str, Any]
-    if isinstance(user_id, str) and ObjectId.is_valid(user_id):
-        query = {"_id": {"$in": [user_id, ObjectId(user_id)]}}
+    user_doc: dict[str, Any] | None
+    if isinstance(user_id, ObjectId):
+        user_doc = await db["users"].find_one({"_id": user_id})
+    elif isinstance(user_id, str) and ObjectId.is_valid(user_id):
+        user_doc = await db["users"].find_one({"_id": ObjectId(user_id)})
+        if not user_doc:
+            user_doc = await db["users"].find_one({"_id": user_id})
     else:
-        query = {"_id": user_id}
-
-    user_doc = await db["users"].find_one(query)
+        user_doc = await db["users"].find_one({"_id": user_id})
     if not user_doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
