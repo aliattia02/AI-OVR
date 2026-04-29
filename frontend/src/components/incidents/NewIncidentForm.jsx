@@ -11,6 +11,7 @@ import {
   SEVERITY_OPTIONS,
 } from '../../utils/enums';
 import { formatEnumLabel } from '../../utils/formatters';
+import DisclaimerBanner from '../shared/DisclaimerBanner';
 
 function getCurrentTimeString() {
   const now = new Date();
@@ -18,6 +19,10 @@ function getCurrentTimeString() {
   const m = String(now.getMinutes()).padStart(2, '0');
   return `${h}:${m}`;
 }
+
+const OCCURRENCE_LOCATION_OPTIONS = [
+  { value: 'telehealth_remote', label: 'Telehealth / Remote' },
+];
 
 export default function NewIncidentForm() {
   const { user } = useAuth();
@@ -212,6 +217,7 @@ export default function NewIncidentForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'grid', gap: 14 }}>
       {cascadingError && <div style={{ ...errorStyle, fontWeight: 600 }}>{cascadingError}</div>}
+      <DisclaimerBanner />
 
       <LockedOrSelect
         name="governorate"
@@ -295,7 +301,14 @@ export default function NewIncidentForm() {
 
       <label style={labelStyle}>
         Occurrence Location
-        <input style={fieldStyle} {...register('occurrence_location')} />
+        <select style={fieldStyle} {...register('occurrence_location')}>
+          <option value="">Select location (optional)</option>
+          {OCCURRENCE_LOCATION_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label style={labelStyle}>

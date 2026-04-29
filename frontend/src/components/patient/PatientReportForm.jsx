@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import api from '../../services/api';
 import { incidentService } from '../../services/incidents';
+import DisclaimerBanner from '../shared/DisclaimerBanner';
 
 const REPORTER_ROLE_OPTIONS = ['Patient', 'Visitor', 'Family Member'];
 
@@ -136,6 +137,8 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
       >
         Your report is anonymous. No personal information is required.
       </div>
+
+      <DisclaimerBanner />
 
       {facilityLoadError && <div style={errorStyle}>{facilityLoadError}</div>}
 
