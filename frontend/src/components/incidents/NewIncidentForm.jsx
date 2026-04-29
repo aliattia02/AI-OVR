@@ -301,14 +301,14 @@ export default function NewIncidentForm() {
 
       <label style={labelStyle}>
         Occurrence Location
-        <input style={fieldStyle} list="occurrence-location-options" {...register('occurrence_location')} />
-        <datalist id="occurrence-location-options">
+        <select style={fieldStyle} {...register('occurrence_location')}>
+          <option value="">Select location (optional)</option>
           {OCCURRENCE_LOCATION_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
-        </datalist>
+        </select>
       </label>
 
       <label style={labelStyle}>
