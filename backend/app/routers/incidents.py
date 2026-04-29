@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from datetime import date
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from pydantic import BaseModel
 
 from app.db.database import get_database
+from app.db.database import get_database as get_db
 from app.middleware.auth_middleware import require_role
 from app.models.incident import (
     JCIChapter,
@@ -15,11 +18,23 @@ from app.models.incident import (
     IncidentCreate,
     IncidentResponse,
 )
+from app.models.incident import DisclosureMethod, VulnerablePopulationType
+from app.services.auth_service import get_current_user
 from app.services import email_service, facility_service, incident_service
 from app.utils.enums import ActionStatus, IncidentStatus, Probability, Severity, UserRole
 from app.utils.helpers import build_audit_entry
 
 router = APIRouter(prefix="/incidents", tags=["incidents"])
+
+
+class JCIFieldsUpdate(BaseModel):
+    disclosure_date: Optional[date] = None
+    disclosure_method: Optional[DisclosureMethod] = None
+    disclosure_responsible: Optional[str] = None
+    vulnerable_patient: Optional[bool] = None
+    vulnerable_population_type: Optional[VulnerablePopulationType] = None
+    workplace_violence: Optional[bool] = None
+    medication_error_merp_category: Optional[str] = None
 
 
 # ── List incidents ────────────────────────────────────────────────────────────
@@ -316,3 +331,33 @@ async def submit_ai_feedback(
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
     return {"updated": True, "human_reviewed": True}
+
+
+@router.patch("/{incident_id}/jci-fields")
+async def update_jci_fields(
+    incident_id: str,
+    payload: JCIFieldsUpdate,
+    current_user: dict = Depends(get_current_user),
+    db = Depends(get_db),
+):
+    """Populate JCI 8th Edition optional fields on an existing incident.
+    Restricted to quality_admin and above. Only supplied (non-None) fields are written."""
+    await require_role(
+        UserRole.quality_admin,
+        UserRole.administration_manager,
+        UserRole.governorate_manager,
+        UserRole.top_management,
+    )(current_user)
+
+    update_data = {k: v for k, v in payload.dict().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields provided to update.")
+
+    result = await db.incidents.update_one(
+        {"incident_id": incident_id},
+        {"$set": update_data},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Incident not found.")
+
+    return {"updated": True, "fields_set": list(update_data.keys())}
