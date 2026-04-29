@@ -20,6 +20,10 @@ function getCurrentTimeString() {
   return `${h}:${m}`;
 }
 
+const OCCURRENCE_LOCATION_OPTIONS = [
+  { value: 'telehealth_remote', label: 'Telehealth / Remote' },
+];
+
 export default function NewIncidentForm() {
   const { user } = useAuth();
 
@@ -172,9 +176,6 @@ export default function NewIncidentForm() {
 
   const labelStyle = { fontSize: 13, fontWeight: 600, color: '#111827' };
   const errorStyle = { fontSize: 12, color: '#B91C1C' };
-  const occurrenceLocationOptions = [
-    { value: 'telehealth_remote', label: 'Telehealth / Remote' },
-  ];
 
   // Renders a field that is either a locked text display or a live select/input
   const LockedOrSelect = ({ name, label, options, required, locked }) => {
@@ -302,8 +303,10 @@ export default function NewIncidentForm() {
         Occurrence Location
         <input style={fieldStyle} list="occurrence-location-options" {...register('occurrence_location')} />
         <datalist id="occurrence-location-options">
-          {occurrenceLocationOptions.map((option) => (
-            <option key={option.value} value={option.value} label={option.label} />
+          {OCCURRENCE_LOCATION_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
           ))}
         </datalist>
       </label>
