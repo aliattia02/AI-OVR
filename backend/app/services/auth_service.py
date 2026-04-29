@@ -113,21 +113,25 @@ def build_login_response(access_token: str, user_doc: dict[str, Any]) -> dict[st
     }
 
 
-def create_access_token(data: dict[str, Any]) -> str:
+def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
     """Create a JWT access token containing user scope claims."""
     now = datetime.now(tz=timezone.utc)
     facility = data.get("facility") or data.get("facility_name")
+    user_id = data.get("user_id") or data.get("sub")
     payload = {
-        "user_id": data.get("user_id"),
+        "user_id": user_id,
+        "sub": user_id,
         "role": data.get("role"),
         "facility": facility,
         "administration": data.get("administration"),
         "governorate": data.get("governorate"),
         "tier": data.get("tier"),
         "token_type": "access",
-        "exp": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        "exp": now + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)),
         "iat": now,
     }
+    if "mfa_pending" in data:
+        payload["mfa_pending"] = data.get("mfa_pending")
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
@@ -234,6 +238,8 @@ async def get_current_user(
     claims = decode_token(token)
 
     if claims.get("token_type") != "access":
+        raise _unauthorized_exception()
+    if claims.get("mfa_pending"):
         raise _unauthorized_exception()
 
     user_id = claims.get("user_id")

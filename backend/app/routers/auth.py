@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -10,6 +11,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel, EmailStr, constr
 
 from app.db.database import get_database
+from app.middleware.auth_middleware import require_role
 from app.models.user import UserResponse
 from app.services import auth_service
 from app.utils.enums import UserRole
@@ -39,6 +41,23 @@ class AccessTokenResponse(BaseModel):
     """Access-token-only response payload."""
 
     access_token: str
+
+
+class MFASetupResponse(BaseModel):
+    otpauth_uri: str
+    secret: str
+
+
+class MFAVerifyRequest(BaseModel):
+    temp_token: str
+    totp_code: str
+
+
+class MFALoginResponse(BaseModel):
+    """Response when MFA is required before issuing a full access token."""
+
+    requires_mfa: bool
+    temp_token: str
 
 
 class MessageResponse(BaseModel):
@@ -112,15 +131,22 @@ def _clear_refresh_cookie(response: Response) -> None:
     )
 
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse | MFALoginResponse)
 async def login(
     payload: LoginRequest,
     response: Response,
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> LoginResponse:
+) -> LoginResponse | MFALoginResponse:
     user = await auth_service.authenticate_user(payload.email, payload.password, db)
     if user is None:
         raise _unauthorized()
+
+    if user.mfa_enabled and user.mfa_secret:
+        temp_token = auth_service.create_access_token(
+            {"sub": user.user_id, "role": user.role.value, "mfa_pending": True},
+            expires_delta=timedelta(minutes=5),
+        )
+        return MFALoginResponse(requires_mfa=True, temp_token=temp_token)
 
     access_token = auth_service.create_access_token(user.model_dump())
     refresh_token = auth_service.create_refresh_token(user.user_id)
@@ -139,6 +165,75 @@ async def login(
         is_active=user.is_active,
     )
     return LoginResponse(access_token=access_token, token_type="bearer", user=user_response)
+
+
+@router.post("/mfa/setup", response_model=MFASetupResponse)
+async def mfa_setup(
+    claims: dict[str, Any] = Depends(
+        require_role(
+            UserRole.quality_admin,
+            UserRole.administration_manager,
+            UserRole.governorate_manager,
+            UserRole.top_management,
+        )
+    ),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> MFASetupResponse:
+    user_id = claims.get("user_id")
+    if not user_id:
+        raise _unauthorized()
+
+    user_doc = await db["users"].find_one({"user_id": user_id, "is_active": True})
+    if not user_doc:
+        raise _unauthorized()
+
+    secret = auth_service.generate_mfa_secret()
+    otpauth_uri = auth_service.get_totp_uri(secret, user_doc.get("email", user_id))
+    await db["users"].update_one(
+        {"_id": user_doc["_id"]},
+        {"$set": {"mfa_secret": secret, "mfa_enabled": False, "mfa_enrolled_at": None}},
+    )
+    return MFASetupResponse(otpauth_uri=otpauth_uri, secret=secret)
+
+
+@router.post("/mfa/verify", response_model=LoginResponse)
+async def mfa_verify(
+    payload: MFAVerifyRequest,
+    response: Response,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> LoginResponse:
+    claims = auth_service.decode_token(payload.temp_token)
+    if not claims.get("mfa_pending"):
+        raise _unauthorized()
+
+    user_id = claims.get("user_id") or claims.get("sub")
+    if not user_id:
+        raise _unauthorized()
+
+    user_doc = await db["users"].find_one({"user_id": user_id, "is_active": True})
+    if not user_doc:
+        raise _unauthorized()
+
+    secret = user_doc.get("mfa_secret")
+    if not secret or not auth_service.verify_totp(secret, payload.totp_code):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code")
+
+    now = datetime.now(tz=timezone.utc)
+    await db["users"].update_one(
+        {"_id": user_doc["_id"]},
+        {"$set": {"mfa_enabled": True, "mfa_enrolled_at": now}},
+    )
+
+    access_token = auth_service.create_access_token(_claims_from_user_doc(user_doc))
+    refresh_token = auth_service.create_refresh_token(user_id)
+    await auth_service.store_refresh_token(user_id, refresh_token, db)
+    _set_refresh_cookie(response, refresh_token)
+
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=_to_user_response(user_doc),
+    )
 
 
 @router.post("/refresh", response_model=AccessTokenResponse)

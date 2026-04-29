@@ -75,7 +75,25 @@ def _build_auto_encryption_opts() -> AutoEncryptionOpts | None:
                         "bsonType": "string",
                         "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
                     }
-                }
+                },
+                "description": {
+                    "encrypt": {
+                        "bsonType": "string",
+                        "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+                    }
+                },
+                "specific_error": {
+                    "encrypt": {
+                        "bsonType": "string",
+                        "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+                    }
+                },
+                "notes": {
+                    "encrypt": {
+                        "bsonType": "string",
+                        "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+                    }
+                },
             },
         }
     }
