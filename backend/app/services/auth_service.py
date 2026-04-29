@@ -16,6 +16,7 @@ from jose import JWTError, jwt
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from passlib.exc import UnknownHashError
 from passlib.context import CryptContext
+import pyotp
 
 from app.db.database import get_database
 from app.models.user import UserInDB
@@ -355,3 +356,20 @@ async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIO
         {"$set": {"refresh_tokens": remaining}},
     )
     return True
+
+
+MFA_ISSUER = "eOVR"
+
+
+def generate_mfa_secret() -> str:
+    return pyotp.random_base32()
+
+
+def get_totp_uri(secret: str, username: str) -> str:
+    totp = pyotp.TOTP(secret)
+    return totp.provisioning_uri(name=username, issuer_name=MFA_ISSUER)
+
+
+def verify_totp(secret: str, code: str) -> bool:
+    totp = pyotp.TOTP(secret)
+    return totp.verify(code, valid_window=1)
