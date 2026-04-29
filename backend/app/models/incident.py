@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime
+from enum import Enum
 from typing import Any, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -18,6 +19,34 @@ from app.utils.enums import (
     ReporterType,
     Severity,
 )
+
+
+class JCIChapter(str, Enum):
+    """JCI 8th Edition chapter identifiers used for compliance tagging."""
+
+    IPSG = "IPSG"
+    ACC = "ACC"
+    PFR = "PFR"
+    AOP = "AOP"
+    COP = "COP"
+    ASC = "ASC"
+    MMU = "MMU"
+    PFE = "PFE"
+    QPS = "QPS"
+    PCI = "PCI"
+    GLD = "GLD"
+    FMS = "FMS"
+    SQE = "SQE"
+    MCI = "MCI"
+
+
+class JCIComplianceStatus(str, Enum):
+    """Compliance rating for a JCI measurable element."""
+
+    Met = "Met"
+    PartiallyMet = "PartiallyMet"
+    NotMet = "NotMet"
+    NotApplicable = "NotApplicable"
 
 
 class IncidentCreate(BaseModel):
@@ -75,6 +104,13 @@ class IncidentInDB(IncidentCreate):
     action_status: ActionStatus = ActionStatus.Pending
     final_report: Optional[str] = None
     ai_metadata: AIMetadata = Field(default_factory=AIMetadata.empty)
+    jci_chapter: Optional[JCIChapter] = None
+    jci_standard: Optional[str] = None
+    jci_measurable_element: Optional[str] = None
+    jci_compliance_status: Optional[JCIComplianceStatus] = None
+    jci_evidence: Optional[str] = None
+    jci_gap_analysis: Optional[str] = None
+    jci_action_plan: Optional[str] = None
 
 class IncidentResponse(IncidentInDB):
     """Incident document serialised for API responses.

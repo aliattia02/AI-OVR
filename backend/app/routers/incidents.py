@@ -9,9 +9,15 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.db.database import get_database
 from app.middleware.auth_middleware import require_role
-from app.models.incident import IncidentCreate, IncidentResponse
+from app.models.incident import (
+    JCIChapter,
+    JCIComplianceStatus,
+    IncidentCreate,
+    IncidentResponse,
+)
 from app.services import email_service, facility_service, incident_service
 from app.utils.enums import ActionStatus, IncidentStatus, Probability, Severity, UserRole
+from app.utils.helpers import build_audit_entry
 
 router = APIRouter(prefix="/incidents", tags=["incidents"])
 
@@ -213,6 +219,45 @@ async def save_actions(
         db=db,
     )
     if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+    return {"updated": True}
+
+
+# ── JCI compliance fields ──────────────────────────────────────────────────────
+
+class JCIFieldsBody(BaseModel):
+    jci_chapter: JCIChapter | None = None
+    jci_standard: str | None = None
+    jci_measurable_element: str | None = None
+    jci_compliance_status: JCIComplianceStatus | None = None
+    jci_evidence: str | None = None
+    jci_gap_analysis: str | None = None
+    jci_action_plan: str | None = None
+
+
+@router.patch("/{incident_id}/jci-fields", response_model=dict)
+async def save_jci_fields(
+    incident_id: str,
+    body: JCIFieldsBody,
+    claims: dict = Depends(require_role(UserRole.quality_admin)),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> dict:
+    """Persist JCI 8th Edition compliance metadata for an incident."""
+    updates = body.model_dump(exclude_unset=True, mode="json")
+    if not updates:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No JCI compliance fields provided.",
+        )
+    audit_entry = build_audit_entry(user_id=claims["user_id"], action="jci_fields_saved")
+    result = await db["incidents"].update_one(
+        {"incident_id": incident_id},
+        {
+            "$set": updates,
+            "$push": {"audit_trail": audit_entry},
+        },
+    )
+    if result.matched_count == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
     return {"updated": True}
 
