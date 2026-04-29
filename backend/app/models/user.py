@@ -48,6 +48,9 @@ class UserInDB(UserCreate):
     is_active: bool = True
     created_at: datetime
     last_login: Optional[datetime] = None
+    mfa_enabled: bool = False
+    mfa_secret: Optional[str] = None
+    mfa_enrolled_at: Optional[datetime] = None
 
 
 class UserResponse(BaseModel):

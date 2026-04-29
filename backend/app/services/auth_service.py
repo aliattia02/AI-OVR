@@ -16,6 +16,7 @@ from jose import JWTError, jwt
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from passlib.exc import UnknownHashError
 from passlib.context import CryptContext
+import pyotp
 
 from app.db.database import get_database
 from app.models.user import UserInDB
@@ -112,21 +113,25 @@ def build_login_response(access_token: str, user_doc: dict[str, Any]) -> dict[st
     }
 
 
-def create_access_token(data: dict[str, Any]) -> str:
+def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
     """Create a JWT access token containing user scope claims."""
     now = datetime.now(tz=timezone.utc)
     facility = data.get("facility") or data.get("facility_name")
+    user_id = data.get("user_id") or data.get("sub")
     payload = {
-        "user_id": data.get("user_id"),
+        "user_id": user_id,
+        "sub": user_id,
         "role": data.get("role"),
         "facility": facility,
         "administration": data.get("administration"),
         "governorate": data.get("governorate"),
         "tier": data.get("tier"),
         "token_type": "access",
-        "exp": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        "exp": now + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)),
         "iat": now,
     }
+    if "mfa_pending" in data:
+        payload["mfa_pending"] = data.get("mfa_pending")
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
@@ -233,6 +238,8 @@ async def get_current_user(
     claims = decode_token(token)
 
     if claims.get("token_type") != "access":
+        raise _unauthorized_exception()
+    if claims.get("mfa_pending"):
         raise _unauthorized_exception()
 
     user_id = claims.get("user_id")
@@ -355,3 +362,20 @@ async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIO
         {"$set": {"refresh_tokens": remaining}},
     )
     return True
+
+
+MFA_ISSUER = "eOVR"
+
+
+def generate_mfa_secret() -> str:
+    return pyotp.random_base32()
+
+
+def get_totp_uri(secret: str, username: str) -> str:
+    totp = pyotp.TOTP(secret)
+    return totp.provisioning_uri(name=username, issuer_name=MFA_ISSUER)
+
+
+def verify_totp(secret: str, code: str) -> bool:
+    totp = pyotp.TOTP(secret)
+    return totp.verify(code, valid_window=1)
