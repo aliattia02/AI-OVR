@@ -11,6 +11,7 @@ import {
   SEVERITY_OPTIONS,
 } from '../../utils/enums';
 import { formatEnumLabel } from '../../utils/formatters';
+import DisclaimerBanner from '../shared/DisclaimerBanner';
 
 function getCurrentTimeString() {
   const now = new Date();
@@ -171,6 +172,9 @@ export default function NewIncidentForm() {
 
   const labelStyle = { fontSize: 13, fontWeight: 600, color: '#111827' };
   const errorStyle = { fontSize: 12, color: '#B91C1C' };
+  const occurrenceLocationOptions = [
+    { value: 'telehealth_remote', label: 'Telehealth / Remote' },
+  ];
 
   // Renders a field that is either a locked text display or a live select/input
   const LockedOrSelect = ({ name, label, options, required, locked }) => {
@@ -212,6 +216,7 @@ export default function NewIncidentForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'grid', gap: 14 }}>
       {cascadingError && <div style={{ ...errorStyle, fontWeight: 600 }}>{cascadingError}</div>}
+      <DisclaimerBanner />
 
       <LockedOrSelect
         name="governorate"
@@ -295,7 +300,12 @@ export default function NewIncidentForm() {
 
       <label style={labelStyle}>
         Occurrence Location
-        <input style={fieldStyle} {...register('occurrence_location')} />
+        <input style={fieldStyle} list="occurrence-location-options" {...register('occurrence_location')} />
+        <datalist id="occurrence-location-options">
+          {occurrenceLocationOptions.map((option) => (
+            <option key={option.value} value={option.value} label={option.label} />
+          ))}
+        </datalist>
       </label>
 
       <label style={labelStyle}>
