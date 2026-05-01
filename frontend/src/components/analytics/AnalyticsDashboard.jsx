@@ -71,8 +71,23 @@ export default function AnalyticsDashboard() {
 
   const totalIncidents = useMemo(() => sumCounts(summary?.status), [summary?.status]);
   const openIncidents = Math.max(0, totalIncidents - (statusCounts.Completed || 0));
-  const highRisk = Number(summary?.high_risk ?? summary?.highRisk ?? 0) || 0;
-  const pendingAIReview = Number(summary?.pending_ai_review ?? summary?.pendingAIReview ?? 0) || 0;
+  // high_risk: derived from severity array — Major incidents are the high-risk cohort.
+  // The backend /analytics/summary response only returns status/severity/event_type
+  // arrays and does not include high_risk or pending_ai_review fields directly.
+  const highRisk = useMemo(
+    () => (summary?.severity || []).find((r) => r?.key === 'Major')?.count ?? 0,
+    [summary?.severity]
+  );
+
+  // pending_ai_review: incidents that are still open (not yet Completed).
+  // A reasonable proxy until the backend exposes a dedicated field.
+  const pendingAIReview = useMemo(
+    () =>
+      (summary?.status || [])
+        .filter((r) => r?.key !== 'Completed')
+        .reduce((sum, r) => sum + (Number(r?.count) || 0), 0),
+    [summary?.status]
+  );
 
   const loading = summaryLoading || trendsLoading || (tier >= 4 && compareLoading);
   const error = summaryError || trendsError || (tier >= 4 ? compareError : null);
