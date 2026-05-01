@@ -330,6 +330,10 @@ async def save_final_report(
 ) -> bool:
     """Persist the final report text and advance the incident to *Completed*.
 
+    Enforces the status transition table — only an incident currently in
+    ``ActionTaken`` state may be closed.  Returns ``False`` (causing the router
+    to raise HTTP 400) if the incident is not found or the transition is illegal.
+
     Sets ``report_date`` and ``report_time`` from the current UTC timestamp.
 
     Args:
@@ -339,13 +343,23 @@ async def save_final_report(
         db:          Async Motor database instance.
 
     Returns:
-        ``True`` if the document was updated; ``False`` if not found.
+        ``True`` if the document was updated; ``False`` if not found or the
+        transition from the current status to Completed is not permitted.
     """
+    # Fetch current status and enforce transition table before writing.
+    doc = await db["incidents"].find_one({"incident_id": incident_id}, {"status": 1})
+    if doc is None:
+        return False
+
+    current_status = IncidentStatus(doc["status"])
+    if IncidentStatus.Completed not in _ALLOWED_TRANSITIONS.get(current_status, set()):
+        return False
+
     now = datetime.now(tz=timezone.utc)
     audit_entry = build_audit_entry(
         user_id=user_id,
         action="status_change",
-        old_status=None,
+        old_status=current_status.value,
         new_status=IncidentStatus.Completed.value,
     )
     result = await db["incidents"].update_one(
