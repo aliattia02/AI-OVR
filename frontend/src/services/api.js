@@ -2,22 +2,30 @@ import axios from 'axios';
 
 let _token = null;
 let _redirectingToLogin = false;
+// 15-minute idle timeout to align with the access token TTL.
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
 let _idleTimer = null;
 let _idleListenerAttached = false;
 let _idleLogoutInProgress = false;
-let _lastActivityAt = Date.now();
+let _lastActivityAt = getNow();
 
 export function setToken(token) {
   _token = token;
   if (token) {
-    _lastActivityAt = Date.now();
+    _lastActivityAt = getNow();
   }
   syncIdleTimer();
 }
 
 export function getToken() {
   return _token;
+}
+
+function getNow() {
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    return performance.now();
+  }
+  return Date.now();
 }
 
 function clearIdleTimer() {
@@ -49,7 +57,7 @@ function syncIdleTimer() {
   }
   ensureIdleListeners();
   clearIdleTimer();
-  const elapsed = Date.now() - _lastActivityAt;
+  const elapsed = getNow() - _lastActivityAt;
   const remaining = IDLE_TIMEOUT_MS - elapsed;
   if (remaining <= 0) {
     triggerIdleLogout();
@@ -60,7 +68,7 @@ function syncIdleTimer() {
 
 function handleUserActivity() {
   if (!_token) return;
-  _lastActivityAt = Date.now();
+  _lastActivityAt = getNow();
   syncIdleTimer();
 }
 

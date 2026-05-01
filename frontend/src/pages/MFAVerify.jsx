@@ -4,8 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import api, { setToken } from '../services/api';
 import { MFA_TEMP_TOKEN_STORAGE_KEY } from '../utils/authStorage';
 
-const TEMP_TOKEN_KEY = MFA_TEMP_TOKEN_STORAGE_KEY;
-
 const styles = {
   page: {
     maxWidth: 420,
@@ -92,7 +90,7 @@ export default function MFAVerify() {
   const tempToken = useMemo(() => {
     if (location?.state?.tempToken) return location.state.tempToken;
     if (typeof window === 'undefined') return null;
-    return sessionStorage.getItem(TEMP_TOKEN_KEY);
+    return sessionStorage.getItem(MFA_TEMP_TOKEN_STORAGE_KEY);
   }, [location]);
 
   const handleSubmit = async (e) => {
@@ -121,7 +119,7 @@ export default function MFAVerify() {
       }
       setToken(accessToken);
       if (typeof window !== 'undefined') {
-        sessionStorage.removeItem(TEMP_TOKEN_KEY);
+        sessionStorage.removeItem(MFA_TEMP_TOKEN_STORAGE_KEY);
       }
       await onPasswordChanged();
     } catch (err) {

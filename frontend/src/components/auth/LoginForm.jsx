@@ -18,8 +18,6 @@ const C = {
   g800: "#1F2937",
 };
 
-const MFA_TEMP_TOKEN_KEY = MFA_TEMP_TOKEN_STORAGE_KEY;
-
 export default function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -48,7 +46,7 @@ export default function LoginForm() {
       if (err?.requires_mfa) {
         const tempToken = err?.temp_token ?? null;
         if (tempToken && typeof sessionStorage !== "undefined") {
-          sessionStorage.setItem(MFA_TEMP_TOKEN_KEY, tempToken);
+          sessionStorage.setItem(MFA_TEMP_TOKEN_STORAGE_KEY, tempToken);
         }
         navigate("/mfa/verify", { replace: true, state: { tempToken } });
         return;
