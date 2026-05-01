@@ -132,6 +132,13 @@ async def update_status(
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> dict:
     """Advance the incident workflow status. Only legal transitions are accepted."""
+    # Capture the current status BEFORE the transition so the email can report
+    # the real "from" state.  Uses a lightweight projection — no full document read.
+    pre_doc = await db["incidents"].find_one(
+        {"incident_id": incident_id}, {"status": 1}
+    )
+    old_status_value: str = pre_doc["status"] if pre_doc else ""
+
     updated = await incident_service.update_status(
         incident_id=incident_id,
         new_status=body.new_status,
@@ -144,7 +151,8 @@ async def update_status(
             detail="Invalid status transition or incident not found.",
         )
 
-    # Email notification for status changes
+    # Email notification for status changes — old_status now carries the real
+    # pre-transition value instead of the previous hardcoded empty string.
     incident = await incident_service.get_incident_by_id(incident_id, claims["role"], claims, db)
     if incident:
         qa_email = await facility_service.get_quality_admin_email(incident.facility_name, db)
@@ -152,7 +160,7 @@ async def update_status(
             await email_service.send_status_change_alert(
                 to_email=qa_email,
                 incident_id=incident_id,
-                old_status="",
+                old_status=old_status_value,
                 new_status=body.new_status.value,
             )
 
