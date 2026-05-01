@@ -89,10 +89,7 @@ async def get_incidents_by_mrn(
         {"medical_file_number": mrn},
         {"_id": 0, "incident_id": 1, "status": 1, "occurrence_date": 1},
     )
-    incidents: list[IncidentLinkageResponse] = []
-    async for doc in cursor:
-        incidents.append(IncidentLinkageResponse(**doc))
-    return incidents
+    return [IncidentLinkageResponse(**doc) async for doc in cursor]
 
 
 # ── Create incident ───────────────────────────────────────────────────────────

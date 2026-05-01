@@ -85,9 +85,9 @@ def build_adverse_event(incident: IncidentInDB | dict) -> dict:
 
     occurrence_date = _get_value(incident, "occurrence_date")
     occurrence_time = _get_value(incident, "occurrence_time")
-    occurrence_datetime = _to_date_time(occurrence_date, occurrence_time)
-    if occurrence_datetime:
-        adverse_event["date"] = occurrence_datetime
+    occurrence_value = _to_date_time(occurrence_date, occurrence_time)
+    if occurrence_value:
+        adverse_event["date"] = occurrence_value
 
     registration_date = _get_value(incident, "registration_date")
     recorded_date = _to_iso(registration_date)
