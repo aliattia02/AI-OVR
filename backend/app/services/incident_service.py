@@ -48,6 +48,33 @@ def _doc_to_incident(doc: dict) -> IncidentInDB:
 
 # ── Service functions ─────────────────────────────────────────────────────────
 
+async def _next_incident_seq(db: AsyncIOMotorDatabase) -> int:
+    """Return the next incident sequence number using an atomic MongoDB counter.
+
+    Uses ``find_one_and_update`` with ``upsert=True`` on a ``counters``
+    collection so concurrent calls are serialised by MongoDB — each call
+    receives a unique, strictly-increasing integer regardless of how many
+    requests arrive simultaneously.
+
+    The counter document looks like::
+
+        { "_id": "incident_seq", "seq": 42 }
+
+    Args:
+        db: Async Motor database instance.
+
+    Returns:
+        The next sequence integer (1-based).
+    """
+    counter = await db["counters"].find_one_and_update(
+        {"_id": "incident_seq"},
+        {"$inc": {"seq": 1}},
+        upsert=True,
+        return_document=True,
+    )
+    return int(counter["seq"])
+
+
 async def create_incident(
     data: IncidentCreate,
     reporter_type: ReporterType,
@@ -59,7 +86,8 @@ async def create_incident(
     Steps:
     1. Look up the facility to denormalise ``governorate`` and ``administration``.
     2. Stamp ``registration_date`` with the current UTC time.
-    3. Generate a human-readable ``incident_id`` (e.g. ``"OVR-2026-001"``).
+    3. Obtain a unique sequence number via atomic counter and generate the
+       human-readable ``incident_id`` (e.g. ``"OVR-2026-001"``).
     4. Attach an :meth:`AIMetadata.empty` subdocument.
     5. Build the initial ``audit_trail`` entry.
     6. Call :func:`~app.services.ai_service.classify_incident`.  If a result is
@@ -89,10 +117,12 @@ async def create_incident(
     administration: str = facility_doc.get("administration", "")
     governorate: str = facility_doc.get("governorate", "")
 
-    # Steps 2–3
+    # Steps 2–3: atomic counter replaces count_documents() to eliminate the
+    # race condition where two concurrent submissions would receive the same
+    # count and therefore generate duplicate incident_ids.
     registration_date = datetime.now(tz=timezone.utc)
-    count = await db["incidents"].count_documents({}) + 1
-    incident_id = generate_incident_id(count)
+    seq = await _next_incident_seq(db)
+    incident_id = generate_incident_id(seq)
 
     # Steps 4–5
     ai_metadata = AIMetadata.empty()
