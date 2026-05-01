@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api, { setToken } from '../services/api';
+import { MFA_TEMP_TOKEN_STORAGE_KEY } from '../utils/authStorage';
 
-const TEMP_TOKEN_KEY = 'eovr_mfa_temp_token';
+const TEMP_TOKEN_KEY = MFA_TEMP_TOKEN_STORAGE_KEY;
 
 const styles = {
   page: {

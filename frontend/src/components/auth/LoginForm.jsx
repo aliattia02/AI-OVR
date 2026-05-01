@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { MFA_TEMP_TOKEN_STORAGE_KEY } from "../../utils/authStorage";
 
 const C = {
   navy: "#0C2340",
@@ -17,7 +18,7 @@ const C = {
   g800: "#1F2937",
 };
 
-const MFA_TEMP_TOKEN_KEY = "eovr_mfa_temp_token";
+const MFA_TEMP_TOKEN_KEY = MFA_TEMP_TOKEN_STORAGE_KEY;
 
 export default function LoginForm() {
   const { login } = useAuth();
