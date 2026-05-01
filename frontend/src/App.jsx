@@ -8,6 +8,8 @@ import Analytics from './pages/Analytics';
 import AdminProvision from './pages/AdminProvision';
 import ChangePassword from './pages/ChangePassword';
 import Dashboard from './pages/Dashboard';
+import MFASetup from './pages/MFASetup';
+import MFAVerify from './pages/MFAVerify';
 import PatientReport from './pages/PatientReport';
 import Reports from './pages/Reports';
 import WorkflowPage from './pages/WorkflowPage';
@@ -78,6 +80,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginForm />} />
+        <Route path="/mfa/verify" element={<MFAVerify />} />
         <Route path="/report/:uuid" element={<PatientReport />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route
@@ -91,6 +94,7 @@ export default function App() {
           <Route path="/incidents" element={<Reports />} />
           <Route path="/incidents/:id" element={<IncidentDetailRoute />} />
           <Route path="/new" element={<NewIncidentForm />} />
+          <Route path="/mfa/setup" element={<MFASetup />} />
           <Route
             path="/analytics"
             element={

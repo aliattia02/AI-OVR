@@ -17,6 +17,8 @@ const C = {
   g800: "#1F2937",
 };
 
+const MFA_TEMP_TOKEN_KEY = "eovr_mfa_temp_token";
+
 export default function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -42,6 +44,14 @@ export default function LoginForm() {
         navigate("/", { replace: true });
       }
     } catch (err) {
+      if (err?.requires_mfa) {
+        const tempToken = err?.temp_token ?? null;
+        if (tempToken && typeof sessionStorage !== "undefined") {
+          sessionStorage.setItem(MFA_TEMP_TOKEN_KEY, tempToken);
+        }
+        navigate("/mfa/verify", { replace: true, state: { tempToken } });
+        return;
+      }
       const msg =
         err?.response?.data?.detail ||
         err?.message ||
