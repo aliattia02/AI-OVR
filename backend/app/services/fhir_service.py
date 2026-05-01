@@ -43,8 +43,7 @@ def _codeable_concept(system: str, code: str | None) -> dict | None:
                 "system": system,
                 "code": code,
             }
-        ],
-        "text": code,
+        ]
     }
 
 
