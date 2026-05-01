@@ -211,7 +211,7 @@ async def mfa_verify(
             detail="Invalid or expired temporary token.",
         ) from exc
 
-    user_id = claims.get("sub") or claims.get("user_id")
+    user_id = claims.get("user_id")
     if not user_id:
         raise _unauthorized()
 
