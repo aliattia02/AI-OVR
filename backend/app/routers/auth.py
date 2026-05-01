@@ -14,6 +14,7 @@ from app.db.database import get_database
 from app.middleware.auth_middleware import require_role
 from app.models.user import UserResponse
 from app.services import auth_service
+from app.services.auth_service import generate_mfa_secret, get_totp_uri, verify_totp
 from app.utils.enums import UserRole
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -187,8 +188,8 @@ async def mfa_setup(
     if not user_doc:
         raise _unauthorized()
 
-    secret = auth_service.generate_mfa_secret()
-    otpauth_uri = auth_service.get_totp_uri(secret, user_doc.get("email", user_id))
+    secret = generate_mfa_secret()
+    otpauth_uri = get_totp_uri(secret, user_doc.get("email", user_id))
     await db["users"].update_one(
         {"_id": user_doc["_id"]},
         {"$set": {"mfa_secret": secret, "mfa_enabled": False, "mfa_enrolled_at": None}},
@@ -202,21 +203,32 @@ async def mfa_verify(
     response: Response,
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> LoginResponse:
-    claims = auth_service.decode_token(payload.temp_token)
-    if not claims.get("mfa_pending"):
-        raise _unauthorized()
+    try:
+        claims = auth_service.decode_token(payload.temp_token)
+    except HTTPException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired temporary token.",
+        ) from exc
 
-    user_id = claims.get("user_id") or claims.get("sub")
+    user_id = claims.get("user_id")
     if not user_id:
         raise _unauthorized()
 
     user_doc = await db["users"].find_one({"user_id": user_id, "is_active": True})
-    if not user_doc:
-        raise _unauthorized()
+    if not user_doc or not user_doc.get("mfa_secret"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="MFA not configured for this user.",
+        )
+    if user_doc.get("mfa_enabled") and not claims.get("mfa_pending"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired temporary token.",
+        )
 
-    secret = user_doc.get("mfa_secret")
-    if not secret or not auth_service.verify_totp(secret, payload.totp_code):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code")
+    if not verify_totp(user_doc["mfa_secret"], payload.totp_code):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid MFA code.")
 
     now = datetime.now(tz=timezone.utc)
     await db["users"].update_one(
