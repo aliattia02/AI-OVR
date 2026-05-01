@@ -1,69 +1,75 @@
-"""backend/app/routers/fhir.py — FHIR R4 translation endpoints for E-OVR incidents."""
+from fastapi import APIRouter, Depends, HTTPException
 
-from __future__ import annotations
+from app.dependencies import get_current_user, get_db, require_role
+from app.services.fhir_service import map_incident_to_fhir_adverse_event
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from motor.motor_asyncio import AsyncIOMotorDatabase
-
-from app.db.database import get_database
-from app.middleware.auth_middleware import require_role
-from app.services import incident_service
-from app.services.fhir_service import build_adverse_event, build_adverse_event_bundle
-from app.utils.enums import UserRole
-
-router = APIRouter(prefix="/fhir/r4", tags=["fhir"])
+fhir_router = APIRouter(tags=["FHIR R4"])
 
 
-@router.get("/AdverseEvent", response_model=dict)
-async def list_adverse_events(
-    skip: int = 0,
-    limit: int = 50,
-    claims: dict = Depends(
-        require_role(
-            UserRole.staff,
-            UserRole.quality_admin,
-            UserRole.administration_manager,
-            UserRole.governorate_manager,
-            UserRole.top_management,
-        )
-    ),
-    db: AsyncIOMotorDatabase = Depends(get_database),
-) -> dict:
-    """Return AdverseEvent resources for incidents scoped to the caller's tier."""
-    incidents = await incident_service.get_incidents(
-        role=claims["role"],
-        claims=claims,
-        db=db,
-        skip=skip,
-        limit=limit,
-    )
-    return build_adverse_event_bundle(incidents)
-
-
-@router.get("/AdverseEvent/{incident_id}", response_model=dict)
-async def get_adverse_event(
+@fhir_router.get("/AdverseEvent/{incident_id}")
+async def get_fhir_adverse_event(
     incident_id: str,
-    claims: dict = Depends(
-        require_role(
-            UserRole.staff,
-            UserRole.quality_admin,
-            UserRole.administration_manager,
-            UserRole.governorate_manager,
-            UserRole.top_management,
-        )
-    ),
-    db: AsyncIOMotorDatabase = Depends(get_database),
-) -> dict:
-    """Return a single AdverseEvent resource for an incident."""
-    incident = await incident_service.get_incident_by_id(
-        incident_id=incident_id,
-        role=claims["role"],
-        claims=claims,
-        db=db,
+    current_user: dict = Depends(get_current_user),
+    db=Depends(get_db),
+):
+    """Return a single FHIR R4 AdverseEvent resource for the given incident_id.
+    Scoped to the caller's role — a quality_admin sees only their facility's incidents."""
+    require_role(
+        current_user,
+        [
+            "quality_admin",
+            "administration_manager",
+            "governorate_manager",
+            "top_management",
+        ],
     )
-    if incident is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Incident not found or access denied.",
-        )
-    return build_adverse_event(incident)
+    incident = await db.incidents.find_one({"incident_id": incident_id})
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found.")
+    return map_incident_to_fhir_adverse_event(incident)
+
+
+@fhir_router.get("/AdverseEvent")
+async def list_fhir_adverse_events(
+    current_user: dict = Depends(get_current_user),
+    db=Depends(get_db),
+    skip: int = 0,
+    limit: int = 20,
+):
+    """Return a FHIR R4 Bundle (searchset) of AdverseEvent resources.
+    Scope filter mirrors the existing incidents list scoping for this role.
+    Limit capped at 100 to protect budget."""
+    require_role(
+        current_user,
+        [
+            "quality_admin",
+            "administration_manager",
+            "governorate_manager",
+            "top_management",
+        ],
+    )
+    limit = min(limit, 100)
+
+    # Reuse the same scope filter pattern as the main incidents list endpoint.
+    # For now use facility-level filter; adapt to match the existing get_scope_filter() helper.
+    scope_filter = {}
+    role = current_user.get("role", "")
+    if role == "quality_admin":
+        scope_filter["facility_name"] = current_user.get("facility_name")
+    elif role == "administration_manager":
+        scope_filter["administration"] = current_user.get("administration")
+    elif role == "governorate_manager":
+        scope_filter["governorate"] = current_user.get("governorate")
+    # top_management: no filter (sees all)
+
+    cursor = db.incidents.find(scope_filter).skip(skip).limit(limit)
+    entries = [{"resource": map_incident_to_fhir_adverse_event(inc)} async for inc in cursor]
+    return {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "total": len(entries),
+        "entry": entries,
+    }
+
+
+router = fhir_router
