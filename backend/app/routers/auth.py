@@ -222,7 +222,10 @@ async def mfa_verify(
             detail="MFA not configured for this user.",
         )
     if user_doc.get("mfa_enabled") and not claims.get("mfa_pending"):
-        raise _unauthorized()
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired temporary token.",
+        )
 
     if not verify_totp(user_doc["mfa_secret"], payload.totp_code):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid MFA code.")
