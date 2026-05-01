@@ -8,6 +8,13 @@ export async function login(email, password) {
 
 export async function loginWithMeta(email, password) {
   const { data } = await api.post('/auth/login', { email, password });
+  if (data?.requires_mfa) {
+    setToken(null);
+    const mfaError = new Error('MFA verification required');
+    mfaError.requires_mfa = true;
+    mfaError.temp_token = data?.temp_token ?? null;
+    throw mfaError;
+  }
   setToken(data?.access_token ?? null);
   return data;
 }

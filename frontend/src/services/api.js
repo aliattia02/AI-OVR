@@ -2,13 +2,97 @@ import axios from 'axios';
 
 let _token = null;
 let _redirectingToLogin = false;
+// 15-minute idle timeout to align with the access token TTL.
+const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+let _idleTimer = null;
+let _idleListenerAttached = false;
+let _idleLogoutInProgress = false;
+let _lastActivityAt = getNow();
 
 export function setToken(token) {
   _token = token;
+  if (token) {
+    _lastActivityAt = getNow();
+  }
+  syncIdleTimer();
 }
 
 export function getToken() {
   return _token;
+}
+
+function getNow() {
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    return performance.now();
+  }
+  return Date.now();
+}
+
+function clearIdleTimer() {
+  if (_idleTimer) {
+    clearTimeout(_idleTimer);
+    _idleTimer = null;
+  }
+}
+
+function ensureIdleListeners() {
+  if (_idleListenerAttached || typeof window === 'undefined') return;
+  const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
+  events.forEach((eventName) => {
+    window.addEventListener(eventName, handleUserActivity, { passive: true });
+  });
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      handleUserActivity();
+    }
+  });
+  _idleListenerAttached = true;
+}
+
+function syncIdleTimer() {
+  if (typeof window === 'undefined') return;
+  if (!_token) {
+    clearIdleTimer();
+    return;
+  }
+  ensureIdleListeners();
+  clearIdleTimer();
+  const elapsed = getNow() - _lastActivityAt;
+  const remaining = IDLE_TIMEOUT_MS - elapsed;
+  if (remaining <= 0) {
+    triggerIdleLogout();
+    return;
+  }
+  _idleTimer = window.setTimeout(triggerIdleLogout, remaining);
+}
+
+function handleUserActivity() {
+  if (!_token) return;
+  _lastActivityAt = getNow();
+  syncIdleTimer();
+}
+
+async function triggerIdleLogout() {
+  if (_idleLogoutInProgress) return;
+  _idleLogoutInProgress = true;
+  try {
+    await axios.post('/api/auth/logout', null, { withCredentials: true });
+  } catch (error) {
+    if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+      console.warn('Idle logout failed to reach server.', error);
+    }
+  } finally {
+    setToken(null);
+    _idleLogoutInProgress = false;
+    if (
+      typeof window !== 'undefined' &&
+      window.location.pathname !== '/login' &&
+      !_redirectingToLogin
+    ) {
+      _redirectingToLogin = true;
+      window.location.replace('/login');
+    }
+  }
 }
 
 const api = axios.create({

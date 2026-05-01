@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { MFA_TEMP_TOKEN_STORAGE_KEY } from "../../utils/authStorage";
 
 const C = {
   navy: "#0C2340",
@@ -42,6 +43,14 @@ export default function LoginForm() {
         navigate("/", { replace: true });
       }
     } catch (err) {
+      if (err?.requires_mfa) {
+        const tempToken = err?.temp_token ?? null;
+        if (tempToken && typeof sessionStorage !== "undefined") {
+          sessionStorage.setItem(MFA_TEMP_TOKEN_STORAGE_KEY, tempToken);
+        }
+        navigate("/mfa/verify", { replace: true, state: { tempToken } });
+        return;
+      }
       const msg =
         err?.response?.data?.detail ||
         err?.message ||
