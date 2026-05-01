@@ -191,21 +191,21 @@ async def mfa_setup(
     secret = generate_mfa_secret()
     otpauth_uri = get_totp_uri(secret, user_doc.get("email", user_id))
     await db["users"].update_one(
-        {"user_id": user_id},
+        {"_id": user_doc["_id"]},
         {"$set": {"mfa_secret": secret, "mfa_enabled": False, "mfa_enrolled_at": None}},
     )
     return MFASetupResponse(otpauth_uri=otpauth_uri, secret=secret)
 
 
-@router.post("/mfa/verify")
+@router.post("/mfa/verify", response_model=LoginResponse)
 async def mfa_verify(
     payload: MFAVerifyRequest,
     response: Response,
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> dict[str, str]:
+) -> LoginResponse:
     try:
         claims = auth_service.decode_token(payload.temp_token)
-    except Exception as exc:
+    except HTTPException as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired temporary token.",
@@ -225,7 +225,7 @@ async def mfa_verify(
     if not verify_totp(user_doc["mfa_secret"], payload.totp_code):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid TOTP code.")
 
-    now = datetime.utcnow()
+    now = datetime.now(tz=timezone.utc)
     await db["users"].update_one(
         {"_id": user_doc["_id"]},
         {"$set": {"mfa_enabled": True, "mfa_enrolled_at": now}},
@@ -236,7 +236,11 @@ async def mfa_verify(
     await auth_service.store_refresh_token(user_id, refresh_token, db)
     _set_refresh_cookie(response, refresh_token)
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=_to_user_response(user_doc),
+    )
 
 
 @router.post("/refresh", response_model=AccessTokenResponse)
