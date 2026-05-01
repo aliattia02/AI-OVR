@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.db.database import lifespan
-from app.routers import ai, analytics, auth, exports, facilities, incidents, patients, users
+from app.routers import ai, analytics, auth, exports, facilities, fhir, incidents, patients, users
 
 APP_VERSION = "2.0.0"
 
@@ -42,6 +42,7 @@ app.include_router(analytics.router)
 app.include_router(exports.router)
 app.include_router(users.router)
 app.include_router(ai.router)
+app.include_router(fhir.router)
 
 
 @app.get("/")
