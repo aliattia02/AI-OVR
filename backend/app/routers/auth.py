@@ -14,6 +14,7 @@ from app.db.database import get_database
 from app.middleware.auth_middleware import require_role
 from app.models.user import UserResponse
 from app.services import auth_service
+from app.services.auth_service import generate_mfa_secret, get_totp_uri, verify_totp
 from app.utils.enums import UserRole
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -187,38 +188,44 @@ async def mfa_setup(
     if not user_doc:
         raise _unauthorized()
 
-    secret = auth_service.generate_mfa_secret()
-    otpauth_uri = auth_service.get_totp_uri(secret, user_doc.get("email", user_id))
+    secret = generate_mfa_secret()
+    otpauth_uri = get_totp_uri(secret, user_doc.get("email", user_id))
     await db["users"].update_one(
-        {"_id": user_doc["_id"]},
+        {"user_id": user_id},
         {"$set": {"mfa_secret": secret, "mfa_enabled": False, "mfa_enrolled_at": None}},
     )
     return MFASetupResponse(otpauth_uri=otpauth_uri, secret=secret)
 
 
-@router.post("/mfa/verify", response_model=LoginResponse)
+@router.post("/mfa/verify")
 async def mfa_verify(
     payload: MFAVerifyRequest,
     response: Response,
     db: AsyncIOMotorDatabase = Depends(get_database),
-) -> LoginResponse:
-    claims = auth_service.decode_token(payload.temp_token)
-    if not claims.get("mfa_pending"):
-        raise _unauthorized()
+) -> dict[str, str]:
+    try:
+        claims = auth_service.decode_token(payload.temp_token)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired temporary token.",
+        ) from exc
 
-    user_id = claims.get("user_id") or claims.get("sub")
+    user_id = claims.get("sub") or claims.get("user_id")
     if not user_id:
         raise _unauthorized()
 
     user_doc = await db["users"].find_one({"user_id": user_id, "is_active": True})
-    if not user_doc:
-        raise _unauthorized()
+    if not user_doc or not user_doc.get("mfa_secret"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="MFA not configured for this user.",
+        )
 
-    secret = user_doc.get("mfa_secret")
-    if not secret or not auth_service.verify_totp(secret, payload.totp_code):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid MFA code")
+    if not verify_totp(user_doc["mfa_secret"], payload.totp_code):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid TOTP code.")
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.utcnow()
     await db["users"].update_one(
         {"_id": user_doc["_id"]},
         {"$set": {"mfa_enabled": True, "mfa_enrolled_at": now}},
@@ -229,11 +236,7 @@ async def mfa_verify(
     await auth_service.store_refresh_token(user_id, refresh_token, db)
     _set_refresh_cookie(response, refresh_token)
 
-    return LoginResponse(
-        access_token=access_token,
-        token_type="bearer",
-        user=_to_user_response(user_doc),
-    )
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post("/refresh", response_model=AccessTokenResponse)
