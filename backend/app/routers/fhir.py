@@ -62,5 +62,8 @@ async def get_adverse_event(
         db=db,
     )
     if incident is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Incident not found or access denied.",
+        )
     return build_adverse_event(incident)
