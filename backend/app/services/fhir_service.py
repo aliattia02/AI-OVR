@@ -1,4 +1,4 @@
-"""backend/app/services/fhir_service.py — Map E·OVR incidents to FHIR R4 AdverseEvent resources."""
+"""backend/app/services/fhir_service.py — Map E-OVR incidents to FHIR R4 AdverseEvent resources."""
 
 from __future__ import annotations
 

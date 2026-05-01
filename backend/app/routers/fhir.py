@@ -1,4 +1,4 @@
-"""backend/app/routers/fhir.py — FHIR R4 translation endpoints for E·OVR incidents."""
+"""backend/app/routers/fhir.py — FHIR R4 translation endpoints for E-OVR incidents."""
 
 from __future__ import annotations
 
