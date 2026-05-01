@@ -389,3 +389,37 @@ async def update_jci_fields(
         raise HTTPException(status_code=404, detail="Incident not found.")
 
     return {"updated": True, "fields_set": list(update_data.keys())}
+
+
+@router.get("/by-mrn/{mrn}")
+async def get_incidents_by_mrn(
+    mrn: str,
+    current_user: dict = Depends(get_current_user),
+    db = Depends(get_db),
+):
+    """Return all incidents linked to a patient medical record number.
+    Restricted to quality_admin and above.
+    This endpoint is the EHR read-only linkage point — the EHR may query eOVR
+    by MRN; eOVR never writes to the EHR.
+    medical_file_number uses CSFLE Deterministic encryption, so equality
+    queries on ciphertext work correctly through Motor's auto-decryption."""
+    await require_role(
+        UserRole.quality_admin,
+        UserRole.administration_manager,
+        UserRole.governorate_manager,
+        UserRole.top_management,
+    )(current_user)
+    if not mrn or len(mrn.strip()) == 0:
+        raise HTTPException(status_code=400, detail="MRN must not be empty.")
+
+    cursor = db.incidents.find(
+        {"medical_file_number": mrn},
+        # Exclude CSFLE-encrypted free-text fields from this response
+        # to minimize PHI surface area in the EHR integration context.
+        {"description": 0, "specific_error": 0, "notes": 0},
+    )
+    results = [inc async for inc in cursor]
+    # Convert ObjectId to str for JSON serialization
+    for inc in results:
+        inc["_id"] = str(inc["_id"])
+    return {"mrn": mrn, "count": len(results), "incidents": results}

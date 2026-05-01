@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 
 from app.db.database import lifespan
 from app.routers import ai, analytics, auth, exports, facilities, fhir, incidents, patients, users
+from app.routers.fhir import fhir_router
 
 APP_VERSION = "2.0.0"
 
@@ -43,6 +44,7 @@ app.include_router(exports.router)
 app.include_router(users.router)
 app.include_router(ai.router)
 app.include_router(fhir.router)
+app.include_router(fhir_router, prefix="/fhir/r4")
 
 
 @app.get("/")
