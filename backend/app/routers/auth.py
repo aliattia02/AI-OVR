@@ -221,9 +221,11 @@ async def mfa_verify(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="MFA not configured for this user.",
         )
+    if user_doc.get("mfa_enabled") and not claims.get("mfa_pending"):
+        raise _unauthorized()
 
     if not verify_totp(user_doc["mfa_secret"], payload.totp_code):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid TOTP code.")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid MFA code.")
 
     now = datetime.now(tz=timezone.utc)
     await db["users"].update_one(
