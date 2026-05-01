@@ -37,6 +37,12 @@ class JCIFieldsUpdate(BaseModel):
     medication_error_merp_category: Optional[str] = None
 
 
+class IncidentLinkageResponse(BaseModel):
+    incident_id: str
+    status: IncidentStatus
+    occurrence_date: Optional[date] = None
+
+
 # ── List incidents ────────────────────────────────────────────────────────────
 
 @router.get("/", response_model=list[IncidentResponse])
@@ -62,6 +68,31 @@ async def list_incidents(
         skip=skip,
         limit=limit,
     )
+
+
+@router.get("/by-mrn/{mrn}", response_model=list[IncidentLinkageResponse])
+async def get_incidents_by_mrn(
+    mrn: str,
+    claims: dict = Depends(
+        require_role(
+            UserRole.staff,
+            UserRole.quality_admin,
+            UserRole.administration_manager,
+            UserRole.governorate_manager,
+            UserRole.top_management,
+        )
+    ),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> list[IncidentLinkageResponse]:
+    """Return minimal incident references for a medical record number."""
+    cursor = db["incidents"].find(
+        {"medical_file_number": mrn},
+        {"_id": 0, "incident_id": 1, "status": 1, "occurrence_date": 1},
+    )
+    incidents: list[IncidentLinkageResponse] = []
+    async for doc in cursor:
+        incidents.append(IncidentLinkageResponse(**doc))
+    return incidents
 
 
 # ── Create incident ───────────────────────────────────────────────────────────
