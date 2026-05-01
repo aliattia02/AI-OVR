@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api, { setToken } from '../services/api';
 import { MFA_TEMP_TOKEN_STORAGE_KEY } from '../utils/authStorage';
@@ -10,6 +11,7 @@ const styles = {
     margin: '80px auto',
     padding: '0 16px',
     color: '#0c2340',
+    fontFamily: '"Segoe UI", system-ui, sans-serif',
   },
   heading: {
     fontSize: 26,
@@ -55,6 +57,11 @@ const styles = {
     textAlign: 'center',
     fontFamily: '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace',
   },
+  fieldError: {
+    marginTop: 6,
+    fontSize: 12,
+    color: '#dc2626',
+  },
   primaryButton: {
     width: '100%',
     border: 'none',
@@ -66,52 +73,47 @@ const styles = {
     cursor: 'pointer',
     marginTop: 16,
   },
-  secondaryButton: {
-    width: '100%',
-    border: '1px solid #e5e7eb',
-    borderRadius: 8,
-    padding: '10px 14px',
-    fontWeight: 600,
-    background: '#f9fafb',
-    color: '#1f2937',
-    cursor: 'pointer',
-    marginTop: 10,
-  },
 };
 
 export default function MFAVerify() {
-  const location = useLocation();
   const navigate = useNavigate();
   const { onPasswordChanged } = useAuth();
-  const [code, setCode] = useState('');
+  const [tempToken, setTempToken] = useState(null);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      totpCode: '',
+    },
+  });
 
-  const tempToken = useMemo(() => {
-    if (location?.state?.tempToken) return location.state.tempToken;
-    if (typeof window === 'undefined') return null;
-    return sessionStorage.getItem(MFA_TEMP_TOKEN_STORAGE_KEY);
-  }, [location]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const storedToken = sessionStorage.getItem(MFA_TEMP_TOKEN_STORAGE_KEY);
+    if (!storedToken) {
+      navigate('/login', { replace: true });
+      return;
+    }
+    setTempToken(storedToken);
+  }, [navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (values) => {
     setError('');
+    const activeToken = tempToken ||
+      (typeof window !== 'undefined' ? sessionStorage.getItem(MFA_TEMP_TOKEN_STORAGE_KEY) : null);
 
-    const trimmedCode = code.trim();
-    if (!tempToken) {
-      setError('Your MFA session expired. Please sign in again.');
-      return;
-    }
-    if (!trimmedCode) {
-      setError('Enter the 6-digit code from your authenticator app.');
+    if (!activeToken) {
+      navigate('/login', { replace: true });
       return;
     }
 
-    setLoading(true);
     try {
       const { data } = await api.post('/auth/mfa/verify', {
-        temp_token: tempToken,
-        code: trimmedCode,
+        temp_token: activeToken,
+        totp_code: values.totpCode,
       });
       const accessToken = data?.access_token;
       if (!accessToken) {
@@ -122,24 +124,26 @@ export default function MFAVerify() {
         sessionStorage.removeItem(MFA_TEMP_TOKEN_STORAGE_KEY);
       }
       await onPasswordChanged();
+      navigate('/', { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.detail || 'Verification failed. Please try again.');
-    } finally {
-      setLoading(false);
+      const message = err?.response?.data?.detail || err?.message || 'Verification failed. Please try again.';
+      setError(typeof message === 'string' ? message : 'Verification failed. Please try again.');
     }
   };
+
+  if (!tempToken) {
+    return null;
+  }
 
   return (
     <div style={styles.page}>
       <h1 style={styles.heading}>Multi-factor verification</h1>
-      <p style={styles.subtext}>
-        Enter the 6-digit code from your authenticator app to finish signing in.
-      </p>
+      <p style={styles.subtext}>Enter the 6-digit code from your authenticator app to finish signing in.</p>
 
       <div style={styles.card}>
         {error ? <div style={styles.error}>{error}</div> : null}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <label htmlFor="mfa-code" style={styles.label}>
             Verification code
           </label>
@@ -148,22 +152,22 @@ export default function MFAVerify() {
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\s+/g, ''))}
             maxLength={6}
-            disabled={loading}
+            disabled={isSubmitting}
             style={styles.input}
+            {...register('totpCode', {
+              required: 'Enter the 6-digit code.',
+              pattern: {
+                value: /^\d{6}$/,
+                message: 'Enter a valid 6-digit code.',
+              },
+              setValueAs: (value) => (typeof value === 'string' ? value.replace(/\D/g, '') : value),
+            })}
           />
+          {errors.totpCode ? <div style={styles.fieldError}>{errors.totpCode.message}</div> : null}
 
-          <button type="submit" disabled={loading} style={styles.primaryButton}>
-            {loading ? 'Verifying…' : 'Verify and continue'}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/login', { replace: true })}
-            style={styles.secondaryButton}
-          >
-            Back to sign in
+          <button type="submit" disabled={isSubmitting} style={styles.primaryButton}>
+            {isSubmitting ? 'Verifying…' : 'Verify and continue'}
           </button>
         </form>
       </div>
