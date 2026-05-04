@@ -55,6 +55,7 @@ class UserInDB(UserBase):
     mfa_enabled: bool = False
     mfa_secret: Optional[str] = None
     mfa_enrolled_at: Optional[datetime] = None
+    # Stored refresh token entries: {jti, token_hash, created_at}
     refresh_tokens: list[dict[str, Any]] = Field(default_factory=list)
 
 
