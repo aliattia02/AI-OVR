@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from fastapi import APIRouter
+from pymongo.errors import PyMongoError
 
 from app.db.database import get_database
 from app.startup_checks import get_ai_provider, sendgrid_configured
@@ -23,6 +24,8 @@ async def health_check() -> dict[str, str]:
         db = get_database()
         await db.command("ping")
         db_status = "connected"
+    except (PyMongoError, RuntimeError):
+        logger.exception("Health check failed to reach MongoDB.")
     except Exception:  # noqa: BLE001
         logger.exception("Health check failed to reach MongoDB.")
 

@@ -66,7 +66,7 @@ def validate_required_env_vars() -> None:
             raise RuntimeError("CSFLE_LOCAL_MASTER_KEY must decode to exactly 96 bytes.")
 
     ai_provider = get_ai_provider().lower()
-    if ai_provider not in {"none", ""} and not os.getenv("AI_API_KEY"):
+    if ai_provider != "none" and not os.getenv("AI_API_KEY"):
         logger.warning("AI_PROVIDER is set but AI_API_KEY is missing; AI features may be disabled.")
 
     _log_startup_summary()

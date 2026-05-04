@@ -56,7 +56,7 @@ def _validate_startup_settings(cors_origins: list[str]) -> None:
 
     if any(origin == "*" for origin in cors_origins):
         raise EnvironmentError(
-            "CORS_ORIGINS cannot include '*' in production when allow_credentials=True."
+            "CORS_ORIGINS cannot include '*' when credentials are enabled."
         )
 
     jwt_secret = _get_jwt_secret()
