@@ -2,20 +2,25 @@
 
 from __future__ import annotations
 
+import logging
 import os
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.db.database import lifespan
-from app.routers import ai, analytics, auth, exports, facilities, incidents, patients, users
+from app.db.database import lifespan as db_lifespan
+from app.routers import ai, analytics, auth, exports, facilities, health, incidents, patients, users
+from app.startup_checks import validate_required_env_vars
 
 APP_VERSION = "2.0.0"
 
 environment = (os.getenv("ENVIRONMENT") or "").strip().lower()
 is_production = environment == "production"
+logger = logging.getLogger(__name__)
 
 
 def _get_jwt_secret() -> str:
@@ -27,10 +32,7 @@ def _resolve_cors_origins() -> list[str]:
     origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
     if not origins:
-        frontend_url = os.getenv("FRONTEND_URL", "").strip()
-        if frontend_url:
-            origins = [frontend_url]
-        elif not is_production:
+        if not is_production:
             origins = ["http://localhost:3000", "http://localhost:5173"]
 
     deduped: list[str] = []
@@ -48,8 +50,8 @@ def _validate_startup_settings(cors_origins: list[str]) -> None:
         return
 
     if not cors_origins:
-        raise EnvironmentError(
-            "CORS_ORIGINS must be set in production to allow the frontend to reach the API."
+        logger.warning(
+            "CORS_ORIGINS is empty in production; browser clients may not reach the API."
         )
 
     if any(origin == "*" for origin in cors_origins):
@@ -62,6 +64,14 @@ def _validate_startup_settings(cors_origins: list[str]) -> None:
         raise EnvironmentError(
             "JWT_SECRET must be set to a strong, non-default value in production."
         )
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    validate_required_env_vars()
+    async with db_lifespan(app):
+        yield
+
 
 app = FastAPI(
     title="E·OVR API",
@@ -89,6 +99,7 @@ app.include_router(analytics.router)
 app.include_router(exports.router)
 app.include_router(users.router)
 app.include_router(ai.router)
+app.include_router(health.router)
 
 
 @app.get("/")
