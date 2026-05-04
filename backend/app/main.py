@@ -17,6 +17,52 @@ APP_VERSION = "2.0.0"
 environment = (os.getenv("ENVIRONMENT") or "").strip().lower()
 is_production = environment == "production"
 
+
+def _get_jwt_secret() -> str:
+    return os.getenv("JWT_SECRET") or os.getenv("JWT_SECRET_KEY", "")
+
+
+def _resolve_cors_origins() -> list[str]:
+    raw_origins = os.getenv("CORS_ORIGINS", "")
+    origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+
+    if not origins:
+        frontend_url = os.getenv("FRONTEND_URL", "").strip()
+        if frontend_url:
+            origins = [frontend_url]
+        elif not is_production:
+            origins = ["http://localhost:3000", "http://localhost:5173"]
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for origin in origins:
+        if origin in seen:
+            continue
+        seen.add(origin)
+        deduped.append(origin)
+    return deduped
+
+
+def _validate_startup_settings(cors_origins: list[str]) -> None:
+    if not is_production:
+        return
+
+    if not cors_origins:
+        raise EnvironmentError(
+            "CORS_ORIGINS must be set in production to allow the frontend to reach the API."
+        )
+
+    if any(origin == "*" for origin in cors_origins):
+        raise EnvironmentError(
+            "CORS_ORIGINS cannot include '*' when allow_credentials is enabled."
+        )
+
+    jwt_secret = _get_jwt_secret()
+    if not jwt_secret or "change_me" in jwt_secret:
+        raise EnvironmentError(
+            "JWT_SECRET must be set to a strong, non-default value in production."
+        )
+
 app = FastAPI(
     title="E·OVR API",
     version=APP_VERSION,
@@ -25,7 +71,8 @@ app = FastAPI(
     redoc_url=None if is_production else "/redoc",
 )
 
-cors_origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "").split(",") if origin.strip()]
+cors_origins = _resolve_cors_origins()
+_validate_startup_settings(cors_origins)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,

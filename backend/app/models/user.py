@@ -10,17 +10,22 @@ from pydantic import BaseModel, EmailStr, model_validator
 from app.utils.enums import UserRole
 
 
-class UserCreate(BaseModel):
-    """Fields supplied when registering a new user account."""
+class UserBase(BaseModel):
+    """Shared user identity fields (no credentials)."""
 
     email: EmailStr
     full_name: str
-    password: str                 # plain-text; hashed before persistence
     role: UserRole
     facility_name: str
     administration: str
     governorate: str
     tier: int                     # 1–5
+
+
+class UserCreate(UserBase):
+    """Fields supplied when registering a new user account."""
+
+    password: str                 # plain-text; hashed before persistence
     must_change_password: bool = True
 
     @model_validator(mode="after")
@@ -35,11 +40,10 @@ class UserCreate(BaseModel):
         return self
 
 
-class UserInDB(UserCreate):
+class UserInDB(UserBase):
     """Full user document as stored in the database.
 
-    Carries ``hashed_password`` in addition to the inherited plain ``password``
-    field; the plain-text value must be discarded after hashing.
+    Carries ``hashed_password`` only; plain-text password is never persisted.
     """
 
     user_id: str
@@ -53,15 +57,8 @@ class UserInDB(UserCreate):
     mfa_enrolled_at: Optional[datetime] = None
 
 
-class UserResponse(BaseModel):
+class UserResponse(UserBase):
     """User document serialised for API responses (no credentials)."""
 
     user_id: str
-    email: EmailStr
-    full_name: str
-    role: UserRole
-    facility_name: str
-    administration: str
-    governorate: str
-    tier: int
     is_active: bool

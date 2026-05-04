@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from app.db.database import get_database
 from app.middleware.auth_middleware import require_role
 from app.models.ai_metadata import AIMetadata
-from app.services import ai_service, incident_service
+from app.services import ai_service
 from app.utils.enums import UserRole
 
 router = APIRouter(prefix="/ai", tags=["ai"])
@@ -28,13 +28,6 @@ class BatchClassifyResponse(BaseModel):
     """Response for batch classification jobs."""
 
     processed: int
-
-
-class AIFeedbackRequest(BaseModel):
-    """Quality-admin feedback payload for AI suggestion review."""
-
-    ai_suggested: str | None = None
-    human_chose: str | None = None
 
 
 class ModelRegistryCreateRequest(BaseModel):
@@ -124,25 +117,6 @@ async def classify_incident_now(
     if updated_doc is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found")
     return AIMetadata.model_validate(updated_doc.get("ai_metadata", {}))
-
-
-@router.post("/feedback/{incident_id}", response_model=MessageResponse)
-async def submit_feedback(
-    incident_id: str,
-    payload: AIFeedbackRequest,
-    claims: dict[str, Any] = Depends(require_role(UserRole.quality_admin)),
-    db: AsyncIOMotorDatabase = Depends(get_database),
-) -> MessageResponse:
-    updated = await incident_service.save_ai_feedback(
-        incident_id=incident_id,
-        ai_suggested=payload.ai_suggested,
-        human_chose=payload.human_chose,
-        reviewer_id=claims["user_id"],
-        db=db,
-    )
-    if not updated:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found")
-    return MessageResponse(message="AI feedback saved")
 
 
 @router.get("/models", response_model=list[dict[str, Any]])
