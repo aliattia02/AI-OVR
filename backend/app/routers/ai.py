@@ -16,6 +16,8 @@ from app.utils.enums import UserRole
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
+# Removed: consolidated into POST /incidents/{id}/ai-feedback
+
 
 class AIProviderDisabledResponse(BaseModel):
     """Response when AI provider is not configured."""

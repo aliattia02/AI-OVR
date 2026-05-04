@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
-from pydantic import BaseModel, EmailStr, model_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 from app.utils.enums import UserRole
 
@@ -55,6 +55,7 @@ class UserInDB(UserBase):
     mfa_enabled: bool = False
     mfa_secret: Optional[str] = None
     mfa_enrolled_at: Optional[datetime] = None
+    refresh_tokens: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class UserResponse(UserBase):
