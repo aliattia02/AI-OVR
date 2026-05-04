@@ -17,20 +17,20 @@ def _is_truthy(value: str | None) -> bool:
     return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
-def _sendgrid_configured() -> bool:
+def sendgrid_configured() -> bool:
     key = os.getenv("SENDGRID_API_KEY", "")
     return bool(key and key != "SG.xxxx" and len(key) >= 20)
 
 
-def _ai_provider() -> str:
+def get_ai_provider() -> str:
     provider = (os.getenv("AI_PROVIDER") or "").strip()
     return provider or "none"
 
 
 def _log_startup_summary() -> None:
     csfle_enabled = _is_truthy(os.getenv("CSFLE_ENABLED"))
-    sendgrid_status = "configured" if _sendgrid_configured() else "not_configured"
-    ai_provider = _ai_provider()
+    sendgrid_status = "configured" if sendgrid_configured() else "not_configured"
+    ai_provider = get_ai_provider()
     logger.info(
         "Startup integrations: CSFLE=%s, SendGrid=%s, AI=%s",
         "enabled" if csfle_enabled else "disabled",
@@ -65,7 +65,7 @@ def validate_required_env_vars() -> None:
         if len(master_key) != 96:
             raise RuntimeError("CSFLE_LOCAL_MASTER_KEY must decode to exactly 96 bytes.")
 
-    ai_provider = _ai_provider().lower()
+    ai_provider = get_ai_provider().lower()
     if ai_provider not in {"none", ""} and not os.getenv("AI_API_KEY"):
         logger.warning("AI_PROVIDER is set but AI_API_KEY is missing; AI features may be disabled.")
 

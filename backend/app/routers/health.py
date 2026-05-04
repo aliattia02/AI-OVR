@@ -3,26 +3,17 @@
 from __future__ import annotations
 
 import logging
-import os
-
 from fastapi import APIRouter
 
 from app.db.database import get_database
+from app.startup_checks import get_ai_provider, sendgrid_configured
 
 router = APIRouter(tags=["health"])
 logger = logging.getLogger(__name__)
 
 
 def _sendgrid_status() -> str:
-    key = os.getenv("SENDGRID_API_KEY", "")
-    if key and key != "SG.xxxx" and len(key) >= 20:
-        return "configured"
-    return "not_configured"
-
-
-def _ai_provider() -> str:
-    provider = (os.getenv("AI_PROVIDER") or "").strip()
-    return provider or "none"
+    return "configured" if sendgrid_configured() else "not_configured"
 
 
 @router.get("/health")
@@ -38,7 +29,7 @@ async def health_check() -> dict[str, str]:
     return {
         "status": "ok",
         "db": db_status,
-        "ai_provider": _ai_provider(),
+        "ai_provider": get_ai_provider(),
         "sendgrid": _sendgrid_status(),
         "version": "1.0.0",
     }
