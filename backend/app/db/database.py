@@ -16,21 +16,10 @@ from pymongo.encryption_options import AutoEncryptionOpts
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-_mongo_url = os.getenv("MONGO_URL")
-if not _mongo_url:
-    raise EnvironmentError(
-        "MONGO_URL environment variable is not set. "
-        "Copy .env.example to .env and provide a valid MongoDB connection string."
-    )
+_mongo_url = os.getenv("MONGO_URL", "")
 MONGO_URL: str = _mongo_url
 
-_db_name = os.getenv("DB_NAME") or os.getenv("MONGO_DB_NAME")
-if not _db_name:
-    raise EnvironmentError(
-        "DB_NAME environment variable is not set. "
-        "Copy .env.example to .env and provide a database name "
-        "(legacy key MONGO_DB_NAME is also supported)."
-    )
+_db_name = os.getenv("DB_NAME") or os.getenv("MONGO_DB_NAME") or ""
 DB_NAME: str = _db_name
 
 # Module-level client, populated by the lifespan context manager.

@@ -2,8 +2,25 @@ services:
   - type: web
     name: eovr-api
     env: python
-    buildCommand: pip install -r requirements.txt
+    plan: starter
+    instance_type: starter
+    buildCommand: pip install -r requirements.txt && python scripts/seed_model_registry.py
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
       - key: ENVIRONMENT
         value: production
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: AI_PROVIDER
+        value: none
+      - key: MONGO_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: CSFLE_LOCAL_MASTER_KEY
+        sync: false

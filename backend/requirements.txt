@@ -1,24 +1,20 @@
 # Core: fastapi, uvicorn[standard], motor, python-jose[cryptography], passlib[bcrypt], pydantic[email], python-multipart
-fastapi
-uvicorn[standard]
-motor
-python-jose[cryptography]
-passlib[bcrypt]
-pydantic[email]
-python-multipart
+fastapi==0.136.1
+uvicorn[standard]==0.46.0
+motor==3.7.1
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+pydantic[email]==2.13.3
+python-multipart==0.0.27
 
 # Utilities: openpyxl, reportlab, arabic-reshaper, python-bidi, sendgrid, python-dotenv
-openpyxl
-reportlab
-arabic-reshaper
-python-bidi
-sendgrid
-python-dotenv
-pyotp
-
-# Testing: pytest, httpx
-pytest
-httpx
+openpyxl==3.1.5
+reportlab==4.5.0
+arabic-reshaper==3.0.1
+python-bidi==0.6.7
+sendgrid==6.12.5
+python-dotenv==1.2.2
+pyotp==2.9.0
 
 # AI (commented out — uncomment when model is ready): openai, anthropic, google-generativeai
 # openai
