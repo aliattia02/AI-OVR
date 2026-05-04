@@ -26,8 +26,9 @@ async def health_check() -> dict[str, str]:
     except Exception:  # noqa: BLE001
         logger.exception("Health check failed to reach MongoDB.")
 
+    status = "ok" if db_status == "connected" else "degraded"
     return {
-        "status": "ok",
+        "status": status,
         "db": db_status,
         "ai_provider": get_ai_provider(),
         "sendgrid": _sendgrid_status(),
