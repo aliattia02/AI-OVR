@@ -2,8 +2,13 @@ import axios from 'axios';
 
 let _token = null;
 let _redirectingToLogin = false;
+
 // 15-minute idle timeout to align with the access token TTL.
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+// Task 5: warn the user 2 minutes before the session expires.
+const WARNING_TIMEOUT_MS = 13 * 60 * 1000;
+
+let _warningTimer = null;
 let _idleTimer = null;
 let _idleListenerAttached = false;
 let _idleLogoutInProgress = false;
@@ -21,6 +26,12 @@ export function getToken() {
   return _token;
 }
 
+// Task 5: called by SessionExpiryWarning after a successful token refresh.
+export function resetSessionTimers() {
+  _lastActivityAt = getNow();
+  syncIdleTimer();
+}
+
 function getNow() {
   if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
     return performance.now();
@@ -28,7 +39,11 @@ function getNow() {
   return Date.now();
 }
 
-function clearIdleTimer() {
+function clearSessionTimers() {
+  if (_warningTimer) {
+    clearTimeout(_warningTimer);
+    _warningTimer = null;
+  }
   if (_idleTimer) {
     clearTimeout(_idleTimer);
     _idleTimer = null;
@@ -52,18 +67,31 @@ function ensureIdleListeners() {
 function syncIdleTimer() {
   if (typeof window === 'undefined') return;
   if (!_token) {
-    clearIdleTimer();
+    clearSessionTimers();
     return;
   }
   ensureIdleListeners();
-  clearIdleTimer();
+  clearSessionTimers();
+
   const elapsed = getNow() - _lastActivityAt;
-  const remaining = IDLE_TIMEOUT_MS - elapsed;
-  if (remaining <= 0) {
+  const remainingLogout = IDLE_TIMEOUT_MS - elapsed;
+
+  if (remainingLogout <= 0) {
     triggerIdleLogout();
     return;
   }
-  _idleTimer = window.setTimeout(triggerIdleLogout, remaining);
+
+  // Schedule warning 2 minutes before expiry (only if there is still time left).
+  const remainingWarning = WARNING_TIMEOUT_MS - elapsed;
+  if (remainingWarning > 0) {
+    _warningTimer = window.setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('session:expiry-warning'));
+      }
+    }, remainingWarning);
+  }
+
+  _idleTimer = window.setTimeout(triggerIdleLogout, remainingLogout);
 }
 
 function handleUserActivity() {
@@ -75,6 +103,13 @@ function handleUserActivity() {
 async function triggerIdleLogout() {
   if (_idleLogoutInProgress) return;
   _idleLogoutInProgress = true;
+
+  // Task 5: notify the UI before the server call so SessionExpiryWarning can
+  // update its state synchronously (the redirect below will follow shortly).
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('session:expired'));
+  }
+
   try {
     await axios.post('/api/auth/logout', null, { withCredentials: true });
   } catch (error) {

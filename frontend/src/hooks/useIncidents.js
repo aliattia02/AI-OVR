@@ -2,9 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { incidentService } from '../services/incidents';
 
 export function useIncidents(params = {}) {
+  const { page = 0, pageSize = 20 } = params;
+  const skip = page * pageSize;
   return useQuery({
-    queryKey: ['incidents', params],
-    queryFn: () => incidentService.getAll(params),
+    queryKey: ['incidents', { page, pageSize }],
+    queryFn: () => incidentService.getAll({ skip, limit: pageSize }),
   });
 }
 
@@ -56,6 +58,17 @@ export function useAIFeedback() {
 
   return useMutation({
     mutationFn: ({ id, sug, chosen }) => incidentService.submitAIFeedback(id, sug, chosen),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['incident', variables.id] });
+    },
+  });
+}
+
+export function useSaveJCIFields() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }) => incidentService.saveJCIFields(id, payload),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['incident', variables.id] });
     },

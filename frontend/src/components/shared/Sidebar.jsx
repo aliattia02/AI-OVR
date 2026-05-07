@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { USER_ROLES } from '../../utils/enums';
 import { analyticsService } from '../../services/analytics';
 
+// Task 4: administration_manager and governorate_manager can now access /workflow.
 const ROLE_VIEWS = {
   patient: [{ id: 'report-incident', label: 'Report Incident' }],
   staff: [
@@ -19,11 +20,13 @@ const ROLE_VIEWS = {
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'reports', label: 'Reports' },
     { id: 'analytics', label: 'Analytics' },
+    { id: 'workflow', label: 'Workflow' },
   ],
   governorate_manager: [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'reports', label: 'Reports' },
     { id: 'analytics', label: 'Analytics' },
+    { id: 'workflow', label: 'Workflow' },
   ],
   top_management: [
     { id: 'dashboard', label: 'Dashboard' },

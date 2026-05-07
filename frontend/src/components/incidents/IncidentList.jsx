@@ -4,6 +4,8 @@ import { INCIDENT_STATUSES, SEVERITY_OPTIONS } from '../../utils/enums';
 import EmptyState from '../shared/EmptyState';
 import IncidentCard from './IncidentCard';
 
+const PAGE_SIZE = 20;
+
 function IncidentSkeletonCard() {
   return (
     <div
@@ -27,22 +29,40 @@ function IncidentSkeletonCard() {
 }
 
 export default function IncidentList({ onIncidentClick, role }) {
-  const { data, isLoading, error, refetch } = useIncidents();
+  const [page, setPage] = useState(0);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [severityFilter, setSeverityFilter] = useState('all');
 
-  const incidents = Array.isArray(data) ? data : [];
+  const { data, isLoading, error, refetch } = useIncidents({ page, pageSize: PAGE_SIZE });
+
+  // Raw server results — used to determine whether a next page exists.
+  const rawResults = Array.isArray(data) ? data : [];
+  const hasNextPage = rawResults.length >= PAGE_SIZE;
 
   const filteredIncidents = useMemo(() => {
-    return incidents.filter((incident) => {
+    return rawResults.filter((incident) => {
       const matchesQuery =
         query.trim().length === 0 || incident?.description?.toLowerCase().includes(query.trim().toLowerCase());
       const matchesStatus = statusFilter === 'all' || incident?.status === statusFilter;
       const matchesSeverity = severityFilter === 'all' || incident?.severity === severityFilter;
       return matchesQuery && matchesStatus && matchesSeverity;
     });
-  }, [incidents, query, statusFilter, severityFilter]);
+  }, [rawResults, query, statusFilter, severityFilter]);
+
+  // Reset to page 0 whenever any filter changes.
+  function handleQueryChange(event) {
+    setQuery(event.target.value);
+    setPage(0);
+  }
+  function handleStatusChange(event) {
+    setStatusFilter(event.target.value);
+    setPage(0);
+  }
+  function handleSeverityChange(event) {
+    setSeverityFilter(event.target.value);
+    setPage(0);
+  }
 
   if (error) {
     return (
@@ -94,7 +114,7 @@ export default function IncidentList({ onIncidentClick, role }) {
         <input
           type="search"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={handleQueryChange}
           placeholder="Search description"
           style={{
             width: '100%',
@@ -108,7 +128,7 @@ export default function IncidentList({ onIncidentClick, role }) {
 
         <select
           value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value)}
+          onChange={handleStatusChange}
           style={{
             width: '100%',
             border: '1px solid #D1D5DB',
@@ -129,7 +149,7 @@ export default function IncidentList({ onIncidentClick, role }) {
 
         <select
           value={severityFilter}
-          onChange={(event) => setSeverityFilter(event.target.value)}
+          onChange={handleSeverityChange}
           style={{
             width: '100%',
             border: '1px solid #D1D5DB',
@@ -149,7 +169,9 @@ export default function IncidentList({ onIncidentClick, role }) {
         </select>
       </div>
 
-      <div style={{ fontSize: 13, color: '#374151', fontWeight: 600 }}>Showing {filteredIncidents.length} incidents</div>
+      <div style={{ fontSize: 13, color: '#374151', fontWeight: 600 }}>
+        Showing {filteredIncidents.length} incidents
+      </div>
 
       {isLoading ? (
         <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
@@ -173,6 +195,59 @@ export default function IncidentList({ onIncidentClick, role }) {
               role={role}
             />
           ))}
+        </div>
+      )}
+
+      {/* Pagination bar — hidden while loading */}
+      {!isLoading && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            paddingTop: 4,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            style={{
+              border: '1px solid #D1D5DB',
+              borderRadius: 8,
+              backgroundColor: page === 0 ? '#F9FAFB' : '#FFFFFF',
+              color: page === 0 ? '#9CA3AF' : '#111827',
+              padding: '7px 14px',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: page === 0 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            ← Previous
+          </button>
+
+          <span style={{ fontSize: 13, color: '#374151', fontWeight: 600 }}>
+            Page {page + 1}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={!hasNextPage}
+            style={{
+              border: '1px solid #D1D5DB',
+              borderRadius: 8,
+              backgroundColor: !hasNextPage ? '#F9FAFB' : '#FFFFFF',
+              color: !hasNextPage ? '#9CA3AF' : '#111827',
+              padding: '7px 14px',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: !hasNextPage ? 'not-allowed' : 'pointer',
+            }}
+          >
+            Next →
+          </button>
         </div>
       )}
     </div>

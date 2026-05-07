@@ -46,6 +46,11 @@ export const incidentService = {
     return data;
   },
 
+  async saveJCIFields(id, payload) {
+    const { data } = await api.patch(`/incidents/${id}/jci-fields`, payload);
+    return data;
+  },
+
   async submitPatientReport(uuid, payload) {
     const { data } = await api.post(`/patients/submit/${uuid}`, payload);
     return data;

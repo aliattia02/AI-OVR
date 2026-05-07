@@ -3,6 +3,7 @@ import LoginForm from './components/auth/LoginForm';
 import IncidentDetail from './components/incidents/IncidentDetail';
 import NewIncidentForm from './components/incidents/NewIncidentForm';
 import Sidebar from './components/shared/Sidebar';
+import SessionExpiryWarning from './components/shared/SessionExpiryWarning';
 import { useAuth } from './context/AuthContext';
 import Analytics from './pages/Analytics';
 import AdminProvision from './pages/AdminProvision';
@@ -75,9 +76,14 @@ function FallbackRedirect() {
   return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />;
 }
 
+// Task 4: workflow is now accessible to all four managerial roles.
+const WORKFLOW_ROLES = ['quality_admin', 'top_management', 'administration_manager', 'governorate_manager'];
+
 export default function App() {
   return (
     <BrowserRouter>
+      {/* Task 5: mounted at root so it is always in the tree while a session exists */}
+      <SessionExpiryWarning />
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/mfa/verify" element={<MFAVerify />} />
@@ -106,7 +112,7 @@ export default function App() {
           <Route
             path="/workflow"
             element={
-              <RoleRoute allowedRoles={['quality_admin', 'top_management']}>
+              <RoleRoute allowedRoles={WORKFLOW_ROLES}>
                 <WorkflowPage />
               </RoleRoute>
             }

@@ -1,20 +1,21 @@
+// frontend/src/components/analytics/AnalyticsDashboard.jsx
+// CompareView now owns its own data-fetching, loading state, and error handling,
+// so this file no longer imports useAnalyticsCompare or the recharts primitives
+// (Bar, BarChart, CartesianGrid, XAxis, YAxis) that were only used in that section.
+
 import { useMemo } from 'react';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
   Cell,
   Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
   Tooltip,
-  XAxis,
-  YAxis,
 } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
-import { useAnalyticsCompare, useAnalyticsSummary, useAnalyticsTrends } from '../../hooks/useAnalytics';
+import { useAnalyticsSummary, useAnalyticsTrends } from '../../hooks/useAnalytics';
 import Spinner from '../shared/Spinner';
+import CompareView from './CompareView';
 import TrendChart from './TrendChart';
 
 const PIE_COLORS = ['#0B7D6B', '#1B6CA8', '#D97706', '#6D28D9', '#EF4444', '#9CA3AF'];
@@ -53,11 +54,8 @@ export default function AnalyticsDashboard() {
   const { tier } = useAuth();
   const { data: summary, isLoading: summaryLoading, error: summaryError } = useAnalyticsSummary();
   const { data: trends, isLoading: trendsLoading, error: trendsError } = useAnalyticsTrends();
-  const {
-    data: compare,
-    isLoading: compareLoading,
-    error: compareError,
-  } = useAnalyticsCompare('facility', { enabled: tier >= 4 });
+
+  // CompareView fetches its own data — no compare query here.
 
   const statusCounts = useMemo(() => toMap(summary?.status), [summary?.status]);
   const severityData = useMemo(
@@ -71,6 +69,7 @@ export default function AnalyticsDashboard() {
 
   const totalIncidents = useMemo(() => sumCounts(summary?.status), [summary?.status]);
   const openIncidents = Math.max(0, totalIncidents - (statusCounts.Completed || 0));
+
   // high_risk: derived from severity array — Major incidents are the high-risk cohort.
   // The backend /analytics/summary response only returns status/severity/event_type
   // arrays and does not include high_risk or pending_ai_review fields directly.
@@ -89,8 +88,9 @@ export default function AnalyticsDashboard() {
     [summary?.status]
   );
 
-  const loading = summaryLoading || trendsLoading || (tier >= 4 && compareLoading);
-  const error = summaryError || trendsError || (tier >= 4 ? compareError : null);
+  // Summary + trends gate the full-page spinner; compare is handled inside CompareView.
+  const loading = summaryLoading || trendsLoading;
+  const error = summaryError || trendsError;
 
   if (loading) {
     return (
@@ -151,20 +151,14 @@ export default function AnalyticsDashboard() {
         </section>
       </div>
 
+      {/* Facility / Governorate comparison — restricted to tier ≥ 4.
+          CompareView handles its own loading skeleton, 403 message, and empty state. */}
       {tier >= 4 && (
         <section style={{ border: '1px solid #E5E7EB', borderRadius: 12, backgroundColor: '#FFFFFF', padding: 14 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>Facility Comparison</div>
-          <div style={{ width: '100%', height: 320 }}>
-            <ResponsiveContainer>
-              <BarChart data={compare || []} margin={{ top: 8, right: 12, left: 0, bottom: 24 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#4B5563' }} angle={-20} textAnchor="end" interval={0} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#4B5563' }} />
-                <Tooltip formatter={(value) => [value, 'Incidents']} />
-                <Bar dataKey="count" fill="#1B6CA8" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>
+            Comparison
           </div>
+          <CompareView />
         </section>
       )}
     </div>

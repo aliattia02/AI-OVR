@@ -1,2 +1,163 @@
 // frontend/src/components/analytics/CompareView.jsx
-// CompareView component — side-by-side comparison of incident metrics across multiple facilities or time periods in E·OVR.
+// Horizontal bar chart comparing incident counts across a chosen dimension.
+// Owns its own data-fetching so AnalyticsDashboard no longer needs useAnalyticsCompare.
+
+import { useMemo, useState } from 'react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import { useAnalyticsCompare } from '../../hooks/useAnalytics';
+import EmptyState from '../shared/EmptyState';
+
+// API supports these two dimensions (GET /analytics/compare?dimension=...)
+const DIMENSIONS = [
+  { value: 'facility', label: 'Facility' },
+  { value: 'governorate', label: 'Governorate' },
+];
+
+const BAR_COLOR = '#1B6CA8';
+const TRUNCATE_AT = 30;
+
+function truncate(str) {
+  if (!str) return '';
+  return str.length > TRUNCATE_AT ? `${str.slice(0, TRUNCATE_AT)}\u2026` : str;
+}
+
+// Skeleton mimics horizontal bar rows to reduce layout shift on load
+function LoadingSkeleton() {
+  const widths = [88, 74, 61, 48, 33, 19];
+  return (
+    <div style={{ padding: '4px 0' }}>
+      {widths.map((w, i) => (
+        <div
+          key={i}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}
+        >
+          <div
+            style={{
+              flexShrink: 0,
+              width: 140,
+              height: 13,
+              borderRadius: 4,
+              backgroundColor: '#E5E7EB',
+            }}
+          />
+          <div
+            style={{
+              width: `${w}%`,
+              height: 22,
+              borderRadius: 6,
+              backgroundColor: '#E5E7EB',
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function CompareView() {
+  const [dimension, setDimension] = useState('facility');
+
+  const { data, isLoading, error } = useAnalyticsCompare(dimension);
+
+  // Sort descending by count; truncate long labels before passing to Recharts
+  const chartData = useMemo(
+    () =>
+      [...(data || [])]
+        .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0))
+        .map((row) => ({ ...row, label: truncate(row.label) })),
+    [data]
+  );
+
+  const is403 = error?.response?.status === 403;
+  // Give each row 46 px; floor at 200 so the chart is never too short
+  const chartHeight = Math.max(chartData.length * 46, 200);
+
+  return (
+    <div>
+      {/* Dimension toggle */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        {DIMENSIONS.map((d) => {
+          const active = dimension === d.value;
+          return (
+            <button
+              key={d.value}
+              onClick={() => setDimension(d.value)}
+              style={{
+                padding: '5px 16px',
+                borderRadius: 20,
+                border: `1.5px solid ${active ? '#1B6CA8' : '#D1D5DB'}`,
+                backgroundColor: active ? '#EFF6FF' : '#FFFFFF',
+                color: active ? '#1B6CA8' : '#4B5563',
+                fontSize: 13,
+                fontWeight: active ? 700 : 400,
+                cursor: 'pointer',
+                transition: 'border-color 0.15s, background-color 0.15s',
+              }}
+            >
+              {d.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Content area */}
+      {isLoading ? (
+        <LoadingSkeleton />
+      ) : is403 ? (
+        <div
+          style={{
+            padding: '14px 16px',
+            borderRadius: 10,
+            backgroundColor: '#FEF2F2',
+            border: '1px solid #FECACA',
+            color: '#991B1B',
+            fontSize: 14,
+            fontWeight: 600,
+          }}
+        >
+          You don&apos;t have permission to view comparison data.
+        </div>
+      ) : !chartData.length ? (
+        <EmptyState message="No data available for this dimension." />
+      ) : (
+        <div style={{ width: '100%', height: chartHeight }}>
+          <ResponsiveContainer>
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 4, right: 24, left: 8, bottom: 4 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" horizontal={false} />
+              <XAxis
+                type="number"
+                allowDecimals={false}
+                tick={{ fontSize: 11, fill: '#4B5563' }}
+              />
+              <YAxis
+                type="category"
+                dataKey="label"
+                width={170}
+                tick={{ fontSize: 11, fill: '#374151' }}
+              />
+              <Tooltip formatter={(value) => [value, 'Incidents']} />
+              <Bar
+                dataKey="count"
+                fill={BAR_COLOR}
+                radius={[0, 6, 6, 0]}
+                barSize={24}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+}

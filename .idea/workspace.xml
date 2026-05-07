@@ -5,22 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/AI-OVR.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/shared/SessionExpiryWarning.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/facility.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/facility.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/users.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/users.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/services/facility_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/facility_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/services/incident_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/incident_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/scripts/Facilities.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/scripts/import_facilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/import_facilities.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/auth/LoginForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/auth/LoginForm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/incidents/NewIncidentForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/incidents/NewIncidentForm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/context/AuthContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/context/AuthContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/analytics/AnalyticsDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/analytics/AnalyticsDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/analytics/CompareView.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/analytics/CompareView.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/patient/QRCodeView.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/patient/QRCodeView.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/shared/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/shared/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/shared/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/shared/Sidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/workflow/WorkflowStep.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/workflow/WorkflowStep.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/workflow/WorkflowView.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/workflow/WorkflowView.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useIncidents.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useIncidents.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminProvision.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminProvision.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/services/admin.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/admin.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/incidents.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/incidents.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,21 +61,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/aliat/Projects/AI-OVR/frontend/src/components/shared&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\aliat\Projects\AI-OVR\frontend\src\components\shared" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -92,6 +99,10 @@
       <option name="presentableId" value="Default" />
       <updated>1776552998263</updated>
       <workItem from="1776552999891" duration="5952000" />
+      <workItem from="1776653334448" duration="20000" />
+      <workItem from="1777647193161" duration="6018000" />
+      <workItem from="1777894335083" duration="10375000" />
+      <workItem from="1777931037337" duration="7000" />
     </task>
     <servers />
   </component>

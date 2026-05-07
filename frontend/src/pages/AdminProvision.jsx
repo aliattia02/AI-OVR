@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { fetchFacilitiesFull, provisionFacility, provisionTierUser } from '../services/admin';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import QRCodeView from '../components/patient/QRCodeView';
 
 const styles = {
   page: {
@@ -289,6 +290,23 @@ function ProvisionResultCard({ result }) {
             <CopyButton text={patientLink} />
           </div>
         </div>
+        {/* Task 7 — QR code for the patient submission link */}
+        <div style={{ marginBottom: 16 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--color-text-secondary)',
+              marginBottom: 8,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            Patient QR Code
+          </div>
+          <QRCodeView facilityUuid={result.patient_link_uuid} />
+        </div>
+
         <AccountCard title="Staff reporter account" data={result.staff_reporter} />
         <AccountCard title="Quality admin account" data={result.quality_admin} />
         <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 4, fontStyle: 'italic' }}>
@@ -760,12 +778,137 @@ function UsersTab() {
   );
 }
 
+// ─── QR Codes tab ────────────────────────────────────────────────────────────
+
+function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
+  const [search, setSearch] = useState('');
+  const [expandedId, setExpandedId] = useState(null);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return facilities;
+    return facilities.filter(
+      (f) =>
+        f.facility_name.toLowerCase().includes(q) ||
+        f.administration.toLowerCase().includes(q) ||
+        f.governorate.toLowerCase().includes(q),
+    );
+  }, [facilities, search]);
+
+  if (facilitiesLoading) {
+    return <p style={styles.loadingText}>Loading facilities…</p>;
+  }
+
+  if (facilitiesError) {
+    return <div style={styles.error}>{facilitiesError}</div>;
+  }
+
+  return (
+    <div>
+      <p style={styles.note}>
+        Click a facility to reveal its QR code and patient submission link. The QR code can be
+        printed and posted at the facility for anonymous patient reporting.
+      </p>
+
+      <input
+        type="search"
+        placeholder="Search by facility, administration, or governorate…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ ...styles.input, marginBottom: 16 }}
+      />
+
+      {filtered.length === 0 ? (
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '40px 0',
+            fontSize: 14,
+            color: 'var(--color-text-secondary)',
+          }}
+        >
+          No facilities match your search.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered.map((f) => {
+            const isOpen = expandedId === f.facility_id;
+            return (
+              <div
+                key={f.facility_id}
+                style={{
+                  border: '1px solid var(--color-border-primary)',
+                  borderRadius: 10,
+                  background: 'var(--color-surface-primary)',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Row header — clickable toggle */}
+                <button
+                  onClick={() => setExpandedId(isOpen ? null : f.facility_id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    padding: '12px 14px',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontFamily: 'inherit',
+                    gap: 10,
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--color-text-primary)' }}>
+                      {f.facility_name}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 2 }}>
+                      {f.administration} · {f.governorate}
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 16,
+                      color: 'var(--color-text-secondary)',
+                      flexShrink: 0,
+                      transform: isOpen ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.15s',
+                    }}
+                  >
+                    ▾
+                  </span>
+                </button>
+
+                {/* Expanded QR panel */}
+                {isOpen && (
+                  <div
+                    style={{
+                      borderTop: '1px solid var(--color-border-secondary)',
+                      padding: '16px 14px',
+                      background: 'var(--color-background-secondary)',
+                    }}
+                  >
+                    <QRCodeView facilityUuid={f.patient_link_uuid} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Tab bar ─────────────────────────────────────────────────────────────────
 
 function TabBar({ active, onChange }) {
   const tabs = [
     { id: 'provision', label: 'Provisioning' },
     { id: 'users',     label: 'Users' },
+    { id: 'qr-codes',  label: 'QR Codes' },
   ];
   return (
     <div
@@ -914,6 +1057,15 @@ export default function AdminProvision() {
 
       {/* ── Users tab ──────────────────────────────────────────────────── */}
       {activeTab === 'users' && <UsersTab />}
+
+      {/* ── QR Codes tab ───────────────────────────────────────────────── */}
+      {activeTab === 'qr-codes' && (
+        <QRCodesTab
+          facilities={facilities}
+          facilitiesLoading={facilitiesLoading}
+          facilitiesError={facilitiesError}
+        />
+      )}
 
       {/* ── Provisioning tab ───────────────────────────────────────────── */}
       {activeTab === 'provision' && (
