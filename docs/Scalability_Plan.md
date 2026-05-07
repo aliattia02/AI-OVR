@@ -93,7 +93,7 @@ IndexModel(
 
 IndexModel(
     [("user_id", ASCENDING)],
-    name="users_user_id_unique",
+    name="users_user_id",
     unique=True,
 )
 # Speeds auth lookups by user_id in auth_service.
