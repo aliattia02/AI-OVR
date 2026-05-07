@@ -62,10 +62,10 @@ function LoadingSkeleton() {
   );
 }
 
-export default function CompareView() {
+export default function CompareView({ filters = {} }) {
   const [dimension, setDimension] = useState('facility');
 
-  const { data, isLoading, error } = useAnalyticsCompare(dimension);
+  const { data, isLoading, error } = useAnalyticsCompare(dimension, filters);
 
   // Sort descending by count; truncate long labels before passing to Recharts
   const chartData = useMemo(

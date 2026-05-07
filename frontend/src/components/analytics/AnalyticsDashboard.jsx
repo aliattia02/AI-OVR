@@ -1,9 +1,16 @@
 // frontend/src/components/analytics/AnalyticsDashboard.jsx
-// CompareView now owns its own data-fetching, loading state, and error handling,
-// so this file no longer imports useAnalyticsCompare or the recharts primitives
-// (Bar, BarChart, CartesianGrid, XAxis, YAxis) that were only used in that section.
+//
+// Changes from previous version:
+//  - Owns `filters` state (EMPTY_FILTERS shape matches DashboardFilterBar).
+//  - Renders DashboardFilterBar above the metric cards.
+//  - Passes `filters` to useAnalyticsSummary and useAnalyticsTrends so React
+//    Query re-fetches whenever any filter value changes.
+//  - Passes `filters` as a prop to CompareView.
+//
+// ⚠️  CompareView also needs a small update — see useAnalytics.js for the
+//     one-paragraph change required there.
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Cell,
   Legend,
@@ -16,9 +23,24 @@ import { useAuth } from '../../context/AuthContext';
 import { useAnalyticsSummary, useAnalyticsTrends } from '../../hooks/useAnalytics';
 import Spinner from '../shared/Spinner';
 import CompareView from './CompareView';
+import DashboardFilterBar from './DashboardFilterBar';
 import TrendChart from './TrendChart';
 
+// ── Constants ─────────────────────────────────────────────────────────────────
+
 const PIE_COLORS = ['#0B7D6B', '#1B6CA8', '#D97706', '#6D28D9', '#EF4444', '#9CA3AF'];
+
+const EMPTY_FILTERS = {
+  governorate:     '',
+  facility_type:   '',
+  facility_name:   '',
+  creation_from:   '',
+  creation_to:     '',
+  occurrence_from: '',
+  occurrence_to:   '',
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function toMap(items = []) {
   return (items || []).reduce((acc, row) => {
@@ -32,7 +54,9 @@ function sumCounts(items = []) {
   return (items || []).reduce((sum, row) => sum + (Number(row?.count) || 0), 0);
 }
 
-function Card({ title, value }) {
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function Card({ title, value, sub }) {
   return (
     <div
       style={{
@@ -41,58 +65,83 @@ function Card({ title, value }) {
         borderRadius: 12,
         padding: 14,
         display: 'grid',
-        gap: 6,
+        gap: 4,
       }}
     >
       <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 600 }}>{title}</div>
-      <div style={{ fontSize: 24, color: '#111827', fontWeight: 800 }}>{value}</div>
+      <div style={{ fontSize: 26, color: '#111827', fontWeight: 800, lineHeight: 1.1 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: '#9CA3AF' }}>{sub}</div>}
     </div>
   );
 }
 
+// ── Main component ────────────────────────────────────────────────────────────
+
 export default function AnalyticsDashboard() {
   const { tier } = useAuth();
-  const { data: summary, isLoading: summaryLoading, error: summaryError } = useAnalyticsSummary();
-  const { data: trends, isLoading: trendsLoading, error: trendsError } = useAnalyticsTrends();
 
-  // CompareView fetches its own data — no compare query here.
+  // ── Filter state ───────────────────────────────────────────────────────────
+  // Lifted here so a single source of truth feeds the filter bar, all hooks,
+  // and the CompareView (which fetches its own data).
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+
+  // ── Data hooks — re-fetch whenever filters change ─────────────────────────
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+    isFetching: summaryFetching,
+    error: summaryError,
+  } = useAnalyticsSummary(filters);
+
+  const {
+    data: trends,
+    isLoading: trendsLoading,
+    isFetching: trendsFetching,
+    error: trendsError,
+  } = useAnalyticsTrends(filters);
+
+  // ── Derived metrics ────────────────────────────────────────────────────────
 
   const statusCounts = useMemo(() => toMap(summary?.status), [summary?.status]);
+
   const severityData = useMemo(
     () =>
       (summary?.severity || []).map((row) => ({
         name: row?.key || 'Unknown',
         value: Number(row?.count) || 0,
       })),
-    [summary?.severity]
+    [summary?.severity],
   );
 
   const totalIncidents = useMemo(() => sumCounts(summary?.status), [summary?.status]);
-  const openIncidents = Math.max(0, totalIncidents - (statusCounts.Completed || 0));
+  const openIncidents  = Math.max(0, totalIncidents - (statusCounts.Completed || 0));
 
-  // high_risk: derived from severity array — Major incidents are the high-risk cohort.
-  // The backend /analytics/summary response only returns status/severity/event_type
-  // arrays and does not include high_risk or pending_ai_review fields directly.
+  // high_risk: Major incidents are the highest-severity cohort available from
+  // the summary response.  The backend does not expose a dedicated field yet.
   const highRisk = useMemo(
     () => (summary?.severity || []).find((r) => r?.key === 'Major')?.count ?? 0,
-    [summary?.severity]
+    [summary?.severity],
   );
 
-  // pending_ai_review: incidents that are still open (not yet Completed).
-  // A reasonable proxy until the backend exposes a dedicated field.
+  // pending_ai_review: incidents not yet Completed are a reasonable proxy until
+  // the backend exposes a dedicated ai_pending field.
   const pendingAIReview = useMemo(
     () =>
       (summary?.status || [])
         .filter((r) => r?.key !== 'Completed')
         .reduce((sum, r) => sum + (Number(r?.count) || 0), 0),
-    [summary?.status]
+    [summary?.status],
   );
 
-  // Summary + trends gate the full-page spinner; compare is handled inside CompareView.
-  const loading = summaryLoading || trendsLoading;
+  // ── Loading / error gates ─────────────────────────────────────────────────
+  // Only block the entire panel on the initial load; background re-fetches
+  // (isFetching) are handled by the filter bar's subtle "Updating…" indicator.
+
+  const initialLoading = summaryLoading || trendsLoading;
+  const backgroundFetching = (summaryFetching && !summaryLoading) || (trendsFetching && !trendsLoading);
   const error = summaryError || trendsError;
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div style={{ minHeight: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Spinner />
@@ -118,27 +167,63 @@ export default function AnalyticsDashboard() {
     );
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
+
   return (
     <div style={{ display: 'grid', gap: 12 }}>
+
+      {/* ── Dashboard filter bar ─────────────────────────────────────────── */}
+      <DashboardFilterBar
+        filters={filters}
+        onFiltersChange={setFilters}
+        isLoading={backgroundFetching}
+      />
+
+      {/* ── KPI cards ────────────────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
-        <Card title="Total Incidents" value={totalIncidents} />
-        <Card title="Open" value={openIncidents} />
-        <Card title="High Risk" value={highRisk} />
-        <Card title="Pending AI Review" value={pendingAIReview} />
+        <Card title="Total Incidents"    value={totalIncidents} />
+        <Card title="Open"               value={openIncidents} />
+        <Card title="High Risk (Major)"  value={highRisk} />
+        <Card title="Pending AI Review"  value={pendingAIReview} />
       </div>
 
+      {/* ── Charts row ───────────────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
-        <section style={{ border: '1px solid #E5E7EB', borderRadius: 12, backgroundColor: '#FFFFFF', padding: 14 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>Monthly Trends</div>
+
+        {/* Trend line */}
+        <section style={{
+          border: '1px solid #E5E7EB',
+          borderRadius: 12,
+          backgroundColor: '#FFFFFF',
+          padding: 14,
+        }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>
+            Monthly Trends
+          </div>
           <TrendChart data={trends || []} />
         </section>
 
-        <section style={{ border: '1px solid #E5E7EB', borderRadius: 12, backgroundColor: '#FFFFFF', padding: 14 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>Severity Breakdown</div>
+        {/* Severity pie */}
+        <section style={{
+          border: '1px solid #E5E7EB',
+          borderRadius: 12,
+          backgroundColor: '#FFFFFF',
+          padding: 14,
+        }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>
+            Severity Breakdown
+          </div>
           <div style={{ width: '100%', height: 280 }}>
             <ResponsiveContainer>
               <PieChart>
-                <Pie data={severityData} dataKey="value" nameKey="name" innerRadius={52} outerRadius={86} paddingAngle={2}>
+                <Pie
+                  data={severityData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={52}
+                  outerRadius={86}
+                  paddingAngle={2}
+                >
                   {severityData.map((entry, index) => (
                     <Cell key={entry.name} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
@@ -151,14 +236,21 @@ export default function AnalyticsDashboard() {
         </section>
       </div>
 
-      {/* Facility / Governorate comparison — restricted to tier ≥ 4.
-          CompareView handles its own loading skeleton, 403 message, and empty state. */}
+      {/* ── Compare view — restricted to tier ≥ 4 ────────────────────────── */}
+      {/* CompareView receives `filters` as a prop so its internal
+          useAnalyticsCompare call re-fetches when dashboard filters change.
+          See the one-paragraph note at the top of useAnalytics.js. */}
       {tier >= 4 && (
-        <section style={{ border: '1px solid #E5E7EB', borderRadius: 12, backgroundColor: '#FFFFFF', padding: 14 }}>
+        <section style={{
+          border: '1px solid #E5E7EB',
+          borderRadius: 12,
+          backgroundColor: '#FFFFFF',
+          padding: 14,
+        }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>
             Comparison
           </div>
-          <CompareView />
+          <CompareView filters={filters} />
         </section>
       )}
     </div>

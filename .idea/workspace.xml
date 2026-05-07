@@ -5,9 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/analytics/DashboardFilterBar.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/vercel.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vercel.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/analytics.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/analytics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/analytics/AnalyticsDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/analytics/AnalyticsDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/analytics/CompareView.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/analytics/CompareView.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useAnalytics.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useAnalytics.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/analytics.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/analytics.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +60,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/aliat/Projects/AI-OVR",
+    "last_opened_file_path": "C:/Users/aliat/Projects/AI-OVR/frontend/src/components/analytics",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -67,6 +71,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\aliat\Projects\AI-OVR\frontend\src\components\analytics" />
       <recent name="C:\Users\aliat\Projects\AI-OVR\frontend\src\components\shared" />
     </key>
   </component>
@@ -90,7 +95,8 @@
       <workItem from="1777647193161" duration="6018000" />
       <workItem from="1777894335083" duration="10375000" />
       <workItem from="1777931037337" duration="7000" />
-      <workItem from="1778176999565" duration="5143000" />
+      <workItem from="1778176999565" duration="6816000" />
+      <workItem from="1778197444986" duration="699000" />
     </task>
     <servers />
   </component>
