@@ -15,7 +15,7 @@ python-bidi==0.6.7
 sendgrid==6.12.5
 python-dotenv==1.2.2
 pyotp==2.9.0
-
+bcrypt==4.0.1
 # AI (commented out — uncomment when model is ready): openai, anthropic, google-generativeai
 # openai
 # anthropic
