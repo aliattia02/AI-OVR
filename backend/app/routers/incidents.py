@@ -30,9 +30,9 @@ router = APIRouter(prefix="/incidents", tags=["incidents"])
 
 @router.get("/", response_model=list[IncidentResponse])
 async def list_incidents(
+    response: Response,
     skip: int = 0,
     limit: int = 50,
-    response: Response,
     claims: dict = Depends(
         require_role(
             UserRole.staff,
