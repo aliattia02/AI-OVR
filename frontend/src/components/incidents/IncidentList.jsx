@@ -10,8 +10,11 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { useIncidents } from '../../hooks/useIncidents';
 import { INCIDENT_STATUSES, SEVERITY_OPTIONS } from '../../utils/enums';
+import { getToken } from '../../services/api';
 import EmptyState from '../shared/EmptyState';
 import StatusBadge from './StatusBadge';
 
@@ -19,17 +22,6 @@ import StatusBadge from './StatusBadge';
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500, 1000];
 const DEFAULT_PAGE_SIZE = 50;
-
-// These mirror backend enums. Extend as new values are added to the backend.
-const FACILITY_TYPE_OPTIONS = [
-  'Hospital',
-  'Primary Health Center',
-  'Specialized Center',
-  'Polyclinic',
-  'Medical Complex',
-  'Rehabilitation Center',
-  'Other',
-];
 
 const ERROR_CLASSIFICATION_OPTIONS = [
   'MedicationError',
@@ -247,6 +239,44 @@ function FilterSelect({ label, value, onChange, options }) {
   );
 }
 
+function LockedFilterChip({ label, value }) {
+  return (
+    <div style={{ display: 'grid', gap: 4 }}>
+      <span style={{ fontSize: 11, fontWeight: 700, color: C.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        {label}
+      </span>
+      <div style={{
+        border: `1px solid ${C.border}`,
+        borderRadius: 7,
+        padding: '8px 10px',
+        fontSize: 13,
+        color: C.textMid,
+        backgroundColor: C.bgAlt,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        minWidth: 0,
+      }}>
+        <span style={{
+          fontSize: 10,
+          backgroundColor: C.brandLight,
+          color: C.brand,
+          borderRadius: 4,
+          padding: '1px 5px',
+          fontWeight: 700,
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
+        }}>
+          Locked
+        </span>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {value || '—'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function DateRangeFilter({ label, from, to, onFromChange, onToChange }) {
   return (
     <div style={{ display: 'grid', gap: 4 }}>
@@ -316,6 +346,7 @@ function ColHeader({ label, sortKey, sortBy, sortDir, onSort }) {
 const EMPTY_FILTERS = {
   query:              '',
   governorate:        'all',
+  administration:     'all',
   facilityType:       'all',
   facilityName:       '',
   status:             'all',
@@ -337,6 +368,11 @@ function activeFilterCount(filters) {
 }
 
 export default function IncidentList({ onIncidentClick, role }) {
+  const { tier, user } = useAuth();
+
+  // Tier-2 users are scoped to their own facility — lock location filters.
+  const isFacilityScoped = tier === 2;
+
   // ── Server-side pagination state
   const [page,     setPage]     = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -356,10 +392,22 @@ export default function IncidentList({ onIncidentClick, role }) {
   const rawResults = Array.isArray(data) ? data : [];
   const hasNextPage = rawResults.length >= pageSize;
 
-  // ── Collect dynamic dropdown options from current data ─────────────────────
+  // ── Collect dynamic dropdown options from loaded data ─────────────────────
   const governorateOptions = useMemo(() => {
-    const vals = [...new Set(rawResults.map(r => r.governorate).filter(Boolean))].sort();
-    return vals;
+    return [...new Set(rawResults.map(r => r.governorate).filter(Boolean))].sort();
+  }, [rawResults]);
+
+  // Administrations cascade from the selected governorate filter
+  const administrationOptions = useMemo(() => {
+    const source = filters.governorate !== 'all'
+      ? rawResults.filter(r => r.governorate === filters.governorate)
+      : rawResults;
+    return [...new Set(source.map(r => r.administration).filter(Boolean))].sort();
+  }, [rawResults, filters.governorate]);
+
+  // Facility types derived from loaded incidents — stays in sync with real data
+  const facilityTypeOptions = useMemo(() => {
+    return [...new Set(rawResults.map(r => r.facility_type).filter(Boolean))].sort();
   }, [rawResults]);
 
   // ── Client-side filtering ──────────────────────────────────────────────────
@@ -378,6 +426,7 @@ export default function IncidentList({ onIncidentClick, role }) {
         if (!haystack.includes(q)) return false;
       }
       if (filters.governorate !== 'all' && inc.governorate !== filters.governorate) return false;
+      if (filters.administration !== 'all' && inc.administration !== filters.administration) return false;
       if (filters.facilityType !== 'all' && inc.facility_type !== filters.facilityType) return false;
       if (filters.facilityName.trim() && !String(inc.facility_name || '').toLowerCase().includes(filters.facilityName.trim().toLowerCase())) return false;
       if (filters.status !== 'all' && inc.status !== filters.status) return false;
@@ -430,7 +479,14 @@ export default function IncidentList({ onIncidentClick, role }) {
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function setFilter(key, value) {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => {
+      const next = { ...prev, [key]: value };
+      // Cascade resets
+      if (key === 'governorate' && value !== prev.governorate) {
+        next.administration = 'all';
+      }
+      return next;
+    });
     setPage(0);
   }
 
@@ -458,7 +514,7 @@ export default function IncidentList({ onIncidentClick, role }) {
     setExporting('xlsx');
     try {
       const res = await fetch('/api/exports/excel', {
-        headers: { Authorization: `Bearer ${window.__ovr_token || ''}` },
+        headers: { Authorization: `Bearer ${getToken() || ''}` },
       });
       if (!res.ok) throw new Error('Export failed');
       const blob = await res.blob();
@@ -597,24 +653,46 @@ export default function IncidentList({ onIncidentClick, role }) {
 
           {/* Row 1: Location */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
-            <FilterSelect
-              label="Governorate"
-              value={filters.governorate}
-              onChange={v => setFilter('governorate', v)}
-              options={governorateOptions}
-            />
-            <FilterSelect
-              label="Facility Type"
-              value={filters.facilityType}
-              onChange={v => setFilter('facilityType', v)}
-              options={FACILITY_TYPE_OPTIONS}
-            />
-            <FilterInput
-              label="Facility Name"
-              value={filters.facilityName}
-              onChange={v => setFilter('facilityName', v)}
-              placeholder="Type to search…"
-            />
+            {isFacilityScoped ? (
+              <LockedFilterChip label="Governorate" value={user?.governorate} />
+            ) : (
+              <FilterSelect
+                label="Governorate"
+                value={filters.governorate}
+                onChange={v => setFilter('governorate', v)}
+                options={governorateOptions}
+              />
+            )}
+            {isFacilityScoped ? (
+              <LockedFilterChip label="Administration" value={user?.administration} />
+            ) : (
+              <FilterSelect
+                label="Administration"
+                value={filters.administration}
+                onChange={v => setFilter('administration', v)}
+                options={administrationOptions}
+              />
+            )}
+            {isFacilityScoped ? (
+              <LockedFilterChip label="Facility Type" value={user?.facility_type} />
+            ) : (
+              <FilterSelect
+                label="Facility Type"
+                value={filters.facilityType}
+                onChange={v => setFilter('facilityType', v)}
+                options={facilityTypeOptions}
+              />
+            )}
+            {isFacilityScoped ? (
+              <LockedFilterChip label="Facility Name" value={user?.facility_name} />
+            ) : (
+              <FilterInput
+                label="Facility Name"
+                value={filters.facilityName}
+                onChange={v => setFilter('facilityName', v)}
+                placeholder="Type to search…"
+              />
+            )}
             <FilterInput
               label="Person Involved"
               value={filters.involvedPerson}
@@ -768,6 +846,15 @@ export default function IncidentList({ onIncidentClick, role }) {
 
 function IncidentRow({ incident: inc, idx, onClick, role }) {
   const [hovered, setHovered] = useState(false);
+  const navigate = useNavigate();
+
+  function handleRowClick() {
+    const id = inc?.incident_id || inc?.id;
+    if (!id) return;
+    // Call the parent callback if provided (e.g. for modal mode), then navigate
+    onClick?.(id);
+    navigate(`/incidents/${id}`);
+  }
 
   const rowBg = hovered
     ? C.brandLight
@@ -777,7 +864,7 @@ function IncidentRow({ incident: inc, idx, onClick, role }) {
 
   return (
     <tr
-      onClick={() => onClick?.(inc?.incident_id || inc?.id)}
+      onClick={handleRowClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{

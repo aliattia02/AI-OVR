@@ -71,28 +71,33 @@ async def get_cascading_options(db: AsyncIOMotorDatabase) -> dict:
     """Return precomputed nested dropdown data for governorate/administration/facility."""
     docs = await db["facilities"].find(
         {},
-        {"_id": 0, "governorate": 1, "administration": 1, "facility_name": 1},
+        {"_id": 0, "governorate": 1, "administration": 1, "facility_name": 1, "facility_type": 1},
     ).to_list(length=None)
 
     governorates: set[str] = set()
     administrations_map: Dict[str, set[str]] = {}
     facilities_map: Dict[str, set[str]] = {}
+    facility_types: set[str] = set()
 
     for doc in docs:
         governorate = doc.get("governorate")
         administration = doc.get("administration")
         facility_name = doc.get("facility_name")
+        facility_type = doc.get("facility_type")
         if not governorate or not administration or not facility_name:
             continue
 
         governorates.add(governorate)
         administrations_map.setdefault(governorate, set()).add(administration)
         facilities_map.setdefault(administration, set()).add(facility_name)
+        if facility_type:
+            facility_types.add(facility_type)
 
     return {
         "governorates": sorted(governorates),
         "administrations": {gov: sorted(admins) for gov, admins in administrations_map.items()},
         "facilities": {admin: sorted(facilities) for admin, facilities in facilities_map.items()},
+        "facility_types": sorted(facility_types),
     }
 
 

@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from app.db.database import get_database
 from app.middleware.auth_middleware import require_role
+from app.models.facility import FacilitySafeResponse
 from app.models.incident import IncidentCreate
 from app.services import email_service, facility_service, incident_service
 from app.utils.enums import ErrorClassification, EventType, ReporterType, Severity, UserRole
@@ -41,6 +42,26 @@ class PatientTokenResponse(BaseModel):
     """Response containing a facility's patient submission token."""
 
     patient_link_uuid: str
+
+
+@router.get("/facility-info/{facility_uuid}", response_model=FacilitySafeResponse)
+async def get_facility_info_by_patient_uuid(
+    facility_uuid: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> FacilitySafeResponse:
+    """Public endpoint — returns safe facility metadata for the anonymous report form.
+    Accepts the patient_link_uuid from the QR URL; never echoes it back in the response.
+    """
+    facility = await facility_service.get_facility_by_patient_uuid(facility_uuid, db)
+    if facility is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Facility not found")
+    return FacilitySafeResponse(
+        governorate=facility.governorate,
+        facility_type=facility.facility_type,
+        administration=facility.administration,
+        facility_name=facility.facility_name,
+        created_at=facility.created_at,
+    )
 
 
 @router.post("/submit/{facility_uuid}", response_model=PatientSubmitResponse)

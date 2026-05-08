@@ -14,6 +14,7 @@ const ROLE_VIEWS = {
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'new-report', label: 'New Report' },
     { id: 'reports', label: 'Reports' },
+    { id: 'analytics', label: 'Analytics' },
     { id: 'workflow', label: 'Workflow' },
   ],
   administration_manager: [

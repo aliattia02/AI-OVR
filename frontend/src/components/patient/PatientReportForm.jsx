@@ -8,36 +8,15 @@ import DisclaimerBanner from '../shared/DisclaimerBanner';
 
 const REPORTER_ROLE_OPTIONS = ['Patient', 'Visitor', 'Family Member'];
 
-function resolveFacilityNameFromCascading(cascadingData, facilityUuid) {
-  if (!cascadingData || typeof cascadingData !== 'object') return '';
-
-  const byUuid = cascadingData.facility_by_uuid || cascadingData.facilities_by_uuid || cascadingData.by_uuid;
-  if (byUuid && typeof byUuid === 'object' && byUuid[facilityUuid]) {
-    return byUuid[facilityUuid];
-  }
-
-  const facilities = cascadingData.facilities;
-  if (Array.isArray(facilities)) {
-    const found = facilities.find(
-      (entry) =>
-        entry?.patient_link_uuid === facilityUuid || entry?.facility_uuid === facilityUuid || entry?.uuid === facilityUuid
-    );
-    return found?.facility_name || '';
-  }
-
-  if (facilities && typeof facilities === 'object') {
-    const possible = facilities[facilityUuid];
-    if (typeof possible === 'string') return possible;
-    if (possible && typeof possible === 'object') return possible.facility_name || possible.name || '';
-  }
-
-  return '';
-}
-
 export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
   const { facility_uuid: facilityUuidFromParams } = useParams();
   const facilityUuid = facilityUuidProp || facilityUuidFromParams;
-  const [facilityName, setFacilityName] = useState('');
+
+  const [facilityInfo, setFacilityInfo] = useState({
+    facilityName: '',
+    administration: '',
+    governorate: '',
+  });
   const [facilityLoadError, setFacilityLoadError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -59,7 +38,7 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
   useEffect(() => {
     let mounted = true;
 
-    const loadFacilityName = async () => {
+    const loadFacilityInfo = async () => {
       if (!facilityUuid) {
         setFacilityLoadError('Invalid reporting link.');
         return;
@@ -67,21 +46,27 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
 
       try {
         setFacilityLoadError('');
-        const { data } = await api.get('/facilities/cascading');
+        // Dedicated public endpoint — returns FacilitySafeResponse for this UUID
+        const { data } = await api.get(`/patients/facility-info/${facilityUuid}`);
         if (!mounted) return;
-        const name = resolveFacilityNameFromCascading(data, facilityUuid);
-        setFacilityName(name || 'Reporting Facility');
+        setFacilityInfo({
+          facilityName: data.facility_name || 'Reporting Facility',
+          administration: data.administration || '',
+          governorate: data.governorate || '',
+        });
       } catch (error) {
         if (!mounted) return;
-        setFacilityName('Reporting Facility');
-        setFacilityLoadError(error?.message || 'Unable to load facility details.');
+        setFacilityInfo({ facilityName: 'Reporting Facility', administration: '', governorate: '' });
+        setFacilityLoadError(
+          error?.response?.status === 404
+            ? 'Reporting link not recognised.'
+            : (error?.message || 'Unable to load facility details.')
+        );
       }
     };
 
-    loadFacilityName();
-    return () => {
-      mounted = false;
-    };
+    loadFacilityInfo();
+    return () => { mounted = false; };
   }, [facilityUuid]);
 
   const submitMutation = useMutation({
@@ -121,9 +106,48 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
   const labelStyle = { display: 'grid', gap: 6, fontSize: 14, fontWeight: 600, color: '#111827' };
   const errorStyle = { fontSize: 13, color: '#B91C1C' };
 
+  const { facilityName, administration, governorate } = facilityInfo;
+  const hasMeta = administration || governorate;
+
   return (
     <div style={{ width: '100%', maxWidth: 560, margin: '0 auto', padding: '12px 12px 20px', display: 'grid', gap: 14 }}>
-      <h2 style={{ margin: 0, fontSize: 20, color: '#0C2340' }}>{facilityName || 'Reporting Facility'}</h2>
+
+      {/* Facility identity card */}
+      <div
+        style={{
+          border: '1px solid #D1D5DB',
+          borderRadius: 12,
+          padding: '14px 16px',
+          display: 'grid',
+          gap: 4,
+          backgroundColor: '#F9FAFB',
+        }}
+      >
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#0C2340' }}>
+          {facilityName || 'Reporting Facility'}
+        </h2>
+
+        {hasMeta && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', marginTop: 4 }}>
+            {administration && (
+              <span style={{ fontSize: 13, color: '#4B5563', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M3 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4ZM3 10a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6ZM14 9a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-2Z" fill="#6B7280" />
+                </svg>
+                {administration}
+              </span>
+            )}
+            {governorate && (
+              <span style={{ fontSize: 13, color: '#4B5563', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M5.05 4.05a7 7 0 1 1 9.9 9.9L10 18.9l-4.95-4.95a7 7 0 0 1 0-9.9ZM10 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="#6B7280" />
+                </svg>
+                {governorate}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
 
       <div
         style={{

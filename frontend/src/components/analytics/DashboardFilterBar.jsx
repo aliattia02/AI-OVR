@@ -26,18 +26,6 @@ const C = {
   shadow:     '0 1px 3px rgba(0,0,0,0.08)',
 };
 
-// Static facility-type list — mirrors FacilityType enum values.
-// Add new values here if the backend enum is extended.
-const FACILITY_TYPE_OPTIONS = [
-  'Hospital',
-  'Primary Health Center',
-  'Specialized Center',
-  'Polyclinic',
-  'Medical Complex',
-  'Rehabilitation Center',
-  'Other',
-];
-
 // ── Data hook ─────────────────────────────────────────────────────────────────
 
 function useCascadingFacilities() {
@@ -150,7 +138,7 @@ function DateRange({ label, from, to, onFromChange, onToChange }) {
  * @param {Function} props.onFiltersChange Called with the new filters object on any change.
  * @param {boolean}  [props.isLoading]    When true, shows a subtle loading pulse on the bar.
  */
-export default function DashboardFilterBar({ filters, onFiltersChange, isLoading = false }) {
+export default function DashboardFilterBar({ filters, onFiltersChange, isLoading = false, lockedFacilityName = null }) {
   const { data: cascading, isLoading: cascadingLoading } = useCascadingFacilities();
 
   // ── Derived option lists ───────────────────────────────────────────────────
@@ -203,6 +191,11 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
     const names = targetAdmins.flatMap(admin => facilities[admin] ?? []);
     return [...new Set(names)].sort();
   }, [cascading, filters.governorate, filters.administration]);
+
+  // Facility types come from the database via the cascading endpoint.
+  const facilityTypeOptions = useMemo(() => {
+    return [...(cascading?.facility_types || [])].sort();
+  }, [cascading]);
 
   // ── Change handlers ────────────────────────────────────────────────────────
 
@@ -334,41 +327,72 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
           </select>
         </FilterGroup>
 
-        {/* Facility Type */}
+        {/* Facility Type — sourced from database via cascading endpoint */}
         <FilterGroup label="Facility Type">
           <select
             value={filters.facility_type}
             onChange={e => set('facility_type', e.target.value)}
+            disabled={cascadingLoading || facilityTypeOptions.length === 0}
             style={selectStyle(!!filters.facility_type)}
             onFocus={e => { e.target.style.borderColor = C.brand; }}
             onBlur={e => { e.target.style.borderColor = C.border; }}
           >
             <option value="">All types</option>
-            {FACILITY_TYPE_OPTIONS.map(t => (
+            {facilityTypeOptions.map(t => (
               <option key={t} value={t}>{t}</option>
             ))}
           </select>
         </FilterGroup>
 
-        {/* Facility Name — cascades from Governorate */}
+        {/* Facility Name — locked for tier-2 users, cascades from Governorate for others */}
         <FilterGroup label="Facility Name">
-          <select
-            value={filters.facility_name}
-            onChange={e => set('facility_name', e.target.value)}
-            disabled={cascadingLoading || facilityNameOptions.length === 0}
-            style={selectStyle(!!filters.facility_name)}
-            onFocus={e => { e.target.style.borderColor = C.brand; }}
-            onBlur={e => { e.target.style.borderColor = C.border; }}
-          >
-            <option value="">
-              {facilityNameOptions.length === 0 && !cascadingLoading
-                ? 'No facilities'
-                : 'All facilities'}
-            </option>
-            {facilityNameOptions.map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
+          {lockedFacilityName !== null ? (
+            <div style={{
+              border: `1px solid ${C.border}`,
+              borderRadius: 7,
+              padding: '7px 10px',
+              fontSize: 13,
+              color: C.textMid,
+              backgroundColor: C.bgAlt,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              minWidth: 0,
+            }}>
+              <span style={{
+                fontSize: 10,
+                backgroundColor: C.brandLight,
+                color: C.brand,
+                borderRadius: 4,
+                padding: '1px 5px',
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+              }}>
+                Your facility
+              </span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {lockedFacilityName}
+              </span>
+            </div>
+          ) : (
+            <select
+              value={filters.facility_name}
+              onChange={e => set('facility_name', e.target.value)}
+              disabled={cascadingLoading || facilityNameOptions.length === 0}
+              style={selectStyle(!!filters.facility_name)}
+              onFocus={e => { e.target.style.borderColor = C.brand; }}
+              onBlur={e => { e.target.style.borderColor = C.border; }}
+            >
+              <option value="">
+                {facilityNameOptions.length === 0 && !cascadingLoading
+                  ? 'No facilities'
+                  : 'All facilities'}
+              </option>
+              {facilityNameOptions.map(name => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+          )}
         </FilterGroup>
 
         {/* Creation Date range */}

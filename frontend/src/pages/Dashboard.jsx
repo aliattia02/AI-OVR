@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 
 // Analytics endpoints require tier ≥ 3.  Staff (tier 1-2) must not trigger
 // those requests or they receive a 403 on every render.
-const ANALYTICS_MIN_TIER = 3;
+const ANALYTICS_MIN_TIER = 2;
 
 function StaffWelcome() {
   return (

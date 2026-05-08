@@ -2,7 +2,7 @@ import AnalyticsDashboard from '../components/analytics/AnalyticsDashboard';
 import EmptyState from '../components/shared/EmptyState';
 import { useAuth } from '../context/AuthContext';
 
-const ANALYTICS_MIN_TIER = 3;
+const ANALYTICS_MIN_TIER = 2;
 
 export default function Analytics() {
   const { tier } = useAuth();

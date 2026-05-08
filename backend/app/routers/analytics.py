@@ -198,7 +198,7 @@ async def analytics_trends(
     (whichever is later wins). When creation_to is provided the window is
     capped accordingly.
     """
-    _require_tier(claims, min_tier=3)
+    _require_tier(claims, min_tier=2)
 
     scope = get_scope_filter(claims["role"], claims)
     extra = _build_extra_match(f)

@@ -79,12 +79,26 @@ function Card({ title, value, sub }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function AnalyticsDashboard() {
-  const { tier } = useAuth();
+  const { tier, user } = useAuth();
+
+  // Tier-2 users are scoped to their own facility only.
+  // Their facility_name is locked into every filter object sent to the backend.
+  const isFacilityScoped = tier === 2;
+  const lockedFacilityName = isFacilityScoped ? (user?.facility_name ?? '') : null;
 
   // ── Filter state ───────────────────────────────────────────────────────────
   // Lifted here so a single source of truth feeds the filter bar, all hooks,
   // and the CompareView (which fetches its own data).
   const [filters, setFilters] = useState(EMPTY_FILTERS);
+
+  // For tier-2 users, always override facility_name with their own facility
+  // before the filters reach the hooks or the filter bar.
+  const effectiveFilters = useMemo(
+    () => isFacilityScoped
+      ? { ...filters, facility_name: lockedFacilityName }
+      : filters,
+    [filters, isFacilityScoped, lockedFacilityName],
+  );
 
   // ── Data hooks — re-fetch whenever filters change ─────────────────────────
   const {
@@ -92,14 +106,14 @@ export default function AnalyticsDashboard() {
     isLoading: summaryLoading,
     isFetching: summaryFetching,
     error: summaryError,
-  } = useAnalyticsSummary(filters);
+  } = useAnalyticsSummary(effectiveFilters);
 
   const {
     data: trends,
     isLoading: trendsLoading,
     isFetching: trendsFetching,
     error: trendsError,
-  } = useAnalyticsTrends(filters);
+  } = useAnalyticsTrends(effectiveFilters);
 
   // ── Derived metrics ────────────────────────────────────────────────────────
 
@@ -175,9 +189,10 @@ export default function AnalyticsDashboard() {
 
       {/* ── Dashboard filter bar ─────────────────────────────────────────── */}
       <DashboardFilterBar
-        filters={filters}
+        filters={effectiveFilters}
         onFiltersChange={setFilters}
         isLoading={backgroundFetching}
+        lockedFacilityName={lockedFacilityName}
       />
 
       {/* ── KPI cards ────────────────────────────────────────────────────── */}
@@ -251,7 +266,7 @@ export default function AnalyticsDashboard() {
           <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>
             Comparison
           </div>
-          <CompareView filters={filters} />
+          <CompareView filters={effectiveFilters} />
         </section>
       )}
     </div>
