@@ -7,9 +7,10 @@ export function useIncidents(params = {}) {
   return useQuery({
     queryKey: ['incidents', { page, pageSize }],
     queryFn: () => incidentService.getAll({ skip, limit: pageSize }),
+    throwOnError: true,   // ← forces React Query to surface errors
+    retry: 1,
   });
 }
-
 export function useIncident(id) {
   return useQuery({
     queryKey: ['incident', id],

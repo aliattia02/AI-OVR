@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
 
@@ -32,6 +32,7 @@ router = APIRouter(prefix="/incidents", tags=["incidents"])
 async def list_incidents(
     skip: int = 0,
     limit: int = 50,
+    response: Response,
     claims: dict = Depends(
         require_role(
             UserRole.staff,
@@ -43,7 +44,15 @@ async def list_incidents(
     ),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> list[IncidentResponse]:
-    """Return incidents scoped automatically to the caller's access tier."""
+    """Return incidents scoped automatically to the caller's access tier.
+
+    Cache-Control is set to no-store so that Vercel's edge cache and the
+    browser never serve a stale (possibly empty) response for this endpoint.
+    """
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, proxy-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     return await incident_service.get_incidents(
         role=claims["role"],
         claims=claims,
@@ -95,6 +104,7 @@ async def create_incident(
 @router.get("/{incident_id}", response_model=IncidentResponse)
 async def get_incident(
     incident_id: str,
+    response: Response,
     claims: dict = Depends(
         require_role(
             UserRole.staff,
@@ -107,6 +117,10 @@ async def get_incident(
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> IncidentResponse:
     """Return a single incident scoped to the caller's access tier."""
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, proxy-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     incident = await incident_service.get_incident_by_id(
         incident_id=incident_id,
         role=claims["role"],
