@@ -1,9 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { incidentService } from '../services/incidents';
 
-// ── Debug flag — active in dev OR when ?debug=1 is in the URL ─────────────────
+// ── Debug flag ────────────────────────────────────────────────────────────────
+// Active when ANY of the following is true:
+//   1. Running locally via `vite dev`          (import.meta.env.DEV)
+//   2. VITE_DEBUG=true set in Vercel env vars  (import.meta.env.VITE_DEBUG)
+//   3. ?debug=1 appended to the URL            (works in both envs)
+//
+// To enable on Vercel without a redeploy: append ?debug=1 to the URL.
+// To enable permanently on Vercel: add VITE_DEBUG=true in
+//   Vercel → Project → Settings → Environment Variables, then redeploy.
+// To disable again: remove the env var and redeploy (no code change needed).
 const DEBUG =
   import.meta.env.DEV ||
+  import.meta.env.VITE_DEBUG === 'true' ||
   new URLSearchParams(window.location.search).get('debug') === '1';
 
 function log(...args) {

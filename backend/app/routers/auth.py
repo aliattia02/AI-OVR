@@ -81,8 +81,23 @@ def _unauthorized() -> HTTPException:
 
 
 def _is_production() -> bool:
+    """Detect a deployed (non-local) environment.
+
+    Priority order:
+      1. RENDER env var — Render.com injects this automatically into every
+         service, so it is always present on Render even if ENVIRONMENT is
+         not set.  This is the most reliable signal.
+      2. ENVIRONMENT env var — accepted as "production" or "prod" for
+         compatibility with other hosting platforms (Railway, Fly.io, etc.).
+
+    Locally neither variable is set, so the function returns False and the
+    cookie is issued without Secure / SameSite=None (correct for HTTP dev).
+    """
+    # Render sets RENDER=true automatically — no manual env var required.
+    if os.getenv("RENDER"):
+        return True
     app_env = (os.getenv("ENVIRONMENT") or "").strip().lower()
-    return app_env == "production"
+    return app_env in ("production", "prod")
 
 
 def _claims_from_user_doc(user_doc: dict[str, Any]) -> dict[str, Any]:
@@ -111,6 +126,17 @@ def _to_user_response(user_doc: dict[str, Any]) -> UserResponse:
 
 
 def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
+    """Write the HttpOnly refresh-token cookie.
+
+    Production (Render):  SameSite=None; Secure=True
+      — required because the browser talks to Vercel (vercel.app) while
+        the cookie originates from Render (onrender.com).  SameSite=None
+        is the only value that survives a cross-site proxy hop.
+
+    Local dev:            SameSite=Lax; Secure=False
+      — correct for plain HTTP on localhost; Secure=False lets the browser
+        store the cookie over an unencrypted connection.
+    """
     is_prod = _is_production()
     response.set_cookie(
         key=REFRESH_COOKIE_NAME,
@@ -124,6 +150,11 @@ def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
 
 
 def _clear_refresh_cookie(response: Response) -> None:
+    """Delete the refresh-token cookie using the same attributes it was set with.
+
+    The samesite / secure values must mirror _set_refresh_cookie exactly;
+    mismatched attributes cause some browsers to silently ignore the deletion.
+    """
     is_prod = _is_production()
     response.delete_cookie(
         key=REFRESH_COOKIE_NAME,
