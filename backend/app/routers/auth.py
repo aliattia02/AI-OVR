@@ -111,23 +111,25 @@ def _to_user_response(user_doc: dict[str, Any]) -> UserResponse:
 
 
 def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
+    is_prod = _is_production()
     response.set_cookie(
         key=REFRESH_COOKIE_NAME,
         value=refresh_token,
         max_age=REFRESH_MAX_AGE_SECONDS,
         httponly=True,
-        samesite="lax",
-        secure=_is_production(),
+        samesite="none" if is_prod else "lax",
+        secure=is_prod,
         path="/",
     )
 
 
 def _clear_refresh_cookie(response: Response) -> None:
+    is_prod = _is_production()
     response.delete_cookie(
         key=REFRESH_COOKIE_NAME,
         httponly=True,
-        samesite="lax",
-        secure=_is_production(),
+        samesite="none" if is_prod else "lax",
+        secure=is_prod,
         path="/",
     )
 
