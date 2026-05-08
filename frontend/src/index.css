@@ -6,6 +6,30 @@
   padding: 0;
 }
 
+:root {
+  /* Surfaces */
+  --color-surface-primary: #ffffff;
+  --color-background-secondary: #f3f6fb;
+
+  /* Text */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+
+  /* Borders */
+  --color-border-primary: #d1d5db;
+  --color-border-secondary: #e5e7eb;
+
+  /* Brand / buttons */
+  --color-primary: #0b7d6b;
+  --color-primary-border: #0b7d6b;
+  --color-button-text: #ffffff;
+
+  /* Danger */
+  --color-danger-background: #fef2f2;
+  --color-danger-text: #991b1b;
+  --color-danger-border: #fca5a5;
+}
+
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: #eef2f7;
