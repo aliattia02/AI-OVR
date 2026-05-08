@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigat
 import LoginForm from './components/auth/LoginForm';
 import IncidentDetail from './components/incidents/IncidentDetail';
 import NewIncidentForm from './components/incidents/NewIncidentForm';
+import Navbar from './components/shared/Navbar';
 import Sidebar from './components/shared/Sidebar';
 import SessionExpiryWarning from './components/shared/SessionExpiryWarning';
 import { useAuth } from './context/AuthContext';
@@ -51,15 +52,20 @@ function AppLayout() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar
-        currentView={currentView}
-        onNavigate={(view) => navigate(PATH_BY_VIEW[view] || '/dashboard')}
-        onSignOut={handleSignOut}
-      />
-      <main style={{ flex: 1, overflow: 'auto', padding: 16 }}>
-        <Outlet />
-      </main>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Top navigation bar */}
+      <Navbar />
+
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <Sidebar
+          currentView={currentView}
+          onNavigate={(view) => navigate(PATH_BY_VIEW[view] || '/dashboard')}
+          onSignOut={handleSignOut}
+        />
+        <main style={{ flex: 1, overflow: 'auto', padding: 16 }}>
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
@@ -88,7 +94,10 @@ export default function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/mfa/verify" element={<MFAVerify />} />
         <Route path="/report/:uuid" element={<PatientReport />} />
+
+        {/* Forced password-change on first login (no layout — full-page) */}
         <Route path="/change-password" element={<ChangePassword />} />
+
         <Route
           element={
             <ProtectedRoute minTier={2}>
@@ -101,6 +110,10 @@ export default function App() {
           <Route path="/incidents/:id" element={<IncidentDetailRoute />} />
           <Route path="/new" element={<NewIncidentForm />} />
           <Route path="/mfa/setup" element={<MFASetup />} />
+
+          {/* Voluntary password change — accessible from the Navbar account menu */}
+          <Route path="/account/password" element={<ChangePassword />} />
+
           <Route
             path="/analytics"
             element={

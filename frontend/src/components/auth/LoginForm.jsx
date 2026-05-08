@@ -21,10 +21,11 @@ const C = {
 export default function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState(null);
+  const [email, setEmail]             = useState("");
+  const [password, setPassword]       = useState("");
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState(null);
+  const [showForgotInfo, setShowForgotInfo] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,9 +37,6 @@ export default function LoginForm() {
     setLoading(true);
     try {
       const me = await login(email.trim(), password);
-      // login() returns null when must_change_password is true —
-      // AuthContext already navigated to /change-password in that case,
-      // so only navigate here when we actually got a user back.
       if (me) {
         navigate("/", { replace: true });
       }
@@ -171,13 +169,35 @@ export default function LoginForm() {
             </div>
 
             {/* Password */}
-            <div style={{ marginBottom: 24 }}>
-              <label
-                htmlFor="eovr-password"
-                style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.g800, marginBottom: 6 }}
-              >
-                Password
-              </label>
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <label
+                  htmlFor="eovr-password"
+                  style={{ fontSize: 13, fontWeight: 600, color: C.g800 }}
+                >
+                  Password
+                </label>
+                {/* ── Forgot password link ── */}
+                <button
+                  type="button"
+                  onClick={() => setShowForgotInfo((v) => !v)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    fontSize: 12,
+                    color: C.teal,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    fontWeight: 500,
+                    textDecoration: "underline",
+                    textUnderlineOffset: 2,
+                  }}
+                >
+                  Forgot password?
+                </button>
+              </div>
+
               <input
                 id="eovr-password"
                 type="password"
@@ -204,48 +224,74 @@ export default function LoginForm() {
               />
             </div>
 
+            {/* Forgot password info box */}
+            {showForgotInfo && (
+              <div
+                style={{
+                  background: C.tealLight,
+                  border: `1px solid ${C.teal}40`,
+                  borderRadius: 8,
+                  padding: "10px 14px",
+                  marginBottom: 16,
+                  fontSize: 13,
+                  color: C.teal,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 8,
+                }}
+              >
+                <span style={{ marginTop: 1, fontSize: 15 }}>ℹ</span>
+                <span>
+                  Password resets are managed by your system administrator.
+                  Please contact your facility&apos;s IT support or quality admin to have your password reset.
+                </span>
+              </div>
+            )}
+
             {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                padding: "11px",
-                borderRadius: 8,
-                border: "none",
-                background: loading ? C.g400 : C.teal,
-                color: "#fff",
-                fontSize: 14,
-                fontWeight: 700,
-                cursor: loading ? "not-allowed" : "pointer",
-                fontFamily: "inherit",
-                letterSpacing: "0.01em",
-                transition: "background 0.15s",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-              }}
-            >
-              {loading ? (
-                <>
-                  <span
-                    style={{
-                      width: 14,
-                      height: 14,
-                      border: "2px solid rgba(255,255,255,0.4)",
-                      borderTopColor: "#fff",
-                      borderRadius: "50%",
-                      display: "inline-block",
-                      animation: "eovr-spin 0.7s linear infinite",
-                    }}
-                  />
-                  Signing in…
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </button>
+            <div style={{ marginTop: 16 }}>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: "100%",
+                  padding: "11px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: loading ? C.g400 : C.teal,
+                  color: "#fff",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  cursor: loading ? "not-allowed" : "pointer",
+                  fontFamily: "inherit",
+                  letterSpacing: "0.01em",
+                  transition: "background 0.15s",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+              >
+                {loading ? (
+                  <>
+                    <span
+                      style={{
+                        width: 14,
+                        height: 14,
+                        border: "2px solid rgba(255,255,255,0.4)",
+                        borderTopColor: "#fff",
+                        borderRadius: "50%",
+                        display: "inline-block",
+                        animation: "eovr-spin 0.7s linear infinite",
+                      }}
+                    />
+                    Signing in…
+                  </>
+                ) : (
+                  "Sign in"
+                )}
+              </button>
+            </div>
           </form>
         </div>
 

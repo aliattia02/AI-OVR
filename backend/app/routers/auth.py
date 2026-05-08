@@ -344,12 +344,16 @@ async def change_password(
     current_user: dict[str, Any] = Depends(auth_service.get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> dict[str, str]:
-    current_user_doc = await db["users"].find_one({"user_id": current_user.get("user_id")}, {"_id": 1})
-    if not current_user_doc:
+    # Pass the application-level user_id (USR-xxx) directly from the JWT claims.
+    # auth_service.change_password queries by the ``user_id`` field, so this works
+    # for all user creation paths (ObjectId _id via create_user, UUID string _id
+    # via provision_facility / provision_tier).
+    user_id = current_user.get("user_id")
+    if not user_id:
         raise _unauthorized()
     return await auth_service.change_password(
         db,
-        str(current_user_doc["_id"]),
+        user_id,
         body.old_password,
         body.new_password,
     )

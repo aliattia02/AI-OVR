@@ -214,17 +214,29 @@ async def change_password(
     old_password: str,
     new_password: str,
 ) -> dict[str, str]:
-    """Change password for a user and clear must_change_password on success."""
-    user_doc = await db["users"].find_one({"_id": user_id})
+    """Change password for a user identified by their application user_id (USR-xxx).
+
+    Queries by the ``user_id`` application field — never by ``_id`` — so the
+    lookup works regardless of whether ``_id`` is an ObjectId (create_user path)
+    or a UUID string (provision_facility / provision_tier path).
+    """
+    user_doc = await db["users"].find_one(
+        {"user_id": user_id},
+        {"_id": 1, "hashed_password": 1},
+    )
     if not user_doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    if not verify_password(old_password, user_doc["hashed_password"]):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+    stored_hash = user_doc.get("hashed_password", "")
+    if not isinstance(stored_hash, str) or not verify_password(old_password, stored_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
 
     new_hash = hash_password(new_password)
     await db["users"].update_one(
-        {"_id": user_id},
+        {"_id": user_doc["_id"]},
         {"$set": {"hashed_password": new_hash, "must_change_password": False}},
     )
     return {"message": "Password changed successfully"}
