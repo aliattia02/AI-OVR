@@ -32,6 +32,7 @@ const PIE_COLORS = ['#0B7D6B', '#1B6CA8', '#D97706', '#6D28D9', '#EF4444', '#9CA
 
 const EMPTY_FILTERS = {
   governorate:     '',
+  administration:  '',
   facility_type:   '',
   facility_name:   '',
   creation_from:   '',

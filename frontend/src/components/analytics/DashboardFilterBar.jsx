@@ -1,11 +1,11 @@
 // frontend/src/components/analytics/DashboardFilterBar.jsx
 //
 // Compact, always-visible filter bar for the dashboard metrics panel.
-// Filter dimensions: Governorate · Facility Type · Facility Name · Creation Date · Occurrence Date
+// Filter dimensions: Governorate · Administration · Facility Type · Facility Name · Creation Date · Occurrence Date
 //
 // Facility options are loaded from the public /facilities/cascading endpoint
 // (no auth required) so the dropdown stays in sync with the database.
-// Facility Name options cascade from the selected Governorate.
+// Cascade chain: Governorate → Administration → Facility Name.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -154,26 +154,66 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
   const { data: cascading, isLoading: cascadingLoading } = useCascadingFacilities();
 
   // ── Derived option lists ───────────────────────────────────────────────────
+  //
+  // get_cascading_options() returns this exact shape (facility_service.py):
+  //
+  //   governorates:   string[]                      — flat list
+  //   administrations: { [governorate]: string[] }  — gov  → admin names
+  //   facilities:      { [administration]: string[] }— admin → facility names
+  //
+  // To go from governorate → facility names we must do a two-step join:
+  //   1. administrations[governorate] → list of admin names for that gov
+  //   2. For each admin name, facilities[admin] → list of facility names
+  //
+  // When no governorate is selected we flatten every admin bucket.
 
   const governorateOptions = useMemo(() => {
-    return (cascading?.governorates || []).slice().sort();
+    return [...(cascading?.governorates || [])].sort();
   }, [cascading]);
 
-  // Facility names filtered by selected governorate
-  const facilityNameOptions = useMemo(() => {
-    const all = cascading?.facilities || [];
-    const scoped = filters.governorate
-      ? all.filter(f => f.governorate === filters.governorate)
-      : all;
-    return [...new Set(scoped.map(f => f.facility_name).filter(Boolean))].sort();
+  // Administrations cascade from the selected governorate.
+  // When no governorate is selected, all administrations are shown.
+  const administrationOptions = useMemo(() => {
+    const administrations = cascading?.administrations ?? {};
+    const admins = filters.governorate
+      ? (administrations[filters.governorate] ?? [])
+      : Object.values(administrations).flat();
+    return [...new Set(admins)].sort();
   }, [cascading, filters.governorate]);
+
+  // Facility names cascade from the selected administration (or governorate when
+  // no administration is chosen). Three-step chain:
+  //   governorate → administrations[gov] → facilities[admin] → names
+  const facilityNameOptions = useMemo(() => {
+    const administrations = cascading?.administrations ?? {};
+    const facilities      = cascading?.facilities      ?? {};
+
+    let targetAdmins;
+    if (filters.administration) {
+      // Specific admin selected — only its facilities
+      targetAdmins = [filters.administration];
+    } else if (filters.governorate) {
+      // Governorate selected but no admin — all admins in that gov
+      targetAdmins = administrations[filters.governorate] ?? [];
+    } else {
+      // No location filter — all admins
+      targetAdmins = Object.values(administrations).flat();
+    }
+
+    const names = targetAdmins.flatMap(admin => facilities[admin] ?? []);
+    return [...new Set(names)].sort();
+  }, [cascading, filters.governorate, filters.administration]);
 
   // ── Change handlers ────────────────────────────────────────────────────────
 
   const set = useCallback((key, value) => {
     const next = { ...filters, [key]: value };
-    // Reset facility_name when governorate changes to avoid stale selection
+    // Cascade resets: changing a parent clears all its children
     if (key === 'governorate' && value !== filters.governorate) {
+      next.administration = '';
+      next.facility_name  = '';
+    }
+    if (key === 'administration' && value !== filters.administration) {
       next.facility_name = '';
     }
     onFiltersChange(next);
@@ -182,6 +222,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
   const clearAll = useCallback(() => {
     onFiltersChange({
       governorate:     '',
+      administration:  '',
       facility_type:   '',
       facility_name:   '',
       creation_from:   '',
@@ -272,6 +313,23 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
             <option value="">All governorates</option>
             {governorateOptions.map(g => (
               <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
+        </FilterGroup>
+
+        {/* Administration — cascades from Governorate */}
+        <FilterGroup label="Administration">
+          <select
+            value={filters.administration}
+            onChange={e => set('administration', e.target.value)}
+            disabled={cascadingLoading || administrationOptions.length === 0}
+            style={selectStyle(!!filters.administration)}
+            onFocus={e => { e.target.style.borderColor = C.brand; }}
+            onBlur={e => { e.target.style.borderColor = C.border; }}
+          >
+            <option value="">All administrations</option>
+            {administrationOptions.map(a => (
+              <option key={a} value={a}>{a}</option>
             ))}
           </select>
         </FilterGroup>

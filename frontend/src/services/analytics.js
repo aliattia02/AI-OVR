@@ -17,6 +17,7 @@ function buildParams(filters = {}) {
   const params = {};
   const keys = [
     'governorate',
+    'administration',
     'facility_type',
     'facility_name',
     'creation_from',

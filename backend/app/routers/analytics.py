@@ -29,6 +29,7 @@ class DashboardFilters:
     def __init__(
         self,
         governorate: str | None = Query(default=None, description="Filter by governorate name"),
+        administration: str | None = Query(default=None, description="Filter by administration name"),
         facility_type: str | None = Query(default=None, description="Filter by facility type"),
         facility_name: str | None = Query(default=None, description="Filter by exact facility name"),
         creation_from: date | None = Query(default=None, description="Earliest registration date (inclusive), YYYY-MM-DD"),
@@ -37,6 +38,7 @@ class DashboardFilters:
         occurrence_to: date | None = Query(default=None, description="Latest occurrence date (inclusive), YYYY-MM-DD"),
     ) -> None:
         self.governorate    = governorate
+        self.administration = administration
         self.facility_type  = facility_type
         self.facility_name  = facility_name
         self.creation_from  = creation_from
@@ -84,6 +86,8 @@ def _build_extra_match(f: DashboardFilters) -> dict[str, Any]:
 
     if f.governorate:
         extra["governorate"] = f.governorate
+    if f.administration:
+        extra["administration"] = f.administration
     if f.facility_type:
         extra["facility_type"] = f.facility_type
     if f.facility_name:
