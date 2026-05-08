@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/analytics/DashboardFilterBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/analytics/DashboardFilterBar.jsx" afterDir="false" />
-    </list>
+    <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -91,7 +88,7 @@
       <workItem from="1777894335083" duration="10375000" />
       <workItem from="1777931037337" duration="7000" />
       <workItem from="1778176999565" duration="6816000" />
-      <workItem from="1778197444986" duration="1608000" />
+      <workItem from="1778197444986" duration="8114000" />
     </task>
     <servers />
   </component>
