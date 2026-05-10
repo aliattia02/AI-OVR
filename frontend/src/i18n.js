@@ -19,10 +19,10 @@ i18n
       ar: { translation: arTranslation },
     },
     supportedLngs: supportedLanguages,
-    lng: 'en',
     fallbackLng: 'en',
     detection: {
       order: ['localStorage', 'navigator'],
+      lookupLocalStorage: 'i18nextLng',
     },
     interpolation: {
       escapeValue: false,
