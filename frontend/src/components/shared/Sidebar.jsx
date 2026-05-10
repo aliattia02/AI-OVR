@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { USER_ROLES } from '../../utils/enums';
 import { analyticsService } from '../../services/analytics';
+import { useDirection } from '../../hooks/useDirection'; // RTL
 
 // Task 4: administration_manager and governorate_manager can now access /workflow.
 const ROLE_VIEWS = {
@@ -40,6 +41,7 @@ const ROLE_VIEWS = {
 
 export default function Sidebar({ onNavigate, currentView, onSignOut }) {
   const { role, tier } = useAuth();
+  const { isRTL } = useDirection(); // RTL
   const roleMeta = USER_ROLES[role] || { label: 'Unknown Role', tier: tier || 0 };
   const navItems = ROLE_VIEWS[role] || [];
 
@@ -55,6 +57,7 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
 
   return (
     <aside
+      className="sidebar" // RTL
       style={{
         width: 210,
         minWidth: 210,
@@ -98,7 +101,7 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
               type="button"
               onClick={() => onNavigate?.(item.id)}
               style={{
-                textAlign: 'left',
+                textAlign: 'start', // RTL
                 border: 'none',
                 borderRadius: 10,
                 backgroundColor: isActive ? 'rgba(255,255,255,0.13)' : 'transparent',
@@ -107,6 +110,10 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
                 fontSize: 13,
                 fontWeight: isActive ? 700 : 600,
                 cursor: 'pointer',
+                display: 'flex', // RTL
+                alignItems: 'center', // RTL
+                gap: 8, // RTL
+                flexDirection: isRTL ? 'row-reverse' : 'row', // RTL
               }}
             >
               {item.label}
@@ -150,7 +157,7 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
           type="button"
           onClick={() => onSignOut?.()}
           style={{
-            textAlign: 'left',
+            textAlign: 'start', // RTL
             border: '1px solid rgba(255,255,255,0.25)',
             borderRadius: 10,
             backgroundColor: 'transparent',

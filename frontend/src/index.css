@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Arabic:wght@300;400;500;600;700&display=swap'); /* RTL */
+
 *,
 *::before,
 *::after {
@@ -50,3 +52,21 @@ body::-webkit-scrollbar-thumb {
 body::-webkit-scrollbar-track {
   background: transparent;
 }
+
+[dir="rtl"] { /* RTL */
+  font-family: 'IBM Plex Arabic', sans-serif; /* RTL */
+} /* RTL */
+
+[dir="rtl"] .sidebar { /* RTL */
+  inset-inline-start: auto; /* RTL */
+  inset-inline-end: 0; /* RTL */
+} /* RTL */
+
+[dir="rtl"] .flex-row-auto-reverse { /* RTL */
+  flex-direction: row-reverse; /* RTL */
+} /* RTL */
+
+/* Keep Recharts rendering LTR while surrounding UI stays RTL. */ /* RTL */
+[dir="rtl"] .recharts-rtl-fix .recharts-wrapper { /* RTL */
+  direction: ltr; /* RTL */
+} /* RTL */

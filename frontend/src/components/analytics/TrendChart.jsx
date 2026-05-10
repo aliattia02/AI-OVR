@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { useDirection } from '../../hooks/useDirection'; // RTL
 
 const TEAL = '#0B7D6B';
 
@@ -26,9 +27,11 @@ function buildMonthlyWindow(rawPoints = []) {
 
 export default function TrendChart({ data = [] }) {
   const chartData = buildMonthlyWindow(data);
+  const { isRTL } = useDirection(); // RTL
 
   return (
-    <div style={{ width: '100%', height: 280 }}>
+    // RTL: keep Recharts rendering LTR so axes/ticks stay correct.
+    <div className={isRTL ? 'recharts-rtl-fix' : undefined} style={{ width: '100%', height: 280 }}>
       <ResponsiveContainer>
         <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />

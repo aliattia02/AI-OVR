@@ -12,6 +12,7 @@ import {
 } from '../../utils/enums';
 import { formatEnumLabel } from '../../utils/formatters';
 import DisclaimerBanner from '../shared/DisclaimerBanner';
+import { useDirection } from '../../hooks/useDirection'; // RTL
 
 function getCurrentTimeString() {
   const now = new Date();
@@ -26,6 +27,7 @@ const OCCURRENCE_LOCATION_OPTIONS = [
 
 export default function NewIncidentForm() {
   const { user } = useAuth();
+  const { dir } = useDirection(); // RTL
 
   // Staff and quality_admin belong to exactly one facility — pre-fill and lock
   // their location fields so they cannot submit on behalf of another facility.
@@ -174,8 +176,8 @@ export default function NewIncidentForm() {
     cursor: 'not-allowed',
   };
 
-  const labelStyle = { fontSize: 13, fontWeight: 600, color: '#111827' };
-  const errorStyle = { fontSize: 12, color: '#B91C1C' };
+  const labelStyle = { fontSize: 13, fontWeight: 600, color: '#111827', textAlign: 'start' }; // RTL
+  const errorStyle = { fontSize: 12, color: '#B91C1C', textAlign: 'start' }; // RTL
 
   // Renders a field that is either a locked text display or a live select/input
   const LockedOrSelect = ({ name, label, options, required, locked }) => {
@@ -195,7 +197,16 @@ export default function NewIncidentForm() {
               tabIndex={-1}
               {...register(name, required ? { required: `${label} is required` } : {})}
             />
-            <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: '#9CA3AF' }}>
+            <span
+              style={{
+                position: 'absolute',
+                insetInlineEnd: 10, // RTL
+                top: '50%',
+                transform: 'translateY(-50%)',
+                fontSize: 11,
+                color: '#9CA3AF',
+              }}
+            >
               🔒
             </span>
           </div>
@@ -215,7 +226,7 @@ export default function NewIncidentForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'grid', gap: 14 }}>
+    <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'grid', gap: 14 }} dir={dir}> // RTL
       {cascadingError && <div style={{ ...errorStyle, fontWeight: 600 }}>{cascadingError}</div>}
       <DisclaimerBanner />
 
@@ -254,7 +265,16 @@ export default function NewIncidentForm() {
               tabIndex={-1}
               {...register('facility_type', { required: 'Facility type is required' })}
             />
-            <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: '#9CA3AF' }}>
+            <span
+              style={{
+                position: 'absolute',
+                insetInlineEnd: 10, // RTL
+                top: '50%',
+                transform: 'translateY(-50%)',
+                fontSize: 11,
+                color: '#9CA3AF',
+              }}
+            >
               🔒
             </span>
           </div>

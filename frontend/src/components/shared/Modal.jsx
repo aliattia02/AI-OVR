@@ -95,13 +95,16 @@ export default function Modal({ title, children, onClose, size = 'md' }) {
       >
         <div
           style={{
-            padding: '14px 18px',
+            paddingBlock: 14, // RTL
+            paddingInlineStart: 18, // RTL
+            paddingInlineEnd: 52, // RTL
             borderBottom: '1px solid #E5E7EB',
             backgroundColor: '#F3F4F6',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 12,
+            position: 'relative', // RTL
           }}
         >
           <h2 id={titleId} style={{ margin: 0, fontSize: 18, color: '#0C2340' }}>
@@ -112,6 +115,10 @@ export default function Modal({ title, children, onClose, size = 'md' }) {
             onClick={() => onClose?.()}
             aria-label="Close modal"
             style={{
+              position: 'absolute', // RTL
+              insetInlineEnd: 12, // RTL
+              top: '50%', // RTL
+              transform: 'translateY(-50%)', // RTL
               width: 32,
               height: 32,
               borderRadius: 8,

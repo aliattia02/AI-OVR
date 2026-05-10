@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { useAnalyticsCompare } from '../../hooks/useAnalytics';
 import EmptyState from '../shared/EmptyState';
+import { useDirection } from '../../hooks/useDirection'; // RTL
 
 // API supports these two dimensions (GET /analytics/compare?dimension=...)
 const DIMENSIONS = [
@@ -64,6 +65,7 @@ function LoadingSkeleton() {
 
 export default function CompareView({ filters = {} }) {
   const [dimension, setDimension] = useState('facility');
+  const { isRTL } = useDirection(); // RTL
 
   const { data, isLoading, error } = useAnalyticsCompare(dimension, filters);
 
@@ -128,7 +130,8 @@ export default function CompareView({ filters = {} }) {
       ) : !chartData.length ? (
         <EmptyState message="No data available for this dimension." />
       ) : (
-        <div style={{ width: '100%', height: chartHeight }}>
+        // RTL: keep Recharts rendering LTR so axes/ticks stay correct.
+        <div className={isRTL ? 'recharts-rtl-fix' : undefined} style={{ width: '100%', height: chartHeight }}>
           <ResponsiveContainer>
             <BarChart
               data={chartData}

@@ -5,12 +5,14 @@ import { useParams } from 'react-router-dom';
 import api from '../../services/api';
 import { incidentService } from '../../services/incidents';
 import DisclaimerBanner from '../shared/DisclaimerBanner';
+import { useDirection } from '../../hooks/useDirection'; // RTL
 
 const REPORTER_ROLE_OPTIONS = ['Patient', 'Visitor', 'Family Member'];
 
 export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
   const { facility_uuid: facilityUuidFromParams } = useParams();
   const facilityUuid = facilityUuidProp || facilityUuidFromParams;
+  const { isRTL } = useDirection(); // RTL
 
   const [facilityInfo, setFacilityInfo] = useState({
     facilityName: '',
@@ -103,8 +105,8 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
     []
   );
 
-  const labelStyle = { display: 'grid', gap: 6, fontSize: 14, fontWeight: 600, color: '#111827' };
-  const errorStyle = { fontSize: 13, color: '#B91C1C' };
+  const labelStyle = { display: 'grid', gap: 6, fontSize: 14, fontWeight: 600, color: '#111827', textAlign: 'start' }; // RTL
+  const errorStyle = { fontSize: 13, color: '#B91C1C', textAlign: 'start' }; // RTL
 
   const { facilityName, administration, governorate } = facilityInfo;
   const hasMeta = administration || governorate;
@@ -130,7 +132,16 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
         {hasMeta && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', marginTop: 4 }}>
             {administration && (
-              <span style={{ fontSize: 13, color: '#4B5563', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span
+                style={{
+                  fontSize: 13,
+                  color: '#4B5563',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  flexDirection: isRTL ? 'row-reverse' : 'row', // RTL
+                }}
+              >
                 <svg width="13" height="13" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <path d="M3 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4ZM3 10a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6ZM14 9a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-2Z" fill="#6B7280" />
                 </svg>
@@ -138,7 +149,16 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
               </span>
             )}
             {governorate && (
-              <span style={{ fontSize: 13, color: '#4B5563', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span
+                style={{
+                  fontSize: 13,
+                  color: '#4B5563',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  flexDirection: isRTL ? 'row-reverse' : 'row', // RTL
+                }}
+              >
                 <svg width="13" height="13" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <path fillRule="evenodd" clipRule="evenodd" d="M5.05 4.05a7 7 0 1 1 9.9 9.9L10 18.9l-4.95-4.95a7 7 0 0 1 0-9.9ZM10 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="#6B7280" />
                 </svg>
