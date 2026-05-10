@@ -2,6 +2,7 @@ export const DisclaimerBanner = ({ className = '' }) => {
   return (
     <div
       className={className}
+      dir="auto" // RTL
       style={{
         border: '1px solid #b5d4f4',
         background: '#e6f1fb',

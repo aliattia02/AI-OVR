@@ -25,6 +25,7 @@ import Spinner from '../shared/Spinner';
 import CompareView from './CompareView';
 import DashboardFilterBar from './DashboardFilterBar';
 import TrendChart from './TrendChart';
+import { useDirection } from '../../hooks/useDirection'; // RTL
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -80,6 +81,7 @@ function Card({ title, value, sub }) {
 
 export default function AnalyticsDashboard() {
   const { tier, user } = useAuth();
+  const { isRTL } = useDirection(); // RTL
 
   // Tier-2 users are scoped to their own facility only.
   // Their facility_name is locked into every filter object sent to the backend.
@@ -196,7 +198,14 @@ export default function AnalyticsDashboard() {
       />
 
       {/* ── KPI cards ────────────────────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+          gap: 10,
+          direction: isRTL ? 'rtl' : 'ltr', // RTL
+        }}
+      >
         <Card title="Total Incidents"    value={totalIncidents} />
         <Card title="Open"               value={openIncidents} />
         <Card title="High Risk (Major)"  value={highRisk} />

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useDirection } from '../../hooks/useDirection'; // RTL
 
 const ROWS = ['Major', 'Moderate', 'Minor'];
 const COLS = ['High', 'Medium', 'Low'];
@@ -40,10 +41,18 @@ function getRiskLevel(score) {
 export default function RiskMatrix({ severity, probability, onChange, readOnly = false }) {
   const selectedScore = useMemo(() => getRiskScore(severity, probability), [severity, probability]);
   const clickable = !readOnly && typeof onChange === 'function';
+  const { isRTL } = useDirection(); // RTL
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 8,
+          direction: isRTL ? 'ltr' : undefined, // RTL
+        }}
+      >
         {ROWS.map((rowSeverity) =>
           COLS.map((colProbability) => {
             const score = getRiskScore(rowSeverity, colProbability);
@@ -89,7 +98,14 @@ export default function RiskMatrix({ severity, probability, onChange, readOnly =
         )}
       </div>
 
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: '#111827',
+          textAlign: 'start', // RTL
+        }}
+      >
         Risk Score: {selectedScore ?? '—'} — {getRiskLevel(selectedScore)}
       </div>
     </div>

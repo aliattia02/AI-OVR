@@ -10,6 +10,13 @@ const supportedLanguages = [
   // TODO: 'de' to be added later
 ];
 
+const applyLanguageDirection = (lng) => { // RTL
+  document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr'; // RTL
+  document.documentElement.lang = lng; // RTL
+}; // RTL
+
+i18n.on('languageChanged', applyLanguageDirection); // RTL
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -27,6 +34,7 @@ i18n
     interpolation: {
       escapeValue: false,
     },
-  });
+  })
+  .then(() => applyLanguageDirection(i18n.language)); // RTL
 
 export default i18n;

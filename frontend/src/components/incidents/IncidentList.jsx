@@ -17,6 +17,7 @@ import { INCIDENT_STATUSES, SEVERITY_OPTIONS } from '../../utils/enums';
 import { getToken } from '../../services/api';
 import EmptyState from '../shared/EmptyState';
 import StatusBadge from './StatusBadge';
+import { useDirection } from '../../hooks/useDirection'; // RTL
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -195,6 +196,7 @@ function FilterInput({ label, value, onChange, type = 'text', placeholder = '' }
           backgroundColor: C.bg,
           outline: 'none',
           transition: 'border-color 0.15s',
+          textAlign: 'start', // RTL
         }}
         onFocus={e => { e.target.style.borderColor = C.borderFocus; }}
         onBlur={e => { e.target.style.borderColor = C.border; }}
@@ -203,7 +205,7 @@ function FilterInput({ label, value, onChange, type = 'text', placeholder = '' }
   );
 }
 
-function FilterSelect({ label, value, onChange, options }) {
+function FilterSelect({ label, value, onChange, options, isRTL }) { // RTL
   return (
     <label style={{ display: 'grid', gap: 4 }}>
       <span style={{ fontSize: 11, fontWeight: 700, color: C.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -224,8 +226,8 @@ function FilterSelect({ label, value, onChange, options }) {
           appearance: 'none',
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
           backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'right 10px center',
-          paddingRight: 28,
+          backgroundPosition: isRTL ? 'left 10px center' : 'right 10px center', // RTL
+          paddingInlineEnd: 28, // RTL
         }}
       >
         <option value="all">All</option>
@@ -302,7 +304,14 @@ function DateRangeFilter({ label, from, to, onFromChange, onToChange }) {
         />
       </div>
       <div style={{ display: 'flex', gap: 8, fontSize: 10, color: C.textMuted, paddingTop: 1 }}>
-        <span>From</span><span style={{ marginLeft: 'auto' }}>To</span>
+        <span>From</span>
+        <span
+          style={{
+            marginInlineStart: 'auto', // RTL
+          }}
+        >
+          To
+        </span>
       </div>
     </div>
   );
@@ -315,7 +324,7 @@ function ColHeader({ label, sortKey, sortBy, sortDir, onSort }) {
       onClick={() => onSort(sortKey)}
       style={{
         padding: '10px 14px',
-        textAlign: 'left',
+        textAlign: 'start', // RTL
         fontSize: 11,
         fontWeight: 700,
         textTransform: 'uppercase',
@@ -333,7 +342,12 @@ function ColHeader({ label, sortKey, sortBy, sortDir, onSort }) {
     >
       {label}
       {active && (
-        <span style={{ marginLeft: 4, opacity: 0.8 }}>
+        <span
+          style={{
+            marginInlineStart: 4, // RTL
+            opacity: 0.8,
+          }}
+        >
           {sortDir === 'asc' ? '↑' : '↓'}
         </span>
       )}
@@ -369,6 +383,7 @@ function activeFilterCount(filters) {
 
 export default function IncidentList({ onIncidentClick, role }) {
   const { tier, user } = useAuth();
+  const { isRTL } = useDirection(); // RTL
 
   // Tier-2 users are scoped to their own facility — lock location filters.
   const isFacilityScoped = tier === 2;
@@ -552,7 +567,17 @@ export default function IncidentList({ onIncidentClick, role }) {
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
         {/* Quick search */}
         <div style={{ position: 'relative', flex: '1 1 260px', minWidth: 220 }}>
-          <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.textMuted, fontSize: 14, pointerEvents: 'none' }}>
+          <span
+            style={{
+              position: 'absolute',
+              insetInlineStart: 11, // RTL
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: C.textMuted,
+              fontSize: 14,
+              pointerEvents: 'none',
+            }}
+          >
             🔍
           </span>
           <input
@@ -560,7 +585,20 @@ export default function IncidentList({ onIncidentClick, role }) {
             value={filters.query}
             onChange={e => setFilter('query', e.target.value)}
             placeholder="Search by ID, description, person, facility…"
-            style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 8, padding: '9px 12px 9px 34px', fontSize: 13, color: C.text, boxSizing: 'border-box', outline: 'none', backgroundColor: C.bg }}
+            style={{
+              width: '100%',
+              border: `1px solid ${C.border}`,
+              borderRadius: 8,
+              paddingBlock: 9, // RTL
+              paddingInlineStart: 34, // RTL
+              paddingInlineEnd: 12, // RTL
+              fontSize: 13,
+              color: C.text,
+              boxSizing: 'border-box',
+              outline: 'none',
+              backgroundColor: C.bg,
+              textAlign: 'start', // RTL
+            }}
             onFocus={e => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brandLight}`; }}
             onBlur={e => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
           />
@@ -584,7 +622,15 @@ export default function IncidentList({ onIncidentClick, role }) {
               {advFilterCount}
             </span>
           )}
-          <span style={{ fontSize: 10, opacity: 0.7, marginLeft: 2 }}>{advOpen ? '▲' : '▼'}</span>
+          <span
+            style={{
+              fontSize: 10,
+              opacity: 0.7,
+              marginInlineStart: 2, // RTL
+            }}
+          >
+            {advOpen ? '▲' : '▼'}
+          </span>
         </button>
 
         {advFilterCount > 0 && (
@@ -594,7 +640,16 @@ export default function IncidentList({ onIncidentClick, role }) {
         )}
 
         {/* Page size */}
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: C.textMuted, marginLeft: 'auto' }}>
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 12,
+            color: C.textMuted,
+            marginInlineStart: 'auto', // RTL
+          }}
+        >
           Rows:
           <select
             value={pageSize}
@@ -661,6 +716,7 @@ export default function IncidentList({ onIncidentClick, role }) {
                 value={filters.governorate}
                 onChange={v => setFilter('governorate', v)}
                 options={governorateOptions}
+                isRTL={isRTL} // RTL
               />
             )}
             {isFacilityScoped ? (
@@ -671,6 +727,7 @@ export default function IncidentList({ onIncidentClick, role }) {
                 value={filters.administration}
                 onChange={v => setFilter('administration', v)}
                 options={administrationOptions}
+                isRTL={isRTL} // RTL
               />
             )}
             {isFacilityScoped ? (
@@ -681,6 +738,7 @@ export default function IncidentList({ onIncidentClick, role }) {
                 value={filters.facilityType}
                 onChange={v => setFilter('facilityType', v)}
                 options={facilityTypeOptions}
+                isRTL={isRTL} // RTL
               />
             )}
             {isFacilityScoped ? (
@@ -708,24 +766,28 @@ export default function IncidentList({ onIncidentClick, role }) {
               value={filters.errorClassification}
               onChange={v => setFilter('errorClassification', v)}
               options={ERROR_CLASSIFICATION_OPTIONS}
+              isRTL={isRTL} // RTL
             />
             <FilterSelect
               label="Event Type"
               value={filters.eventType}
               onChange={v => setFilter('eventType', v)}
               options={EVENT_TYPE_OPTIONS}
+              isRTL={isRTL} // RTL
             />
             <FilterSelect
               label="Severity"
               value={filters.severity}
               onChange={v => setFilter('severity', v)}
               options={SEVERITY_OPTS}
+              isRTL={isRTL} // RTL
             />
             <FilterSelect
               label="Incident Status"
               value={filters.status}
               onChange={v => setFilter('status', v)}
               options={INCIDENT_STATUS_OPTIONS}
+              isRTL={isRTL} // RTL
             />
           </div>
 
@@ -816,7 +878,16 @@ export default function IncidentList({ onIncidentClick, role }) {
 
       {/* ── Pagination ────────────────────────────────────────────────────── */}
       {!isLoading && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 2 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            paddingTop: 2,
+            flexDirection: isRTL ? 'row-reverse' : 'row', // RTL
+          }}
+        >
           <button
             type="button"
             onClick={() => setPage(p => Math.max(0, p - 1))}
