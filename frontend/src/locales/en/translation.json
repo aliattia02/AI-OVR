@@ -181,26 +181,26 @@
       "export_xlsx_failed": "XLSX export failed. Please try again.",
       "ai_marker": "AI ✓",
       "classification_options": {
-        "medication_error": "MedicationError",
-        "clinical_management": "ClinicalManagement",
-        "diagnosis_error": "DiagnosisError",
-        "patient_fall": "PatientFall",
-        "hospital_acquired_infection": "HospitalAcquiredInfection",
-        "surgical_procedure_error": "SurgicalProcedureError",
-        "equipment_failure": "EquipmentFailure",
-        "documentation_error": "DocumentationError",
-        "communication_error": "CommunicationError",
-        "blood_transfusion_error": "BloodTransfusionError",
-        "workplace_violence": "WorkplaceViolence",
+        "medication_error": "Medication Error",
+        "clinical_management": "Clinical Management",
+        "diagnosis_error": "Diagnosis Error",
+        "patient_fall": "Patient Fall",
+        "hospital_acquired_infection": "Hospital Acquired Infection",
+        "surgical_procedure_error": "Surgical Procedure Error",
+        "equipment_failure": "Equipment Failure",
+        "documentation_error": "Documentation Error",
+        "communication_error": "Communication Error",
+        "blood_transfusion_error": "Blood Transfusion Error",
+        "workplace_violence": "Workplace Violence",
         "environmental": "Environmental",
         "other": "Other"
       },
       "event_type_options": {
-        "near_miss": "NearMiss",
-        "adverse_event": "AdverseEvent",
-        "sentinel_event": "SentinelEvent",
-        "no_harm": "NoHarm",
-        "unsafe_condition": "UnsafeCondition"
+        "near_miss": "Near Miss",
+        "adverse_event": "Adverse Event",
+        "sentinel_event": "Sentinel Event",
+        "no_harm": "No Harm",
+        "unsafe_condition": "Unsafe Condition"
       }
     },
     "card": {
