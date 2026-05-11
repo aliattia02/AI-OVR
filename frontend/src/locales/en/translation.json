@@ -196,8 +196,10 @@
         "other": "Other"
       },
       "event_type_options": {
+        "incident_event": "Incident Event",
         "near_miss": "Near Miss",
         "adverse_event": "Adverse Event",
+        "significant_event": "Significant Event",
         "sentinel_event": "Sentinel Event",
         "no_harm": "No Harm",
         "unsafe_condition": "Unsafe Condition"
@@ -341,7 +343,9 @@
       "near_miss": "Near Miss",
       "adverse_event": "Adverse Event",
       "significant_event": "Significant Event",
-      "sentinel_event": "Sentinel Event"
+      "sentinel_event": "Sentinel Event",
+      "no_harm": "No Harm",
+      "unsafe_condition": "Unsafe Condition"
     },
     "classification": {
       "label": "Error Classification",
