@@ -48,8 +48,8 @@
       "aswan": "Aswan",
       "ismailia": "Ismailia",
       "luxor": "Luxor",
-      "port_said": "Port_Said",
-      "south_sinai": "South_Sinai",
+      "port_said": "Port Said",
+      "south_sinai": "South Sinai",
       "suez": "Suez"
     },
     "governorate_labels": {
@@ -75,7 +75,7 @@
       "error_failed": "Login failed. Please try again.",
       "sign_in": "Sign in",
       "signing_in": "Signing in…",
-      "footer_stats": "6 Governorates · 348 Facilities · Confidential"
+      "footer_stats": "{{governorate_count}} Governorates · {{facility_count}} Facilities · Confidential"
     },
     "mfa_verify": {
       "title": "Multi-factor verification",
@@ -139,7 +139,7 @@
       "user_provisioning": "User Provisioning"
     },
     "app_tagline": "Occurrence Reporting",
-    "app_stats": "6 Governorates · 348 Facilities",
+    "app_stats": "{{governorate_count}} Governorates · {{facility_count}} Facilities",
     "patient_badge": "🔒 Anonymous · No login required",
     "unknown_role": "Unknown Role",
     "ai_status_not_configured": "AI: Not configured",
