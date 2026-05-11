@@ -113,7 +113,7 @@
       "error_same": "New password must differ from the temporary password.",
       "error_failed": "Failed to change password.",
       "temporary_password_label": "Temporary password",
-      "new_password_label": "New password (min. 8 characters)",
+      "new_password_label": "New password (min. {{min}} characters)",
       "confirm_password_label": "Confirm new password",
       "button_saving": "Saving…",
       "button_continue": "Set password and continue"
