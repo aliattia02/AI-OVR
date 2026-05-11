@@ -1,1 +1,629 @@
-{}
+{
+  "common": {
+    "brand_mark": "E·O",
+    "brand_name": "E·OVR",
+    "app_full_name": "Electronic Occurrence & Variance Reporting",
+    "loading": "Loading",
+    "retry": "Retry",
+    "close_modal": "Close modal",
+    "from": "From",
+    "to": "To",
+    "placeholder_dash": "—",
+    "submitting": "Submitting...",
+    "tier_label": "Tier {{tier}}",
+    "locked_label": "locked",
+    "disclaimer_ar": "يستخدم فقط لأغراض تحسين الجودة وليس كوثيقة قانونية. هوية المبلغ محمية.",
+    "disclaimer_en": "This report is used exclusively for quality improvement — not for legal proceedings. Reporter identity is protected.",
+    "page_titles": {
+      "dashboard": "Dashboard",
+      "analytics": "Analytics"
+    },
+    "dashboard_welcome": {
+      "title": "Welcome to E·OVR",
+      "description": "Use the sidebar to submit a new incident report or review existing reports assigned to your facility. Analytics are available to managers and above."
+    },
+    "fields": {
+      "governorate": "Governorate",
+      "administration": "Administration",
+      "facility": "Facility",
+      "facility_type": "Facility Type",
+      "facility_name": "Facility Name",
+      "description": "Description",
+      "occurrence_date": "Occurrence Date",
+      "occurrence_time": "Occurrence Time",
+      "occurrence_location": "Occurrence Location",
+      "reporter_role": "Reporter Role",
+      "medical_file_number": "Medical File Number",
+      "creation_date": "Creation Date"
+    },
+    "roles": {
+      "patient": "Patient",
+      "staff": "Staff",
+      "quality_admin": "Quality Admin",
+      "administration_manager": "Administration Manager",
+      "governorate_manager": "Governorate Manager",
+      "top_management": "Top Management"
+    },
+    "governorates": {
+      "aswan": "Aswan",
+      "ismailia": "Ismailia",
+      "luxor": "Luxor",
+      "port_said": "Port_Said",
+      "south_sinai": "South_Sinai",
+      "suez": "Suez"
+    },
+    "governorate_labels": {
+      "aswan": "أسوان",
+      "ismailia": "الإسماعيلية",
+      "luxor": "الأقصر",
+      "port_said": "بورسعيد",
+      "south_sinai": "جنوب سيناء",
+      "suez": "السويس"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "email_label": "Email address",
+      "email_placeholder": "you@hospital.gov.eg",
+      "password_label": "Password",
+      "password_placeholder": "••••••••",
+      "forgot_password": "Forgot password?",
+      "forgot_info": "Password resets are managed by your system administrator. Please contact your facility's IT support or quality admin to have your password reset.",
+      "error_required": "Email and password are required.",
+      "error_invalid": "Invalid email or password.",
+      "error_failed": "Login failed. Please try again.",
+      "sign_in": "Sign in",
+      "signing_in": "Signing in…",
+      "footer_stats": "6 Governorates · 348 Facilities · Confidential"
+    },
+    "mfa_verify": {
+      "title": "Multi-factor verification",
+      "description": "Enter the 6-digit code from your authenticator app to finish signing in.",
+      "code_label": "Verification code",
+      "error_required": "Enter the 6-digit code.",
+      "error_invalid": "Enter a valid 6-digit code.",
+      "error_missing_token": "Missing access token.",
+      "error_failed": "Verification failed. Please try again.",
+      "button_verifying": "Verifying…",
+      "button_continue": "Verify and continue"
+    },
+    "mfa_setup": {
+      "title": "Set up multi-factor authentication",
+      "description": "Scan the QR code with your authenticator app, or enter the secret manually. Then enter the 6-digit code to confirm enrollment.",
+      "error_generate": "Unable to generate MFA setup details.",
+      "success": "MFA enrolled successfully",
+      "error_failed": "Verification failed. Please try again.",
+      "loading_qr": "Generating QR…",
+      "qr_alt": "MFA QR code",
+      "qr_unavailable": "QR unavailable",
+      "manual_secret_label": "Manual setup secret",
+      "manual_secret_unavailable": "Unavailable",
+      "code_label": "Enter the 6-digit code from your authenticator",
+      "error_required": "Enter the 6-digit code.",
+      "error_invalid": "Enter a valid 6-digit code.",
+      "button_verifying": "Verifying…",
+      "button_confirm": "Confirm MFA enrollment"
+    },
+    "change_password": {
+      "title": "Set your password",
+      "description": "Your account was created with a temporary password. Please set a new one to continue.",
+      "error_min_length": "New password must be at least {{min}} characters.",
+      "error_mismatch": "Passwords do not match.",
+      "error_same": "New password must differ from the temporary password.",
+      "error_failed": "Failed to change password.",
+      "temporary_password_label": "Temporary password",
+      "new_password_label": "New password (min. 8 characters)",
+      "confirm_password_label": "Confirm new password",
+      "button_saving": "Saving…",
+      "button_continue": "Set password and continue"
+    },
+    "session": {
+      "title_expired": "Session Expired",
+      "title_expiring": "Session Expiring Soon",
+      "message_expired": "Your session has expired due to inactivity.",
+      "message_expiring": "Your session will expire in 2 minutes due to inactivity. Would you like to stay logged in?",
+      "error_refresh": "Could not extend your session. Please log in again.",
+      "button_logout": "Log Out Now",
+      "button_refreshing": "Refreshing…",
+      "button_stay_logged_in": "Stay Logged In"
+    }
+  },
+  "nav": {
+    "items": {
+      "report_incident": "Report Incident",
+      "new_report": "New Report",
+      "my_reports": "My Reports",
+      "reports": "Reports",
+      "workflow": "Workflow",
+      "user_provisioning": "User Provisioning"
+    },
+    "app_tagline": "Occurrence Reporting",
+    "app_stats": "6 Governorates · 348 Facilities",
+    "patient_badge": "🔒 Anonymous · No login required",
+    "unknown_role": "Unknown Role",
+    "ai_status_not_configured": "AI: Not configured",
+    "ai_status_configured": "AI: {{model}}",
+    "sign_out": "Sign out"
+  },
+  "incidents": {
+    "list": {
+      "page_title": "Incident Reports",
+      "quick_search_placeholder": "Search by ID, description, person, facility…",
+      "advanced_search": "Advanced Search",
+      "clear_filters": "✕ Clear filters",
+      "rows_label": "Rows:",
+      "export_csv": "CSV",
+      "export_xlsx": "XLSX",
+      "advanced_filters": "Advanced Filters",
+      "clear_all": "Clear all",
+      "all_option": "All",
+      "locked": "Locked",
+      "facility_name_placeholder": "Type to search…",
+      "person_involved_label": "Person Involved",
+      "person_involved_placeholder": "Name or ID…",
+      "incident_status_label": "Incident Status",
+      "error_title": "Failed to load incidents.",
+      "error_subtitle": "Please try again.",
+      "loading": "Loading…",
+      "empty_title": "No incidents found",
+      "empty_subtitle": "Try adjusting your search or filter criteria.",
+      "showing": "Showing",
+      "of": "of",
+      "loaded": "loaded",
+      "incidents": "incidents",
+      "column_incident_id": "Incident ID",
+      "column_occurrence": "Occurrence",
+      "column_created": "Created",
+      "pagination_previous": "← Previous",
+      "pagination_page": "Page",
+      "pagination_next": "Next →",
+      "export_xlsx_failed": "XLSX export failed. Please try again.",
+      "ai_marker": "AI ✓",
+      "classification_options": {
+        "medication_error": "MedicationError",
+        "clinical_management": "ClinicalManagement",
+        "diagnosis_error": "DiagnosisError",
+        "patient_fall": "PatientFall",
+        "hospital_acquired_infection": "HospitalAcquiredInfection",
+        "surgical_procedure_error": "SurgicalProcedureError",
+        "equipment_failure": "EquipmentFailure",
+        "documentation_error": "DocumentationError",
+        "communication_error": "CommunicationError",
+        "blood_transfusion_error": "BloodTransfusionError",
+        "workplace_violence": "WorkplaceViolence",
+        "environmental": "Environmental",
+        "other": "Other"
+      },
+      "event_type_options": {
+        "near_miss": "NearMiss",
+        "adverse_event": "AdverseEvent",
+        "sentinel_event": "SentinelEvent",
+        "no_harm": "NoHarm",
+        "unsafe_condition": "UnsafeCondition"
+      }
+    },
+    "card": {
+      "aria_incident_id": "Incident {{id}}",
+      "aria_incident_facility": "Incident details for {{facility}}",
+      "unknown_facility": "Unknown Facility",
+      "unknown_facility_lower": "unknown facility",
+      "severity_label": "Severity:",
+      "registered_label": "Registered:"
+    },
+    "detail": {
+      "no_selection_title": "No incident selected",
+      "no_selection_subtitle": "Choose an incident to view full details.",
+      "error_title": "Failed to load incident details.",
+      "error_subtitle": "Please try again.",
+      "not_found_title": "Incident not found",
+      "not_found_subtitle": "This incident may no longer be available.",
+      "governorate_label": "Governorate:",
+      "registered_label": "Registered:",
+      "back": "Back",
+      "incident_details_title": "Incident Details",
+      "risk_assessment_title": "Risk Assessment",
+      "status_workflow_title": "Status Workflow",
+      "audit_trail_title": "Audit Trail",
+      "current_status_label": "Current status:",
+      "no_legal_next_states": "No legal next states.",
+      "audit_user_label": "User:",
+      "no_audit_entries": "No audit entries available.",
+      "locked_message": "Requires Quality Admin access",
+      "generic_error": "An error occurred. Please try again.",
+      "save": "Save",
+      "saving": "Saving...",
+      "arabic_fields": {
+        "incident_id": "رقم البلاغ",
+        "status": "الحالة",
+        "facility_name": "اسم المنشأة",
+        "facility_type": "نوع المنشأة",
+        "governorate": "المحافظة",
+        "administration": "الإدارة",
+        "occurrence_date": "تاريخ الحدوث",
+        "occurrence_time": "وقت الحدوث",
+        "occurrence_location": "مكان الحدوث",
+        "registration_date": "تاريخ التسجيل",
+        "report_date": "تاريخ التقرير النهائي",
+        "report_time": "وقت التقرير النهائي",
+        "reporter_type": "نوع المبلّغ",
+        "reporter_role": "صفة المبلّغ",
+        "involved_person": "الشخص المعني",
+        "reporting_department": "القسم المبلّغ",
+        "responsible_manager": "المدير المسؤول",
+        "description": "وصف الواقعة",
+        "error_classification": "تصنيف الخطأ",
+        "specific_error": "الخطأ المحدد",
+        "event_type": "نوع الحدث",
+        "severity": "الخطورة",
+        "probability": "الاحتمالية",
+        "risk_score": "درجة المخاطر",
+        "recommendations": "التوصيات",
+        "notes": "ملاحظات",
+        "medical_file_number": "رقم الملف الطبي",
+        "action_status": "حالة الإجراء"
+      }
+    },
+    "new": {
+      "facility_options_error": "Failed to load facility options.",
+      "select_label": "Select {{label}}",
+      "facility_type_label": "Facility Type",
+      "reporter_role_label": "Reporter Role",
+      "involved_person_label": "Involved Person",
+      "responsible_manager_label": "Responsible Manager",
+      "reporting_department_label": "Reporting Department",
+      "specific_error_label": "Specific Error",
+      "recommendations_label": "Recommendations",
+      "notes_label": "Notes",
+      "select_type": "Select type",
+      "select_role": "Select role",
+      "select_location_optional": "Select location (optional)",
+      "select_classification": "Select classification",
+      "select_event_type": "Select event type",
+      "select_severity": "Select severity",
+      "occurrence_location_telehealth": "Telehealth / Remote",
+      "stored_encrypted": "Stored encrypted",
+      "error_facility_type_required": "Facility type is required",
+      "error_reporter_role_required": "Reporter role is required",
+      "error_involved_person_required": "Involved person is required",
+      "error_occurrence_date_required": "Occurrence date is required",
+      "error_description_required": "Description is required",
+      "error_classification_required": "Error classification is required",
+      "error_event_type_required": "Event type is required",
+      "error_severity_required": "Severity is required",
+      "error_submit": "Failed to submit incident.",
+      "success_submit": "Incident submitted successfully.",
+      "submit": "Submit Incident"
+    },
+    "status": {
+      "label": "Status",
+      "created": "Created",
+      "in_progress": "In Progress",
+      "evaluating": "Evaluating",
+      "more_info_needed": "More Info Needed",
+      "action_taken": "Action Taken",
+      "completed": "Completed",
+      "unknown": "Unknown"
+    },
+    "severity": {
+      "label": "Severity",
+      "minor": "Minor",
+      "moderate": "Moderate",
+      "major": "Major"
+    },
+    "probability": {
+      "label": "Probability",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "risk": {
+      "label": "Risk",
+      "risk_score_label": "Risk Score",
+      "risk_score_prefix": "Risk Score:",
+      "risk_separator": " — ",
+      "not_selected": "Not Selected",
+      "high_risk": "High Risk",
+      "medium_risk": "Medium Risk",
+      "low_risk": "Low Risk",
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "score_critical": "{{score}} · Critical",
+      "score_high": "{{score}} · High",
+      "score_medium": "{{score}} · Medium",
+      "score_low": "{{score}} · Low"
+    },
+    "event_type": {
+      "label": "Event Type",
+      "incident_event": "Incident Event",
+      "near_miss": "Near Miss",
+      "adverse_event": "Adverse Event",
+      "significant_event": "Significant Event",
+      "sentinel_event": "Sentinel Event"
+    },
+    "classification": {
+      "label": "Error Classification",
+      "column_label": "Classification",
+      "medication": "Medication",
+      "administrative": "Administrative",
+      "clinical": "Clinical",
+      "equipment": "Equipment",
+      "infection_control": "Infection Control",
+      "falls": "Falls",
+      "documentation": "Documentation",
+      "behavior": "Behavior"
+    },
+    "action": {
+      "panel_title": "CAPA",
+      "corrective_action": "Corrective Action",
+      "preventive_action": "Preventive Action",
+      "action_date": "Action Date",
+      "action_time": "Action Time",
+      "action_status": "Action Status",
+      "status_pending": "Pending",
+      "status_in_progress": "In Progress",
+      "status_completed": "Completed",
+      "error_save": "Failed to save CAPA."
+    },
+    "ai": {
+      "panel_title": "AI Badge",
+      "suggested": "AI Suggested",
+      "reviewed": "AI Reviewed",
+      "pending_review": "AI Pending Review",
+      "classification_label": "Classification:",
+      "event_type_label": "Event Type:",
+      "confidence_label": "Confidence:",
+      "confidence_value": "{{percent}}% confidence",
+      "accept": "Accept",
+      "override": "Override",
+      "confirm_override": "Confirm Override",
+      "final_note": "AI suggested — Quality Admin decision is final",
+      "applied_notice": "AI Classification Applied: {{classification}} — pending Quality Admin review.",
+      "error_save_feedback": "Failed to save AI feedback."
+    },
+    "jci": {
+      "panel_title": "JCI & Disclosure",
+      "disclosure_info_title": "Disclosure Information",
+      "compliance_title": "JCI Compliance",
+      "disclosure_fields": {
+        "disclosure_date": "Disclosure Date",
+        "disclosure_method": "Disclosure Method",
+        "responsible_person": "Responsible Person",
+        "vulnerable_patient": "Vulnerable Patient",
+        "vulnerable_population_type": "Vulnerable Population Type",
+        "workplace_violence": "Workplace Violence",
+        "merp_category": "MERP Category"
+      },
+      "chapter_label": "JCI Chapter",
+      "compliance_status_label": "Compliance Status",
+      "select_chapter": "— Select chapter —",
+      "select_status": "— Select status —",
+      "standard_label": "Standard",
+      "standard_placeholder": "e.g. IPSG.1",
+      "measurable_element_label": "Measurable Element",
+      "measurable_element_placeholder": "e.g. ME 1",
+      "evidence_label": "Evidence",
+      "gap_analysis_label": "Gap Analysis",
+      "action_plan_label": "Action Plan",
+      "save_jci": "Save JCI",
+      "error_save": "Failed to save JCI fields.",
+      "chapters": {
+        "ipsg": "IPSG",
+        "acc": "ACC",
+        "pfr": "PFR",
+        "aop": "AOP",
+        "cop": "COP",
+        "asc": "ASC",
+        "mmu": "MMU",
+        "pfe": "PFE",
+        "qps": "QPS",
+        "pci": "PCI",
+        "gld": "GLD",
+        "fms": "FMS",
+        "sqe": "SQE",
+        "mci": "MCI"
+      },
+      "compliance_statuses": {
+        "met": "Met",
+        "partially_met": "Partially Met",
+        "not_met": "Not Met",
+        "not_applicable": "Not Applicable"
+      }
+    },
+    "final": {
+      "panel_title": "Final Report",
+      "submit": "Submit",
+      "error_submit": "Failed to submit final report."
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "unavailable": "Analytics not available for your role.",
+    "error_loading": "Failed to load analytics data.",
+    "kpi": {
+      "total_incidents": "Total Incidents",
+      "open": "Open",
+      "high_risk_major": "High Risk (Major)",
+      "pending_ai_review": "Pending AI Review"
+    },
+    "charts": {
+      "monthly_trends": "Monthly Trends",
+      "severity_breakdown": "Severity Breakdown",
+      "comparison": "Comparison"
+    },
+    "tooltip_incidents": "Incidents",
+    "compare": {
+      "no_permission": "You don't have permission to view comparison data.",
+      "no_data": "No data available for this dimension."
+    },
+    "filters": {
+      "title": "Dashboard Filters",
+      "active_count": "{{count}} active",
+      "updating": "Updating…",
+      "clear_all": "✕ Clear all",
+      "all_governorates": "All governorates",
+      "all_administrations": "All administrations",
+      "all_types": "All types",
+      "your_facility": "Your facility",
+      "no_facilities": "No facilities",
+      "all_facilities": "All facilities"
+    }
+  },
+  "patient": {
+    "report": {
+      "facility_fallback": "Reporting Facility",
+      "invalid_link": "Invalid reporting link.",
+      "link_not_recognised": "Reporting link not recognised.",
+      "load_error": "Unable to load facility details.",
+      "anonymous_notice": "Your report is anonymous. No personal information is required.",
+      "description_required": "Description is required",
+      "submit_error": "Failed to submit report.",
+      "submit": "Submit Report",
+      "success": "Your report has been received. Reference: {{reference}}",
+      "reference_na": "N/A",
+      "reporter_roles": {
+        "patient": "Patient",
+        "visitor": "Visitor",
+        "family_member": "Family Member"
+      }
+    },
+    "qr": {
+      "no_link_assigned": "No patient link has been assigned to this facility yet.",
+      "copied": "✓ Copied!",
+      "copy_failed": "Copy failed",
+      "copy_link": "Copy Link",
+      "download_png": "Download QR PNG"
+    }
+  },
+  "admin": {
+    "title": "User provisioning",
+    "note": "Top management only. Temporary passwords are shown once — copy them immediately.",
+    "tabs": {
+      "provisioning": "Provisioning",
+      "users": "Users",
+      "qr_codes": "QR Codes"
+    },
+    "common": {
+      "copy": "Copy",
+      "copied": "✓ Copied",
+      "show": "Show",
+      "hide": "Hide",
+      "username": "Username",
+      "email": "Email",
+      "temp_password": "Temp password",
+      "full_name": "Full name",
+      "credentials_provisioned": "Credentials provisioned",
+      "patient_submission_link": "Patient submission link",
+      "patient_qr_code": "Patient QR Code",
+      "staff_reporter_account": "Staff reporter account",
+      "quality_admin_account": "Quality admin account",
+      "password_shown_once": "⚠ This password is shown once. Copy it before leaving this page.",
+      "role_account_created": "{{role}} account created",
+      "loading_facilities": "Loading facilities…",
+      "loading_location_options": "Loading location options…",
+      "facility_data_error": "Failed to load facility data. Check your connection or permissions.",
+      "id_label": "ID:"
+    },
+    "facility_provision": {
+      "section_title": "Provision facility credentials",
+      "section_description": "Creates a staff reporter and quality admin account. Select the facility by location.",
+      "submit": "Provision credentials",
+      "submitting": "Provisioning…",
+      "error": "Failed to provision facility credentials.",
+      "facility_unit_label": "Facility / Unit",
+      "select_governorate": "— Select governorate —",
+      "select_administration": "— Select administration —",
+      "select_facility": "— Select facility —"
+    },
+    "tier_user": {
+      "section_title": "Create governorate / administration user",
+      "section_description": "Creates a higher-tier account. Temporary password is shown once.",
+      "role_label": "Role",
+      "role_governorate_manager": "Governorate manager",
+      "role_administration_manager": "Administration manager",
+      "role_top_management": "Top management (Tier 5 — system-wide)",
+      "top_management_notice": "⚠ Top management accounts have system-wide access to all governorates, administrations, and facilities. No geographic scope is required.",
+      "submit": "Create higher-tier user",
+      "submitting": "Creating…",
+      "error": "Failed to create higher-tier user."
+    },
+    "users": {
+      "loading": "Loading users…",
+      "error": "Failed to load users. Check your connection or permissions.",
+      "search_placeholder": "Search by name, email, facility…",
+      "all_roles": "All roles",
+      "all_statuses": "All statuses",
+      "status_active": "Active",
+      "status_inactive": "Inactive",
+      "count_label": "{{filtered}} of {{total}} user{{suffix}}",
+      "empty": "No users match your filters."
+    },
+    "qr_codes": {
+      "note": "Click a facility to reveal its QR code and patient submission link. The QR code can be printed and posted at the facility for anonymous patient reporting.",
+      "search_placeholder": "Search by facility, administration, or governorate…",
+      "empty": "No facilities match your search."
+    }
+  },
+  "workflow": {
+    "title": "Incident Workflow",
+    "intro": "E·OVR incident lifecycle from report intake through closure.",
+    "risk_matrix_title": "Risk Matrix (Reference)",
+    "risk_matrix_description": "Reference-only matrix used during the Evaluating stage.",
+    "score_reference_title": "Score Reference Guide",
+    "score_reference_note": "Guide reflects matrix outcomes only; scores 5, 7, and 8 are not produced by this 3×3 model.",
+    "scores_label": "Scores:",
+    "next_label": "Next:",
+    "steps": {
+      "created": {
+        "description": "Submitted by patient (anonymous) or staff (authenticated).",
+        "actions": {
+          "captured": "Incident details are captured and time-stamped.",
+          "identity_protected": "Reporter identity is protected for anonymous patient submissions.",
+          "quality_queue": "Incident enters the Quality queue for triage."
+        }
+      },
+      "in_progress": {
+        "description": "Quality Admin opens the case and begins review.",
+        "actions": {
+          "facts_reviewed": "Initial facts and supporting evidence are reviewed.",
+          "stakeholders": "Stakeholders are identified for follow-up.",
+          "ownership_assigned": "Case ownership and next review checkpoints are assigned."
+        }
+      },
+      "evaluating": {
+        "description": "Risk matrix is assigned and CAPA is drafted.",
+        "actions": {
+          "assessments": "Severity and probability are assessed.",
+          "risk_documented": "Risk score and priority level are documented.",
+          "capa_draft": "Corrective and Preventive Action (CAPA) draft is prepared."
+        }
+      },
+      "action_taken": {
+        "description": "CAPA is implemented by the facility.",
+        "actions": {
+          "actions_executed": "Approved actions are executed by responsible teams.",
+          "evidence_collected": "Evidence of implementation is collected.",
+          "effectiveness_checks": "Effectiveness checks are scheduled and tracked."
+        }
+      },
+      "completed": {
+        "description": "Final report is written and submitted.",
+        "actions": {
+          "outcomes_finalized": "Outcome summary and lessons learned are finalized.",
+          "report_submitted": "Final report is submitted for record and audit trail.",
+          "incident_closed": "Incident is formally closed in the workflow."
+        }
+      },
+      "more_info_needed": {
+        "description": "Case is sent back for clarification and returns to Evaluating after updates.",
+        "actions": {
+          "clarification_request": "Clarification request is sent to reporter or responsible team.",
+          "missing_evidence": "Missing evidence or context is collected.",
+          "loop_back": "Case loops back to Evaluating for final scoring and CAPA refinement."
+        }
+      }
+    }
+  }
+}
