@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="" />
+    <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/locales/ar/translation.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/locales/ar/translation.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/locales/en/translation.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/locales/en/translation.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -52,7 +56,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/aliat/Projects/AI-OVR/frontend/src/components/analytics&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/aliat/Projects/AI-OVR&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -90,7 +94,10 @@
       <workItem from="1778176999565" duration="6816000" />
       <workItem from="1778197444986" duration="8114000" />
       <workItem from="1778228411655" duration="2897000" />
-      <workItem from="1778262551903" duration="6249000" />
+      <workItem from="1778262551903" duration="10964000" />
+      <workItem from="1778413388370" duration="2211000" />
+      <workItem from="1778430651723" duration="65000" />
+      <workItem from="1778510245920" duration="6365000" />
     </task>
     <servers />
   </component>

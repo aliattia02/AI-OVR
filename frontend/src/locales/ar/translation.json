@@ -1,1 +1,622 @@
-{}
+{
+  "common": {
+    "brand_mark": "E·O",
+    "brand_name": "E·OVR",
+    "app_full_name": "الإبلاغ الإلكتروني عن الحوادث والاختلافات",
+    "loading": "جارٍ التحميل",
+    "retry": "إعادة المحاولة",
+    "close_modal": "إغلاق النافذة المنبثقة",
+    "from": "من",
+    "to": "إلى",
+    "placeholder_dash": "—",
+    "submitting": "جارٍ الإرسال...",
+    "tier_label": "المستوى {{tier}}",
+    "locked_label": "مغلق",
+    "disclaimer": "يُستخدم هذا التقرير حصريًا لتحسين الجودة — وليس للإجراءات القانونية. هوية المُبلغ محمية.",
+    "page_titles": {
+      "dashboard": "لوحة القيادة",
+      "analytics": "التحليلات"
+    },
+    "dashboard_welcome": {
+      "title": "مرحبًا بك في E·OVR",
+      "description": "استخدم الشريط الجانبي لتقديم تقرير حادث جديد أو مراجعة التقارير الحالية المخصصة لمنشأتك. التحليلات متاحة للمديرين وما فوق."
+    },
+    "fields": {
+      "governorate": "المحافظة",
+      "administration": "الإدارة",
+      "facility": "المنشأة",
+      "facility_type": "نوع المنشأة",
+      "facility_name": "اسم المنشأة",
+      "description": "الوصف",
+      "occurrence_date": "تاريخ الحادث",
+      "occurrence_time": "وقت الحادث",
+      "occurrence_location": "موقع الحادث",
+      "reporter_role": "دور المُبلغ",
+      "medical_file_number": "رقم الملف الطبي",
+      "creation_date": "تاريخ الإنشاء"
+    },
+    "roles": {
+      "patient": "مريض",
+      "staff": "موظف",
+      "quality_admin": "مسؤول الجودة",
+      "administration_manager": "مدير الإدارة",
+      "governorate_manager": "مدير المحافظة",
+      "top_management": "الإدارة العليا"
+    },
+    "governorates": {
+      "aswan": "أسوان",
+      "ismailia": "الإسماعيلية",
+      "luxor": "الأقصر",
+      "port_said": "بورسعيد",
+      "south_sinai": "جنوب سيناء",
+      "suez": "السويس"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "تسجيل الدخول إلى حسابك",
+      "email_label": "عنوان البريد الإلكتروني",
+      "email_placeholder": "you@hospital.gov.eg",
+      "password_label": "كلمة المرور",
+      "password_placeholder": "••••••••",
+      "forgot_password": "هل نسيت كلمة المرور؟",
+      "forgot_info": "تتم إدارة إعادة تعيين كلمات المرور بواسطة مسؤول النظام الخاص بك. يرجى الاتصال بدعم تكنولوجيا المعلومات في منشأتك أو مسؤول الجودة لإعادة تعيين كلمة المرور الخاصة بك.",
+      "error_required": "البريد الإلكتروني وكلمة المرور مطلوبان.",
+      "error_invalid": "بريد إلكتروني أو كلمة مرور غير صالحة.",
+      "error_failed": "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+      "sign_in": "تسجيل الدخول",
+      "signing_in": "جارٍ تسجيل الدخول…",
+      "footer_stats": "{{governorate_count}} محافظات · {{facility_count}} منشآت · سري"
+    },
+    "mfa_verify": {
+      "title": "التحقق متعدد العوامل",
+      "description": "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة الخاص بك لإنهاء تسجيل الدخول.",
+      "code_label": "رمز التحقق",
+      "error_required": "أدخل الرمز المكون من 6 أرقام.",
+      "error_invalid": "أدخل رمزًا صالحًا مكونًا من 6 أرقام.",
+      "error_missing_token": "رمز الوصول مفقود.",
+      "error_failed": "فشل التحقق. يرجى المحاولة مرة أخرى.",
+      "button_verifying": "جارٍ التحقق…",
+      "button_continue": "تحقق وتابع"
+    },
+    "mfa_setup": {
+      "title": "إعداد المصادقة متعددة العوامل",
+      "description": "امسح رمز الاستجابة السريعة باستخدام تطبيق المصادقة الخاص بك، أو أدخل الرمز السري يدويًا. ثم أدخل الرمز المكون من 6 أرقام لتأكيد التسجيل.",
+      "error_generate": "تعذر إنشاء تفاصيل إعداد المصادقة متعددة العوامل.",
+      "success": "تم تسجيل المصادقة متعددة العوامل بنجاح",
+      "error_failed": "فشل التحقق. يرجى المحاولة مرة أخرى.",
+      "loading_qr": "جارٍ إنشاء رمز الاستجابة السريعة…",
+      "qr_alt": "رمز الاستجابة السريعة للمصادقة متعددة العوامل",
+      "qr_unavailable": "رمز الاستجابة السريعة غير متاح",
+      "manual_secret_label": "الرمز السري للإعداد اليدوي",
+      "manual_secret_unavailable": "غير متاح",
+      "code_label": "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة الخاص بك",
+      "error_required": "أدخل الرمز المكون من 6 أرقام.",
+      "error_invalid": "أدخل رمزًا صالحًا مكونًا من 6 أرقام.",
+      "button_verifying": "جارٍ التحقق…",
+      "button_confirm": "تأكيد تسجيل المصادقة متعددة العوامل"
+    },
+    "change_password": {
+      "title": "تعيين كلمة المرور الخاصة بك",
+      "description": "تم إنشاء حسابك بكلمة مرور مؤقتة. يرجى تعيين كلمة مرور جديدة للمتابعة.",
+      "error_min_length": "يجب أن تتكون كلمة المرور الجديدة من {{min}} أحرف على الأقل.",
+      "error_mismatch": "كلمات المرور غير متطابقة.",
+      "error_same": "يجب أن تختلف كلمة المرور الجديدة عن كلمة المرور المؤقتة.",
+      "error_failed": "فشل تغيير كلمة المرور.",
+      "temporary_password_label": "كلمة المرور المؤقتة",
+      "new_password_label": "كلمة المرور الجديدة (الحد الأدنى {{min}} أحرف)",
+      "confirm_password_label": "تأكيد كلمة المرور الجديدة",
+      "button_saving": "جارٍ الحفظ…",
+      "button_continue": "تعيين كلمة المرور والمتابعة"
+    },
+    "session": {
+      "title_expired": "انتهت الجلسة",
+      "title_expiring": "الجلسة على وشك الانتهاء",
+      "message_expired": "انتهت جلستك بسبب عدم النشاط.",
+      "message_expiring": "ستنتهي جلستك في غضون دقيقتين بسبب عدم النشاط. هل ترغب في البقاء مسجلاً للدخول؟",
+      "error_refresh": "تعذر تمديد جلستك. يرجى تسجيل الدخول مرة أخرى.",
+      "button_logout": "تسجيل الخروج الآن",
+      "button_refreshing": "جارٍ التحديث…",
+      "button_stay_logged_in": "البقاء مسجلاً للدخول"
+    }
+  },
+  "nav": {
+    "items": {
+      "report_incident": "الإبلاغ عن حادث",
+      "new_report": "تقرير جديد",
+      "my_reports": "تقاريري",
+      "reports": "التقارير",
+      "workflow": "سير العمل",
+      "user_provisioning": "توفير المستخدمين"
+    },
+    "app_tagline": "الإبلاغ عن الحوادث",
+    "app_stats": "{{governorate_count}} محافظات · {{facility_count}} منشآت",
+    "patient_badge": "🔒 مجهول · لا يتطلب تسجيل الدخول",
+    "unknown_role": "دور غير معروف",
+    "ai_status_not_configured": "الذكاء الاصطناعي: غير مكوّن",
+    "ai_status_configured": "الذكاء الاصطناعي: {{model}}",
+    "sign_out": "تسجيل الخروج"
+  },
+  "incidents": {
+    "list": {
+      "page_title": "تقارير الحوادث",
+      "quick_search_placeholder": "البحث حسب المعرف، الوصف، الشخص، المنشأة…",
+      "advanced_search": "بحث متقدم",
+      "clear_filters": "✕ مسح الفلاتر",
+      "rows_label": "الصفوف:",
+      "export_csv": "CSV",
+      "export_xlsx": "XLSX",
+      "advanced_filters": "فلاتر متقدمة",
+      "clear_all": "مسح الكل",
+      "all_option": "الكل",
+      "locked": "مغلق",
+      "facility_name_placeholder": "اكتب للبحث…",
+      "person_involved_label": "الشخص المعني",
+      "person_involved_placeholder": "الاسم أو المعرف…",
+      "incident_status_label": "حالة الحادث",
+      "error_title": "فشل تحميل الحوادث.",
+      "error_subtitle": "يرجى المحاولة مرة أخرى.",
+      "loading": "جارٍ التحميل…",
+      "empty_title": "لم يتم العثور على حوادث",
+      "empty_subtitle": "حاول تعديل معايير البحث أو التصفية.",
+      "showing": "عرض",
+      "of": "من",
+      "loaded": "تم التحميل",
+      "incidents": "حوادث",
+      "column_incident_id": "معرف الحادث",
+      "column_occurrence": "الحادث",
+      "column_created": "تاريخ الإنشاء",
+      "pagination_previous": "← السابق",
+      "pagination_page": "صفحة",
+      "pagination_next": "التالي →",
+      "export_xlsx_failed": "فشل تصدير XLSX. يرجى المحاولة مرة أخرى.",
+      "ai_marker": "الذكاء الاصطناعي ✓",
+      "classification_options": {
+        "medication_error": "خطأ دوائي",
+        "clinical_management": "الإدارة السريرية",
+        "diagnosis_error": "خطأ في التشخيص",
+        "patient_fall": "سقوط المريض",
+        "hospital_acquired_infection": "عدوى مكتسبة من المستشفى",
+        "surgical_procedure_error": "خطأ في الإجراء الجراحي",
+        "equipment_failure": "عطل في المعدات",
+        "documentation_error": "خطأ في التوثيق",
+        "communication_error": "خطأ في الاتصال",
+        "blood_transfusion_error": "خطأ في نقل الدم",
+        "workplace_violence": "العنف في مكان العمل",
+        "environmental": "بيئي",
+        "other": "أخرى"
+      },
+      "event_type_options": {
+        "incident_event": "حدث حادث",
+        "near_miss": "حادث وشيك",
+        "adverse_event": "حدث ضار",
+        "significant_event": "حدث مهم",
+        "sentinel_event": "حدث جسيم",
+        "no_harm": "لا ضرر",
+        "unsafe_condition": "حالة غير آمنة"
+      }
+    },
+    "card": {
+      "aria_incident_id": "حادث {{id}}",
+      "aria_incident_facility": "تفاصيل الحادث للمنشأة {{facility}}",
+      "unknown_facility": "منشأة غير معروفة",
+      "unknown_facility_lower": "منشأة غير معروفة",
+      "severity_label": "الخطورة:",
+      "registered_label": "مسجل:"
+    },
+    "detail": {
+      "no_selection_title": "لم يتم تحديد حادث",
+      "no_selection_subtitle": "اختر حادثًا لعرض التفاصيل الكاملة.",
+      "error_title": "فشل تحميل تفاصيل الحادث.",
+      "error_subtitle": "يرجى المحاولة مرة أخرى.",
+      "not_found_title": "لم يتم العثور على الحادث",
+      "not_found_subtitle": "قد لا يكون هذا الحادث متاحًا بعد الآن.",
+      "governorate_label": "المحافظة:",
+      "registered_label": "مسجل:",
+      "back": "رجوع",
+      "incident_details_title": "تفاصيل الحادث",
+      "risk_assessment_title": "تقييم المخاطر",
+      "status_workflow_title": "سير عمل الحالة",
+      "audit_trail_title": "سجل التدقيق",
+      "current_status_label": "الحالة الحالية:",
+      "no_legal_next_states": "لا توجد حالات تالية قانونية.",
+      "audit_user_label": "المستخدم:",
+      "no_audit_entries": "لا توجد إدخالات تدقيق متاحة.",
+      "locked_message": "يتطلب الوصول إلى مسؤول الجودة",
+      "generic_error": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ...",
+      "fields": {
+        "incident_id": "معرف الحادث",
+        "status": "الحالة",
+        "facility_name": "اسم المنشأة",
+        "facility_type": "نوع المنشأة",
+        "governorate": "المحافظة",
+        "administration": "الإدارة",
+        "occurrence_date": "تاريخ الحادث",
+        "occurrence_time": "وقت الحادث",
+        "occurrence_location": "موقع الحادث",
+        "registration_date": "تاريخ التسجيل",
+        "report_date": "تاريخ التقرير النهائي",
+        "report_time": "وقت التقرير النهائي",
+        "reporter_type": "نوع المُبلغ",
+        "reporter_role": "دور المُبلغ",
+        "involved_person": "الشخص المعني",
+        "reporting_department": "قسم الإبلاغ",
+        "responsible_manager": "المدير المسؤول",
+        "description": "الوصف",
+        "error_classification": "تصنيف الخطأ",
+        "specific_error": "خطأ محدد",
+        "event_type": "نوع الحدث",
+        "risk_score": "درجة المخاطرة",
+        "recommendations": "التوصيات",
+        "notes": "ملاحظات",
+        "medical_file_number": "رقم الملف الطبي",
+        "action_status": "حالة الإجراء"
+      }
+    },
+    "new": {
+      "facility_options_error": "فشل تحميل خيارات المنشأة.",
+      "select_label": "اختر {{label}}",
+      "facility_type_label": "نوع المنشأة",
+      "reporter_role_label": "دور المُبلغ",
+      "involved_person_label": "الشخص المعني",
+      "responsible_manager_label": "المدير المسؤول",
+      "reporting_department_label": "قسم الإبلاغ",
+      "specific_error_label": "خطأ محدد",
+      "recommendations_label": "التوصيات",
+      "notes_label": "ملاحظات",
+      "select_type": "اختر النوع",
+      "select_role": "اختر الدور",
+      "select_location_optional": "اختر الموقع (اختياري)",
+      "select_classification": "اختر التصنيف",
+      "select_event_type": "اختر نوع الحدث",
+      "select_severity": "اختر الخطورة",
+      "occurrence_location_telehealth": "الرعاية الصحية عن بعد / عن بعد",
+      "stored_encrypted": "مخزن مشفر",
+      "error_facility_type_required": "نوع المنشأة مطلوب",
+      "error_reporter_role_required": "دور المُبلغ مطلوب",
+      "error_involved_person_required": "الشخص المعني مطلوب",
+      "error_occurrence_date_required": "تاريخ الحادث مطلوب",
+      "error_description_required": "الوصف مطلوب",
+      "error_classification_required": "تصنيف الخطأ مطلوب",
+      "error_event_type_required": "نوع الحدث مطلوب",
+      "error_severity_required": "الخطورة مطلوبة",
+      "error_submit": "فشل تقديم الحادث.",
+      "success_submit": "تم تقديم الحادث بنجاح.",
+      "submit": "تقديم الحادث"
+    },
+    "status": {
+      "label": "الحالة",
+      "created": "تم الإنشاء",
+      "in_progress": "قيد التقدم",
+      "evaluating": "جارٍ التقييم",
+      "more_info_needed": "مطلوب مزيد من المعلومات",
+      "action_taken": "تم اتخاذ الإجراء",
+      "completed": "مكتمل",
+      "unknown": "غير معروف"
+    },
+    "severity": {
+      "label": "الخطورة",
+      "minor": "طفيف",
+      "moderate": "متوسط",
+      "major": "كبير"
+    },
+    "probability": {
+      "label": "الاحتمالية",
+      "low": "منخفض",
+      "medium": "متوسط",
+      "high": "مرتفع"
+    },
+    "risk": {
+      "label": "المخاطر",
+      "risk_score_label": "درجة المخاطرة",
+      "risk_score_prefix": "درجة المخاطرة:",
+      "risk_separator": " — ",
+      "not_selected": "لم يتم التحديد",
+      "high_risk": "مخاطر عالية",
+      "medium_risk": "مخاطر متوسطة",
+      "low_risk": "مخاطر منخفضة",
+      "critical": "حرج",
+      "high": "عالي",
+      "medium": "متوسط",
+      "low": "منخفض",
+      "score_critical": "{{score}} · حرج",
+      "score_high": "{{score}} · عالي",
+      "score_medium": "{{score}} · متوسط",
+      "score_low": "{{score}} · منخفض"
+    },
+    "event_type": {
+      "label": "نوع الحدث",
+      "incident_event": "حدث حادث",
+      "near_miss": "حادث وشيك",
+      "adverse_event": "حدث ضار",
+      "significant_event": "حدث مهم",
+      "sentinel_event": "حدث جسيم",
+      "no_harm": "لا ضرر",
+      "unsafe_condition": "حالة غير آمنة"
+    },
+    "classification": {
+      "label": "تصنيف الخطأ",
+      "column_label": "التصنيف",
+      "medication": "دواء",
+      "administrative": "إداري",
+      "clinical": "سريري",
+      "equipment": "معدات",
+      "infection_control": "مكافحة العدوى",
+      "falls": "سقوط",
+      "documentation": "توثيق",
+      "behavior": "سلوك"
+    },
+    "action": {
+      "panel_title": "CAPA",
+      "corrective_action": "إجراء تصحيحي",
+      "preventive_action": "إجراء وقائي",
+      "action_date": "تاريخ الإجراء",
+      "action_time": "وقت الإجراء",
+      "action_status": "حالة الإجراء",
+      "status_pending": "معلق",
+      "status_in_progress": "قيد التقدم",
+      "status_completed": "مكتمل",
+      "error_save": "فشل حفظ CAPA."
+    },
+    "ai": {
+      "panel_title": "شارة الذكاء الاصطناعي",
+      "suggested": "مقترح من الذكاء الاصطناعي",
+      "reviewed": "تمت مراجعته بواسطة الذكاء الاصطناعي",
+      "pending_review": "بانتظار مراجعة الذكاء الاصطناعي",
+      "classification_label": "التصنيف:",
+      "event_type_label": "نوع الحدث:",
+      "confidence_label": "الثقة:",
+      "confidence_value": "{{percent}}% ثقة",
+      "accept": "قبول",
+      "override": "تجاوز",
+      "confirm_override": "تأكيد التجاوز",
+      "final_note": "مقترح من الذكاء الاصطناعي — قرار مسؤول الجودة نهائي",
+      "applied_notice": "تم تطبيق تصنيف الذكاء الاصطناعي: {{classification}} — بانتظار مراجعة مسؤول الجودة.",
+      "error_save_feedback": "فشل حفظ ملاحظات الذكاء الاصطناعي."
+    },
+    "jci": {
+      "panel_title": "JCI والإفصاح",
+      "disclosure_info_title": "معلومات الإفصاح",
+      "compliance_title": "الامتثال لمعايير JCI",
+      "disclosure_fields": {
+        "disclosure_date": "تاريخ الإفصاح",
+        "disclosure_method": "طريقة الإفصاح",
+        "responsible_person": "الشخص المسؤول",
+        "vulnerable_patient": "مريض ضعيف",
+        "vulnerable_population_type": "نوع السكان الضعفاء",
+        "workplace_violence": "العنف في مكان العمل",
+        "merp_category": "فئة MERP"
+      },
+      "chapter_label": "فصل JCI",
+      "compliance_status_label": "حالة الامتثال",
+      "select_chapter": "— اختر الفصل —",
+      "select_status": "— اختر الحالة —",
+      "standard_label": "المعيار",
+      "standard_placeholder": "مثال: IPSG.1",
+      "measurable_element_label": "العنصر القابل للقياس",
+      "measurable_element_placeholder": "مثال: ME 1",
+      "evidence_label": "الأدلة",
+      "gap_analysis_label": "تحليل الفجوات",
+      "action_plan_label": "خطة العمل",
+      "save_jci": "حفظ JCI",
+      "error_save": "فشل حفظ حقول JCI.",
+      "chapters": {
+        "ipsg": "IPSG",
+        "acc": "ACC",
+        "pfr": "PFR",
+        "aop": "AOP",
+        "cop": "COP",
+        "asc": "ASC",
+        "mmu": "MMU",
+        "pfe": "PFE",
+        "qps": "QPS",
+        "pci": "PCI",
+        "gld": "GLD",
+        "fms": "FMS",
+        "sqe": "SQE",
+        "mci": "MCI"
+      },
+      "compliance_statuses": {
+        "met": "متحقق",
+        "partially_met": "متحقق جزئيًا",
+        "not_met": "غير متحقق",
+        "not_applicable": "غير قابل للتطبيق"
+      }
+    },
+    "final": {
+      "panel_title": "التقرير النهائي",
+      "submit": "إرسال",
+      "error_submit": "فشل إرسال التقرير النهائي."
+    }
+  },
+  "analytics": {
+    "title": "التحليلات",
+    "unavailable": "التحليلات غير متاحة لدورك.",
+    "error_loading": "فشل تحميل بيانات التحليلات.",
+    "kpi": {
+      "total_incidents": "إجمالي الحوادث",
+      "open": "مفتوح",
+      "high_risk_major": "مخاطر عالية (كبيرة)",
+      "pending_ai_review": "بانتظار مراجعة الذكاء الاصطناعي"
+    },
+    "charts": {
+      "monthly_trends": "الاتجاهات الشهرية",
+      "severity_breakdown": "توزيع الخطورة",
+      "comparison": "مقارنة"
+    },
+    "tooltip_incidents": "الحوادث",
+    "compare": {
+      "no_permission": "ليس لديك إذن لعرض بيانات المقارنة.",
+      "no_data": "لا توجد بيانات متاحة لهذا البعد."
+    },
+    "filters": {
+      "title": "فلاتر لوحة القيادة",
+      "active_count": "{{count}} نشط",
+      "updating": "جارٍ التحديث…",
+      "clear_all": "✕ مسح الكل",
+      "all_governorates": "جميع المحافظات",
+      "all_administrations": "جميع الإدارات",
+      "all_types": "جميع الأنواع",
+      "your_facility": "منشأتك",
+      "no_facilities": "لا توجد منشآت",
+      "all_facilities": "جميع المنشآت"
+    }
+  },
+  "patient": {
+    "report": {
+      "facility_fallback": "منشأة الإبلاغ",
+      "invalid_link": "رابط إبلاغ غير صالح.",
+      "link_not_recognised": "رابط الإبلاغ غير معروف.",
+      "load_error": "تعذر تحميل تفاصيل المنشأة.",
+      "anonymous_notice": "تقريرك مجهول. لا يلزم تقديم معلومات شخصية.",
+      "description_required": "الوصف مطلوب",
+      "submit_error": "فشل تقديم التقرير.",
+      "submit": "تقديم التقرير",
+      "success": "تم استلام تقريرك. المرجع: {{reference}}",
+      "reference_na": "غير متوفر",
+      "reporter_roles": {
+        "patient": "مريض",
+        "visitor": "زائر",
+        "family_member": "فرد من العائلة"
+      }
+    },
+    "qr": {
+      "no_link_assigned": "لم يتم تعيين رابط للمريض لهذه المنشأة بعد.",
+      "copied": "✓ تم النسخ!",
+      "copy_failed": "فشل النسخ",
+      "copy_link": "نسخ الرابط",
+      "download_png": "تنزيل QR PNG"
+    }
+  },
+  "admin": {
+    "title": "توفير المستخدمين",
+    "note": "الإدارة العليا فقط. يتم عرض كلمات المرور المؤقتة مرة واحدة — انسخها فورًا.",
+    "tabs": {
+      "provisioning": "التوفير",
+      "users": "المستخدمون",
+      "qr_codes": "رموز QR"
+    },
+    "common": {
+      "copy": "نسخ",
+      "copied": "✓ تم النسخ",
+      "show": "إظهار",
+      "hide": "إخفاء",
+      "username": "اسم المستخدم",
+      "email": "البريد الإلكتروني",
+      "temp_password": "كلمة المرور المؤقتة",
+      "full_name": "الاسم الكامل",
+      "credentials_provisioned": "تم توفير بيانات الاعتماد",
+      "patient_submission_link": "رابط تقديم المريض",
+      "patient_qr_code": "رمز QR للمريض",
+      "staff_reporter_account": "حساب مُبلغ الموظفين",
+      "quality_admin_account": "حساب مسؤول الجودة",
+      "password_shown_once": "⚠ يتم عرض كلمة المرور هذه مرة واحدة. انسخها قبل مغادرة هذه الصفحة.",
+      "role_account_created": "تم إنشاء حساب {{role}}",
+      "loading_facilities": "جارٍ تحميل المنشآت…",
+      "loading_location_options": "جارٍ تحميل خيارات الموقع…",
+      "facility_data_error": "فشل تحميل بيانات المنشأة. تحقق من اتصالك أو أذوناتك.",
+      "id_label": "المعرف:"
+    },
+    "facility_provision": {
+      "section_title": "توفير بيانات اعتماد المنشأة",
+      "section_description": "ينشئ حساب مُبلغ للموظفين ومسؤول جودة. حدد المنشأة حسب الموقع.",
+      "submit": "توفير بيانات الاعتماد",
+      "submitting": "جارٍ التوفير…",
+      "error": "فشل توفير بيانات اعتماد المنشأة.",
+      "facility_unit_label": "المنشأة / الوحدة",
+      "select_governorate": "— اختر المحافظة —",
+      "select_administration": "— اختر الإدارة —",
+      "select_facility": "— اختر المنشأة —"
+    },
+    "tier_user": {
+      "section_title": "إنشاء مستخدم للمحافظة / الإدارة",
+      "section_description": "ينشئ حسابًا ذا مستوى أعلى. يتم عرض كلمة المرور المؤقتة مرة واحدة.",
+      "role_label": "الدور",
+      "role_governorate_manager": "مدير المحافظة",
+      "role_administration_manager": "مدير الإدارة",
+      "role_top_management": "الإدارة العليا (المستوى 5 — على مستوى النظام)",
+      "top_management_notice": "⚠ حسابات الإدارة العليا لديها وصول على مستوى النظام إلى جميع المحافظات والإدارات والمنشآت. لا يلزم تحديد نطاق جغرافي.",
+      "submit": "إنشاء مستخدم ذي مستوى أعلى",
+      "submitting": "جارٍ الإنشاء…",
+      "error": "فشل إنشاء مستخدم ذي مستوى أعلى."
+    },
+    "users": {
+      "loading": "جارٍ تحميل المستخدمين…",
+      "error": "فشل تحميل المستخدمين. تحقق من اتصالك أو أذوناتك.",
+      "search_placeholder": "البحث حسب الاسم، البريد الإلكتروني، المنشأة…",
+      "all_roles": "جميع الأدوار",
+      "all_statuses": "جميع الحالات",
+      "status_active": "نشط",
+      "status_inactive": "غير نشط",
+      "count_label": "{{filtered}} من {{total}} مستخدم{{suffix}}",
+      "empty": "لا يوجد مستخدمون يطابقون فلاترك."
+    },
+    "qr_codes": {
+      "note": "انقر على منشأة للكشف عن رمز QR الخاص بها ورابط تقديم المريض. يمكن طباعة رمز QR ونشره في المنشأة للإبلاغ المجهول للمرضى.",
+      "search_placeholder": "البحث حسب المنشأة، الإدارة، أو المحافظة…",
+      "empty": "لا توجد منشآت تطابق بحثك."
+    }
+  },
+  "workflow": {
+    "title": "سير عمل الحادث",
+    "intro": "دورة حياة حادث E·OVR من استلام التقرير حتى الإغلاق.",
+    "risk_matrix_title": "مصفوفة المخاطر (مرجع)",
+    "risk_matrix_description": "مصفوفة مرجعية فقط تستخدم خلال مرحلة التقييم.",
+    "score_reference_title": "دليل مرجع الدرجات",
+    "score_reference_note": "يعكس الدليل نتائج المصفوفة فقط؛ الدرجات 5 و 7 و 8 لا تنتج عن هذا النموذج 3×3.",
+    "scores_label": "الدرجات:",
+    "next_label": "التالي:",
+    "steps": {
+      "created": {
+        "description": "تم التقديم من قبل المريض (مجهول) أو الموظف (موثق).",
+        "actions": {
+          "captured": "يتم التقاط تفاصيل الحادث وتوثيقها بالوقت.",
+          "identity_protected": "هوية المُبلغ محمية لتقديمات المرضى المجهولة.",
+          "quality_queue": "يدخل الحادث قائمة انتظار الجودة للفرز."
+        }
+      },
+      "in_progress": {
+        "description": "يفتح مسؤول الجودة الحالة ويبدأ المراجعة.",
+        "actions": {
+          "facts_reviewed": "تتم مراجعة الحقائق الأولية والأدلة الداعمة.",
+          "stakeholders": "يتم تحديد أصحاب المصلحة للمتابعة.",
+          "ownership_assigned": "يتم تعيين ملكية الحالة ونقاط المراجعة التالية."
+        }
+      },
+      "evaluating": {
+        "description": "يتم تعيين مصفوفة المخاطر وصياغة CAPA.",
+        "actions": {
+          "assessments": "يتم تقييم الخطورة والاحتمالية.",
+          "risk_documented": "يتم توثيق درجة المخاطرة ومستوى الأولوية.",
+"capa_draft": "يتم إعداد مسودة الإجراءات التصحيحية والوقائية (CAPA)."
+        }
+      },
+      "action_taken": {
+        "description": "يتم تنفيذ CAPA بواسطة المنشأة.",
+        "actions": {
+          "actions_executed": "يتم تنفيذ الإجراءات المعتمدة من قبل الفرق المسؤولة.",
+          "evidence_collected": "يتم جمع أدلة التنفيذ.",
+          "effectiveness_checks": "يتم جدولة وتتبع فحوصات الفعالية."
+        }
+      },
+      "completed": {
+        "description": "يتم كتابة التقرير النهائي وتقديمه.",
+        "actions": {
+          "outcomes_finalized": "يتم الانتهاء من ملخص النتائج والدروس المستفادة.",
+          "report_submitted": "يتم تقديم التقرير النهائي للسجل وسجل التدقيق.",
+          "incident_closed": "يتم إغلاق الحادث رسميًا في سير العمل."
+        }
+      },
+      "more_info_needed": {
+        "description": "يتم إرسال الحالة مرة أخرى للتوضيح وتعود إلى التقييم بعد التحديثات.",
+        "actions": {
+          "clarification_request": "يتم إرسال طلب توضيح إلى المُبلغ أو الفريق المسؤول.",
+          "missing_evidence": "يتم جمع الأدلة أو السياق المفقود.",
+          "loop_back": "تعود الحالة إلى التقييم للتسجيل النهائي وتحسين CAPA."
+        }
+      }
+    }
+  }
+}

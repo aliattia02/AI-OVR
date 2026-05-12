@@ -1,48 +1,54 @@
+// frontend/src/components/shared/Sidebar.jsx
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { USER_ROLES } from '../../utils/enums';
 import { analyticsService } from '../../services/analytics';
-import { useDirection } from '../../hooks/useDirection'; // RTL
+import { useDirection } from '../../hooks/useDirection';
 
-// Task 4: administration_manager and governorate_manager can now access /workflow.
+// Nav item ids map to translation keys under nav.items.*
 const ROLE_VIEWS = {
-  patient: [{ id: 'report-incident', label: 'Report Incident' }],
+  patient: [
+    { id: 'report-incident', labelKey: 'nav.items.report_incident' },
+  ],
   staff: [
-    { id: 'new-report', label: 'New Report' },
-    { id: 'reports', label: 'My Reports' },
+    { id: 'new-report',  labelKey: 'nav.items.new_report' },
+    { id: 'reports',     labelKey: 'nav.items.my_reports' },
   ],
   quality_admin: [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'new-report', label: 'New Report' },
-    { id: 'reports', label: 'Reports' },
-    { id: 'analytics', label: 'Analytics' },
-    { id: 'workflow', label: 'Workflow' },
+    { id: 'dashboard',   labelKey: 'common.page_titles.dashboard' },
+    { id: 'new-report',  labelKey: 'nav.items.new_report' },
+    { id: 'reports',     labelKey: 'nav.items.reports' },
+    { id: 'analytics',   labelKey: 'common.page_titles.analytics' },
+    { id: 'workflow',    labelKey: 'nav.items.workflow' },
   ],
   administration_manager: [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'reports', label: 'Reports' },
-    { id: 'analytics', label: 'Analytics' },
-    { id: 'workflow', label: 'Workflow' },
+    { id: 'dashboard',   labelKey: 'common.page_titles.dashboard' },
+    { id: 'reports',     labelKey: 'nav.items.reports' },
+    { id: 'analytics',   labelKey: 'common.page_titles.analytics' },
+    { id: 'workflow',    labelKey: 'nav.items.workflow' },
   ],
   governorate_manager: [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'reports', label: 'Reports' },
-    { id: 'analytics', label: 'Analytics' },
-    { id: 'workflow', label: 'Workflow' },
+    { id: 'dashboard',   labelKey: 'common.page_titles.dashboard' },
+    { id: 'reports',     labelKey: 'nav.items.reports' },
+    { id: 'analytics',   labelKey: 'common.page_titles.analytics' },
+    { id: 'workflow',    labelKey: 'nav.items.workflow' },
   ],
   top_management: [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'reports', label: 'Reports' },
-    { id: 'analytics', label: 'Analytics' },
-    { id: 'workflow', label: 'Workflow' },
-    { id: 'admin-provision', label: 'User Provisioning' },
+    { id: 'dashboard',        labelKey: 'common.page_titles.dashboard' },
+    { id: 'reports',          labelKey: 'nav.items.reports' },
+    { id: 'analytics',        labelKey: 'common.page_titles.analytics' },
+    { id: 'workflow',         labelKey: 'nav.items.workflow' },
+    { id: 'admin-provision',  labelKey: 'nav.items.user_provisioning' },
   ],
 };
 
 export default function Sidebar({ onNavigate, currentView, onSignOut }) {
   const { role, tier } = useAuth();
-  const { isRTL } = useDirection(); // RTL
-  const roleMeta = USER_ROLES[role] || { label: 'Unknown Role', tier: tier || 0 };
+  const { t }          = useTranslation();
+  const { isRTL }      = useDirection();
+
+  const roleMeta = USER_ROLES[role] || { label: t('nav.unknown_role'), tier: tier || 0 };
   const navItems = ROLE_VIEWS[role] || [];
 
   const { data: health } = useQuery({
@@ -51,13 +57,13 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
     staleTime: 60_000,
   });
 
-  const aiProvider = String(health?.ai_provider || '').trim().toLowerCase();
-  const aiModelName = health?.ai_model || health?.model_name || health?.model || health?.ai_provider || 'Configured';
+  const aiProvider     = String(health?.ai_provider || '').trim().toLowerCase();
+  const aiModelName    = health?.ai_model || health?.model_name || health?.model || health?.ai_provider || 'Configured';
   const aiNotConfigured = !aiProvider || aiProvider === 'none';
 
   return (
     <aside
-      className="sidebar" // RTL
+      className="sidebar"
       style={{
         width: 210,
         minWidth: 210,
@@ -69,10 +75,17 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
         padding: '16px 12px',
       }}
     >
+      {/* Header */}
       <div style={{ display: 'grid', gap: 6 }}>
-        <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: 0.2 }}>E·OVR</div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.90)', fontWeight: 600 }}>Occurrence Reporting</div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.68)' }}>6 Governorates · 348 Facilities</div>
+        <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: 0.2 }}>
+          {t('common.brand_name')}
+        </div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.90)', fontWeight: 600 }}>
+          {t('nav.app_tagline')}
+        </div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.68)' }}>
+          {t('nav.app_stats', { governorate_count: 6, facility_count: 348 })}
+        </div>
 
         {role === 'patient' && (
           <div
@@ -87,21 +100,24 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
               fontWeight: 700,
             }}
           >
-            🔒 Anonymous · No login required
+            {t('nav.patient_badge')}
           </div>
         )}
       </div>
 
+      {/* Navigation */}
       <nav style={{ marginTop: 18, display: 'grid', gap: 4 }}>
         {navItems.map((item) => {
-          const isActive = currentView === item.id || currentView === item.label;
+          const label    = t(item.labelKey);
+          // currentView may carry the old English label from ROLE_VIEWS — match by id
+          const isActive = currentView === item.id || currentView === item.labelKey;
           return (
             <button
               key={item.id}
               type="button"
               onClick={() => onNavigate?.(item.id)}
               style={{
-                textAlign: 'start', // RTL
+                textAlign: 'start',
                 border: 'none',
                 borderRadius: 10,
                 backgroundColor: isActive ? 'rgba(255,255,255,0.13)' : 'transparent',
@@ -110,21 +126,24 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
                 fontSize: 13,
                 fontWeight: isActive ? 700 : 600,
                 cursor: 'pointer',
-                display: 'flex', // RTL
-                alignItems: 'center', // RTL
-                gap: 8, // RTL
-                flexDirection: isRTL ? 'row-reverse' : 'row', // RTL
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                flexDirection: isRTL ? 'row-reverse' : 'row',
               }}
             >
-              {item.label}
+              {label}
             </button>
           );
         })}
       </nav>
 
+      {/* Footer */}
       <div style={{ marginTop: 'auto', display: 'grid', gap: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.90)', fontWeight: 700 }}>{roleMeta.label}</span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.90)', fontWeight: 700 }}>
+            {roleMeta.label}
+          </span>
           <span
             style={{
               fontSize: 10,
@@ -135,7 +154,7 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
               fontWeight: 700,
             }}
           >
-            Tier {roleMeta.tier}
+            {t('common.tier_label', { tier: roleMeta.tier })}
           </span>
         </div>
 
@@ -150,14 +169,16 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
             color: aiNotConfigured ? '#FCD34D' : '#86EFAC',
           }}
         >
-          {aiNotConfigured ? 'AI: Not configured' : `AI: ${aiModelName}`}
+          {aiNotConfigured
+            ? t('nav.ai_status_not_configured')
+            : t('nav.ai_status_configured', { model: aiModelName })}
         </div>
 
         <button
           type="button"
           onClick={() => onSignOut?.()}
           style={{
-            textAlign: 'start', // RTL
+            textAlign: 'start',
             border: '1px solid rgba(255,255,255,0.25)',
             borderRadius: 10,
             backgroundColor: 'transparent',
@@ -168,7 +189,7 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
             cursor: 'pointer',
           }}
         >
-          Sign out
+          {t('nav.sign_out')}
         </button>
       </div>
     </aside>
