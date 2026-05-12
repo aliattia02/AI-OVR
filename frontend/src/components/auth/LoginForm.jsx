@@ -1,6 +1,7 @@
 // LoginForm component — renders the E·OVR login form (email/password fields, submit button) and calls the auth service.
 // frontend/src/components/auth/LoginForm.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { MFA_TEMP_TOKEN_STORAGE_KEY } from "../../utils/authStorage";
@@ -21,6 +22,7 @@ const C = {
 export default function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [email, setEmail]             = useState("");
   const [password, setPassword]       = useState("");
   const [loading, setLoading]         = useState(false);
@@ -31,7 +33,7 @@ export default function LoginForm() {
     e.preventDefault();
     setError(null);
     if (!email.trim() || !password.trim()) {
-      setError("Email and password are required.");
+      setError(t("auth.login.error_required"));
       return;
     }
     setLoading(true);
@@ -52,8 +54,8 @@ export default function LoginForm() {
       const msg =
         err?.response?.data?.detail ||
         err?.message ||
-        "Invalid email or password.";
-      setError(typeof msg === "string" ? msg : "Login failed. Please try again.");
+        t("auth.login.error_invalid");
+      setError(typeof msg === "string" ? msg : t("auth.login.error_failed"));
     } finally {
       setLoading(false);
     }
@@ -94,7 +96,7 @@ export default function LoginForm() {
             E·OVR
           </div>
           <div style={{ fontSize: 13, color: C.g400, marginTop: 4, letterSpacing: "0.04em" }}>
-            Electronic Occurrence &amp; Variance Reporting
+            {t("common.app_full_name")}
           </div>
         </div>
 
@@ -109,7 +111,7 @@ export default function LoginForm() {
           }}
         >
           <div style={{ fontSize: 17, fontWeight: 700, color: C.g800, marginBottom: 22 }}>
-            Sign in to your account
+            {t("auth.login.title")}
           </div>
 
           {/* Error banner */}
@@ -140,7 +142,7 @@ export default function LoginForm() {
                 htmlFor="eovr-email"
                 style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.g800, marginBottom: 6 }}
               >
-                Email address
+                {t("auth.login.email_label")}
               </label>
               <input
                 id="eovr-email"
@@ -171,12 +173,12 @@ export default function LoginForm() {
             {/* Password */}
             <div style={{ marginBottom: 8 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <label
-                  htmlFor="eovr-password"
-                  style={{ fontSize: 13, fontWeight: 600, color: C.g800 }}
-                >
-                  Password
-                </label>
+                  <label
+                    htmlFor="eovr-password"
+                    style={{ fontSize: 13, fontWeight: 600, color: C.g800 }}
+                  >
+                    {t("auth.login.password_label")}
+                  </label>
                 {/* ── Forgot password link ── */}
                 <button
                   type="button"
@@ -194,7 +196,7 @@ export default function LoginForm() {
                     textUnderlineOffset: 2,
                   }}
                 >
-                  Forgot password?
+                  {t("auth.login.forgot_password")}
                 </button>
               </div>
 
@@ -204,7 +206,7 @@ export default function LoginForm() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t("auth.login.password_placeholder")}
                 disabled={loading}
                 style={{
                   width: "100%",
@@ -241,10 +243,7 @@ export default function LoginForm() {
                 }}
               >
                 <span style={{ marginTop: 1, fontSize: 15 }}>ℹ</span>
-                <span>
-                  Password resets are managed by your system administrator.
-                  Please contact your facility&apos;s IT support or quality admin to have your password reset.
-                </span>
+                <span>{t("auth.login.forgot_info")}</span>
               </div>
             )}
 
@@ -285,10 +284,10 @@ export default function LoginForm() {
                         animation: "eovr-spin 0.7s linear infinite",
                       }}
                     />
-                    Signing in…
+                    {t("auth.login.signing_in")}
                   </>
                 ) : (
-                  "Sign in"
+                  t("auth.login.sign_in")
                 )}
               </button>
             </div>
@@ -297,7 +296,10 @@ export default function LoginForm() {
 
         {/* Footer note */}
         <div style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: C.g400 }}>
-          6 Governorates · 348 Facilities · Confidential
+          {t("auth.login.footer_stats", {
+            governorate_count: 6,
+            facility_count: 348,
+          })}
         </div>
       </div>
 

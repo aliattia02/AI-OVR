@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api, { setToken } from '../services/api';
@@ -78,6 +79,7 @@ const styles = {
 export default function MFAVerify() {
   const navigate = useNavigate();
   const { onPasswordChanged } = useAuth();
+  const { t } = useTranslation();
   const [tempToken, setTempToken] = useState(null);
   const [error, setError] = useState('');
   const {
@@ -117,7 +119,7 @@ export default function MFAVerify() {
       });
       const accessToken = data?.access_token;
       if (!accessToken) {
-        throw new Error('Missing access token.');
+        throw new Error(t('auth.mfa_verify.error_missing_token'));
       }
       setToken(accessToken);
       if (typeof window !== 'undefined') {
@@ -126,8 +128,8 @@ export default function MFAVerify() {
       await onPasswordChanged();
       navigate('/', { replace: true });
     } catch (err) {
-      const message = err?.response?.data?.detail || err?.message || 'Verification failed. Please try again.';
-      setError(typeof message === 'string' ? message : 'Verification failed. Please try again.');
+      const message = err?.response?.data?.detail || err?.message || t('auth.mfa_verify.error_failed');
+      setError(typeof message === 'string' ? message : t('auth.mfa_verify.error_failed'));
     }
   };
 
@@ -137,15 +139,15 @@ export default function MFAVerify() {
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.heading}>Multi-factor verification</h1>
-      <p style={styles.subtext}>Enter the 6-digit code from your authenticator app to finish signing in.</p>
+      <h1 style={styles.heading}>{t('auth.mfa_verify.title')}</h1>
+      <p style={styles.subtext}>{t('auth.mfa_verify.description')}</p>
 
       <div style={styles.card}>
         {error ? <div style={styles.error}>{error}</div> : null}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <label htmlFor="mfa-code" style={styles.label}>
-            Verification code
+            {t('auth.mfa_verify.code_label')}
           </label>
           <input
             id="mfa-code"
@@ -156,10 +158,10 @@ export default function MFAVerify() {
             disabled={isSubmitting}
             style={styles.input}
             {...register('totpCode', {
-              required: 'Enter the 6-digit code.',
+              required: t('auth.mfa_verify.error_required'),
               pattern: {
                 value: /^\d{6}$/,
-                message: 'Enter a valid 6-digit code.',
+                message: t('auth.mfa_verify.error_invalid'),
               },
               setValueAs: (value) => (typeof value === 'string' ? value.replace(/\D/g, '') : value),
             })}
@@ -167,7 +169,7 @@ export default function MFAVerify() {
           {errors.totpCode ? <div style={styles.fieldError}>{errors.totpCode.message}</div> : null}
 
           <button type="submit" disabled={isSubmitting} style={styles.primaryButton}>
-            {isSubmitting ? 'Verifying…' : 'Verify and continue'}
+            {isSubmitting ? t('auth.mfa_verify.button_verifying') : t('auth.mfa_verify.button_continue')}
           </button>
         </form>
       </div>
