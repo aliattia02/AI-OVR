@@ -84,7 +84,6 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
           {t('nav.app_tagline')}
         </div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.68)' }}>
-          {t('nav.app_stats', { governorate_count: 6, facility_count: 348 })}
         </div>
 
         {role === 'patient' && (

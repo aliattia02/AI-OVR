@@ -296,10 +296,7 @@ export default function LoginForm() {
 
         {/* Footer note */}
         <div style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: C.g400 }}>
-          {t("auth.login.footer_stats", {
-            governorate_count: 6,
-            facility_count: 348,
-          })}
+
         </div>
       </div>
 

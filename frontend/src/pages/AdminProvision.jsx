@@ -590,9 +590,6 @@ function UsersTab() {
   const [filterStatus, setFilterStatus] = useState('');
 
   useEffect(() => {
-    // Wait until AuthContext has confirmed the session and token is set.
-    // Without this guard the request fires before setToken() is called,
-    // lands unauthenticated, and gets a 401.
     if (!user) return;
 
     api
@@ -628,7 +625,6 @@ function UsersTab() {
 
   return (
     <div>
-      {/* ── Toolbar ── */}
       <div
         style={{
           display: 'flex',
@@ -673,12 +669,10 @@ function UsersTab() {
         </select>
       </div>
 
-      {/* ── Count ── */}
       <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 10 }}>
         {filtered.length} of {users.length} user{users.length !== 1 ? 's' : ''}
       </div>
 
-      {/* ── List ── */}
       {filtered.length === 0 ? (
         <div
           style={{
@@ -702,7 +696,6 @@ function UsersTab() {
                 padding: '12px 14px',
               }}
             >
-              {/* Top row: name + status */}
               <div
                 style={{
                   display: 'flex',
@@ -730,7 +723,6 @@ function UsersTab() {
                 <StatusDot active={u.is_active} />
               </div>
 
-              {/* Meta row: role + tier + location */}
               <div
                 style={{
                   display: 'flex',
@@ -781,26 +773,49 @@ function UsersTab() {
 // ─── QR Codes tab ────────────────────────────────────────────────────────────
 
 function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [usersError, setUsersError] = useState('');
+
+  useEffect(() => {
+    if (!user) return;
+    api
+      .get('/users', { params: { limit: 200 } })
+      .then(({ data }) => setUsers(data))
+      .catch(() => setUsersError('Failed to load user data.'))
+      .finally(() => setUsersLoading(false));
+  }, [user]);
+
+  // Only show facilities that have at least one provisioned user
+  const provisionedFacilities = useMemo(() => {
+    const provisionedIds = new Set(users.map((u) => u.facility_id).filter(Boolean));
+    return facilities.filter((f) => provisionedIds.has(f.facility_id));
+  }, [facilities, users]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return facilities;
-    return facilities.filter(
+    if (!q) return provisionedFacilities;
+    return provisionedFacilities.filter(
       (f) =>
         f.facility_name.toLowerCase().includes(q) ||
         f.administration.toLowerCase().includes(q) ||
         f.governorate.toLowerCase().includes(q),
     );
-  }, [facilities, search]);
+  }, [provisionedFacilities, search]);
 
-  if (facilitiesLoading) {
+  if (facilitiesLoading || usersLoading) {
     return <p style={styles.loadingText}>Loading facilities…</p>;
   }
 
   if (facilitiesError) {
     return <div style={styles.error}>{facilitiesError}</div>;
+  }
+
+  if (usersError) {
+    return <div style={styles.error}>{usersError}</div>;
   }
 
   return (
@@ -843,7 +858,6 @@ function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
                   overflow: 'hidden',
                 }}
               >
-                {/* Row header — clickable toggle */}
                 <button
                   onClick={() => setExpandedId(isOpen ? null : f.facility_id)}
                   style={{
@@ -881,7 +895,6 @@ function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
                   </span>
                 </button>
 
-                {/* Expanded QR panel */}
                 {isOpen && (
                   <div
                     style={{
@@ -906,9 +919,9 @@ function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
 
 function TabBar({ active, onChange }) {
   const tabs = [
-    { id: 'provision', label: 'Provisioning' },
-    { id: 'users',     label: 'Users' },
-    { id: 'qr-codes',  label: 'QR Codes' },
+    // { id: 'provision', label: 'Provisioning' }, // TODO: temporarily hidden — restore when ready
+    { id: 'users',    label: 'Users' },
+    { id: 'qr-codes', label: 'QR Codes' },
   ];
   return (
     <div
@@ -953,7 +966,8 @@ function TabBar({ active, onChange }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function AdminProvision() {
-  const [activeTab, setActiveTab] = useState('provision');
+  // Default changed to 'qr-codes' while Provisioning tab is hidden
+  const [activeTab, setActiveTab] = useState('qr-codes');
 
   // Shared facility data — loaded once, consumed by both provisioning sections
   const [facilities, setFacilities] = useState([]);
@@ -1067,7 +1081,7 @@ export default function AdminProvision() {
         />
       )}
 
-      {/* ── Provisioning tab ───────────────────────────────────────────── */}
+      {/* ── Provisioning tab — temporarily hidden, restore by uncommenting TabBar entry ── */}
       {activeTab === 'provision' && (
         <>
           {facilitiesError && <div style={styles.error}>{facilitiesError}</div>}
