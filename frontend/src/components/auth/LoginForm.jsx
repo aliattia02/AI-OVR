@@ -89,11 +89,11 @@ export default function LoginForm() {
             }}
           >
             <span style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.03em" }}>
-              E·O
+              {t("common.brand_mark")}
             </span>
           </div>
           <div style={{ fontSize: 26, fontWeight: 800, color: C.navy, letterSpacing: "-0.02em" }}>
-            E·OVR
+            {t("common.brand_name")}
           </div>
           <div style={{ fontSize: 13, color: C.g400, marginTop: 4, letterSpacing: "0.04em" }}>
             {t("common.app_full_name")}
@@ -150,7 +150,7 @@ export default function LoginForm() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@hospital.gov.eg"
+                placeholder={t("auth.login.email_placeholder")}
                 disabled={loading}
                 style={{
                   width: "100%",

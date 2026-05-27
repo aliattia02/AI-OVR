@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 // ── Design tokens (match the rest of the app) ─────────────────────────────────
 const C = {
@@ -98,7 +99,7 @@ function FilterGroup({ label, children }) {
   );
 }
 
-function DateRange({ label, from, to, onFromChange, onToChange }) {
+function DateRange({ label, from, to, onFromChange, onToChange, fromLabel, toLabel }) {
   return (
     <div style={{ display: 'grid', gap: 4, minWidth: 0 }}>
       <FilterLabel>{label}</FilterLabel>
@@ -107,7 +108,7 @@ function DateRange({ label, from, to, onFromChange, onToChange }) {
           type="date"
           value={from}
           onChange={e => onFromChange(e.target.value)}
-          title="From"
+          title={fromLabel}
           style={dateInputStyle}
           onFocus={e => { e.target.style.borderColor = C.brand; }}
           onBlur={e => { e.target.style.borderColor = C.border; }}
@@ -116,14 +117,14 @@ function DateRange({ label, from, to, onFromChange, onToChange }) {
           type="date"
           value={to}
           onChange={e => onToChange(e.target.value)}
-          title="To"
+          title={toLabel}
           style={dateInputStyle}
           onFocus={e => { e.target.style.borderColor = C.brand; }}
           onBlur={e => { e.target.style.borderColor = C.border; }}
         />
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: C.textMuted }}>
-        <span>From</span><span>To</span>
+        <span>{fromLabel}</span><span>{toLabel}</span>
       </div>
     </div>
   );
@@ -140,6 +141,7 @@ function DateRange({ label, from, to, onFromChange, onToChange }) {
  */
 export default function DashboardFilterBar({ filters, onFiltersChange, isLoading = false, lockedFacilityName = null }) {
   const { data: cascading, isLoading: cascadingLoading } = useCascadingFacilities();
+  const { t } = useTranslation();
 
   // ── Derived option lists ───────────────────────────────────────────────────
   //
@@ -246,7 +248,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>
-          Dashboard Filters
+          {t('analytics.filters.title')}
         </span>
         {activeCount > 0 && (
           <span style={{
@@ -258,11 +260,11 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
             padding: '1px 7px',
             lineHeight: 1.7,
           }}>
-            {activeCount} active
+            {t('analytics.filters.active_count', { count: activeCount })}
           </span>
         )}
         {isLoading && (
-          <span style={{ fontSize: 11, color: C.textMuted, marginLeft: 4 }}>Updating…</span>
+          <span style={{ fontSize: 11, color: C.textMuted, marginLeft: 4 }}>{t('analytics.filters.updating')}</span>
         )}
         {activeCount > 0 && (
           <button
@@ -280,7 +282,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
               borderRadius: 5,
             }}
           >
-            ✕ Clear all
+            {t('analytics.filters.clear_all')}
           </button>
         )}
       </div>
@@ -294,7 +296,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
       }}>
 
         {/* Governorate */}
-        <FilterGroup label="Governorate">
+        <FilterGroup label={t('common.fields.governorate')}>
           <select
             value={filters.governorate}
             onChange={e => set('governorate', e.target.value)}
@@ -303,7 +305,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
             onFocus={e => { e.target.style.borderColor = C.brand; }}
             onBlur={e => { e.target.style.borderColor = C.border; }}
           >
-            <option value="">All governorates</option>
+            <option value="">{t('analytics.filters.all_governorates')}</option>
             {governorateOptions.map(g => (
               <option key={g} value={g}>{g}</option>
             ))}
@@ -311,7 +313,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
         </FilterGroup>
 
         {/* Administration — cascades from Governorate */}
-        <FilterGroup label="Administration">
+        <FilterGroup label={t('common.fields.administration')}>
           <select
             value={filters.administration}
             onChange={e => set('administration', e.target.value)}
@@ -320,7 +322,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
             onFocus={e => { e.target.style.borderColor = C.brand; }}
             onBlur={e => { e.target.style.borderColor = C.border; }}
           >
-            <option value="">All administrations</option>
+            <option value="">{t('analytics.filters.all_administrations')}</option>
             {administrationOptions.map(a => (
               <option key={a} value={a}>{a}</option>
             ))}
@@ -328,7 +330,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
         </FilterGroup>
 
         {/* Facility Type — sourced from database via cascading endpoint */}
-        <FilterGroup label="Facility Type">
+        <FilterGroup label={t('common.fields.facility_type')}>
           <select
             value={filters.facility_type}
             onChange={e => set('facility_type', e.target.value)}
@@ -337,7 +339,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
             onFocus={e => { e.target.style.borderColor = C.brand; }}
             onBlur={e => { e.target.style.borderColor = C.border; }}
           >
-            <option value="">All types</option>
+            <option value="">{t('analytics.filters.all_types')}</option>
             {facilityTypeOptions.map(t => (
               <option key={t} value={t}>{t}</option>
             ))}
@@ -345,7 +347,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
         </FilterGroup>
 
         {/* Facility Name — locked for tier-2 users, cascades from Governorate for others */}
-        <FilterGroup label="Facility Name">
+        <FilterGroup label={t('common.fields.facility_name')}>
           {lockedFacilityName !== null ? (
             <div style={{
               border: `1px solid ${C.border}`,
@@ -368,7 +370,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
                 fontWeight: 700,
                 whiteSpace: 'nowrap',
               }}>
-                Your facility
+                {t('analytics.filters.your_facility')}
               </span>
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {lockedFacilityName}
@@ -385,8 +387,8 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
             >
               <option value="">
                 {facilityNameOptions.length === 0 && !cascadingLoading
-                  ? 'No facilities'
-                  : 'All facilities'}
+                  ? t('analytics.filters.no_facilities')
+                  : t('analytics.filters.all_facilities')}
               </option>
               {facilityNameOptions.map(name => (
                 <option key={name} value={name}>{name}</option>
@@ -397,20 +399,24 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
 
         {/* Creation Date range */}
         <DateRange
-          label="Creation Date"
+          label={t('common.fields.creation_date')}
           from={filters.creation_from}
           to={filters.creation_to}
           onFromChange={v => set('creation_from', v)}
           onToChange={v => set('creation_to', v)}
+          fromLabel={t('common.from')}
+          toLabel={t('common.to')}
         />
 
         {/* Occurrence Date range */}
         <DateRange
-          label="Occurrence Date"
+          label={t('common.fields.occurrence_date')}
           from={filters.occurrence_from}
           to={filters.occurrence_to}
           onFromChange={v => set('occurrence_from', v)}
           onToChange={v => set('occurrence_to', v)}
+          fromLabel={t('common.from')}
+          toLabel={t('common.to')}
         />
 
       </div>

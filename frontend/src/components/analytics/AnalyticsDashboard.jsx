@@ -11,6 +11,7 @@
 //     one-paragraph change required there.
 
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Cell,
   Legend,
@@ -82,6 +83,7 @@ function Card({ title, value, sub }) {
 export default function AnalyticsDashboard() {
   const { tier, user } = useAuth();
   const { isRTL } = useDirection(); // RTL
+  const { t } = useTranslation();
 
   // Tier-2 users are scoped to their own facility only.
   // Their facility_name is locked into every filter object sent to the backend.
@@ -124,10 +126,10 @@ export default function AnalyticsDashboard() {
   const severityData = useMemo(
     () =>
       (summary?.severity || []).map((row) => ({
-        name: row?.key || 'Unknown',
+        name: row?.key || t('incidents.status.unknown'),
         value: Number(row?.count) || 0,
       })),
-    [summary?.severity],
+    [summary?.severity, t],
   );
 
   const totalIncidents = useMemo(() => sumCounts(summary?.status), [summary?.status]);
@@ -179,7 +181,7 @@ export default function AnalyticsDashboard() {
           fontWeight: 600,
         }}
       >
-        Failed to load analytics data.
+        {t('analytics.error_loading')}
       </div>
     );
   }
@@ -206,10 +208,10 @@ export default function AnalyticsDashboard() {
           direction: isRTL ? 'rtl' : 'ltr', // RTL
         }}
       >
-        <Card title="Total Incidents"    value={totalIncidents} />
-        <Card title="Open"               value={openIncidents} />
-        <Card title="High Risk (Major)"  value={highRisk} />
-        <Card title="Pending AI Review"  value={pendingAIReview} />
+        <Card title={t('analytics.kpi.total_incidents')} value={totalIncidents} />
+        <Card title={t('analytics.kpi.open')} value={openIncidents} />
+        <Card title={t('analytics.kpi.high_risk_major')} value={highRisk} />
+        <Card title={t('analytics.kpi.pending_ai_review')} value={pendingAIReview} />
       </div>
 
       {/* ── Charts row ───────────────────────────────────────────────────── */}
@@ -223,7 +225,7 @@ export default function AnalyticsDashboard() {
           padding: 14,
         }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>
-            Monthly Trends
+            {t('analytics.charts.monthly_trends')}
           </div>
           <TrendChart data={trends || []} />
         </section>
@@ -236,7 +238,7 @@ export default function AnalyticsDashboard() {
           padding: 14,
         }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>
-            Severity Breakdown
+            {t('analytics.charts.severity_breakdown')}
           </div>
           <div style={{ width: '100%', height: 280 }}>
             <ResponsiveContainer>
@@ -253,7 +255,7 @@ export default function AnalyticsDashboard() {
                     <Cell key={entry.name} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [value, 'Incidents']} />
+                <Tooltip formatter={(value) => [value, t('analytics.tooltip_incidents')]} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -273,7 +275,7 @@ export default function AnalyticsDashboard() {
           padding: 14,
         }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 10 }}>
-            Comparison
+            {t('analytics.charts.comparison')}
           </div>
           <CompareView filters={effectiveFilters} />
         </section>

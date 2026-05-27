@@ -3,6 +3,7 @@
 // Owns its own data-fetching so AnalyticsDashboard no longer needs useAnalyticsCompare.
 
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bar,
   BarChart,
@@ -17,10 +18,7 @@ import EmptyState from '../shared/EmptyState';
 import { useDirection } from '../../hooks/useDirection'; // RTL
 
 // API supports these two dimensions (GET /analytics/compare?dimension=...)
-const DIMENSIONS = [
-  { value: 'facility', label: 'Facility' },
-  { value: 'governorate', label: 'Governorate' },
-];
+const DIMENSION_KEYS = ['facility', 'governorate'];
 
 const BAR_COLOR = '#1B6CA8';
 const TRUNCATE_AT = 30;
@@ -66,6 +64,7 @@ function LoadingSkeleton() {
 export default function CompareView({ filters = {} }) {
   const [dimension, setDimension] = useState('facility');
   const { isRTL } = useDirection(); // RTL
+  const { t } = useTranslation();
 
   const { data, isLoading, error } = useAnalyticsCompare(dimension, filters);
 
@@ -82,11 +81,19 @@ export default function CompareView({ filters = {} }) {
   // Give each row 46 px; floor at 200 so the chart is never too short
   const chartHeight = Math.max(chartData.length * 46, 200);
 
+  const dimensions = useMemo(
+    () => [
+      { value: DIMENSION_KEYS[0], label: t('common.fields.facility') },
+      { value: DIMENSION_KEYS[1], label: t('common.fields.governorate') },
+    ],
+    [t],
+  );
+
   return (
     <div>
       {/* Dimension toggle */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {DIMENSIONS.map((d) => {
+        {dimensions.map((d) => {
           const active = dimension === d.value;
           return (
             <button
@@ -125,10 +132,10 @@ export default function CompareView({ filters = {} }) {
             fontWeight: 600,
           }}
         >
-          You don&apos;t have permission to view comparison data.
+          {t('analytics.compare.no_permission')}
         </div>
       ) : !chartData.length ? (
-        <EmptyState message="No data available for this dimension." />
+        <EmptyState message={t('analytics.compare.no_data')} />
       ) : (
         // RTL: keep Recharts rendering LTR so axes/ticks stay correct.
         <div className={isRTL ? 'recharts-rtl-fix' : undefined} style={{ width: '100%', height: chartHeight }}>
@@ -150,7 +157,7 @@ export default function CompareView({ filters = {} }) {
                 width={170}
                 tick={{ fontSize: 11, fill: '#374151' }}
               />
-              <Tooltip formatter={(value) => [value, 'Incidents']} />
+              <Tooltip formatter={(value) => [value, t('analytics.tooltip_incidents')]} />
               <Bar
                 dataKey="count"
                 fill={BAR_COLOR}
