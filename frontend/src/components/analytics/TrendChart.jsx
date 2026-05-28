@@ -8,6 +8,7 @@ import {
   YAxis,
 } from 'recharts';
 import { useDirection } from '../../hooks/useDirection'; // RTL
+import { useTranslation } from 'react-i18next';
 
 const TEAL = '#0B7D6B';
 
@@ -28,6 +29,7 @@ function buildMonthlyWindow(rawPoints = []) {
 export default function TrendChart({ data = [] }) {
   const chartData = buildMonthlyWindow(data);
   const { isRTL } = useDirection(); // RTL
+  const { t } = useTranslation();
 
   return (
     // RTL: keep Recharts rendering LTR so axes/ticks stay correct.
@@ -38,7 +40,7 @@ export default function TrendChart({ data = [] }) {
           <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#4B5563' }} />
           <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#4B5563' }} />
           <Tooltip
-            formatter={(value) => [value, 'Incidents']}
+            formatter={(value) => [value, t('analytics.tooltip_incidents')]}
             contentStyle={{ borderRadius: 10, border: '1px solid #E5E7EB' }}
             labelStyle={{ fontWeight: 600 }}
           />

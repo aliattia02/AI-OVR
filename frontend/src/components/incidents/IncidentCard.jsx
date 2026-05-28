@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import StatusBadge from './StatusBadge';
 import { formatDate, formatEnumLabel } from '../../utils/formatters';
 
 export default function IncidentCard({ incident, onClick }) {
   const [hovered, setHovered] = useState(false);
+  const { t } = useTranslation();
 
   const handleClick = () => {
     onClick?.(incident);
@@ -40,13 +42,13 @@ export default function IncidentCard({ incident, onClick }) {
       }}
       aria-label={
         incident?.incident_id
-          ? `Incident ${incident.incident_id}`
-          : `Incident details for ${incident?.facility_name ?? 'unknown facility'}`
+          ? t('incidents.card.aria_incident_id', { id: incident.incident_id })
+          : t('incidents.card.aria_incident_facility', { facility: incident?.facility_name ?? t('incidents.card.unknown_facility_lower') })
       }
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>{incident?.facility_name || 'Unknown Facility'}</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>{incident?.facility_name || t('incidents.card.unknown_facility')}</div>
           <div style={{ fontSize: 12, color: '#4B5563' }}>{incident?.governorate || ''}</div>
         </div>
 
@@ -80,11 +82,11 @@ export default function IncidentCard({ incident, onClick }) {
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <StatusBadge status={incident?.status} />
         <span style={{ fontSize: 12, color: '#374151', fontWeight: 600 }}>
-          Severity: {incident?.severity ? formatEnumLabel(incident.severity) : '—'}
+          {t('incidents.card.severity_label')} {incident?.severity ? formatEnumLabel(incident.severity) : t('common.placeholder_dash')}
         </span>
       </div>
 
-      <div style={{ fontSize: 12, color: '#4B5563' }}>Registered: {formatDate(incident?.registration_date) || '—'}</div>
+      <div style={{ fontSize: 12, color: '#4B5563' }}>{t('incidents.card.registered_label')} {formatDate(incident?.registration_date) || t('common.placeholder_dash')}</div>
 
       {showAIPending && (
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content' }}>
@@ -97,7 +99,7 @@ export default function IncidentCard({ incident, onClick }) {
               display: 'inline-block',
             }}
           />
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#0B7D6B' }}>AI Pending Review</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: '#0B7D6B' }}>{t('incidents.ai.pending_review')}</span>
         </div>
       )}
     </div>

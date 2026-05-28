@@ -2,17 +2,23 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { incidentService } from '../../services/incidents';
 import DisclaimerBanner from '../shared/DisclaimerBanner';
 import { useDirection } from '../../hooks/useDirection'; // RTL
 
-const REPORTER_ROLE_OPTIONS = ['Patient', 'Visitor', 'Family Member'];
+const REPORTER_ROLE_OPTIONS = [
+  { value: 'Patient', labelKey: 'patient.report.reporter_roles.patient' },
+  { value: 'Visitor', labelKey: 'patient.report.reporter_roles.visitor' },
+  { value: 'Family Member', labelKey: 'patient.report.reporter_roles.family_member' },
+];
 
 export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
   const { facility_uuid: facilityUuidFromParams } = useParams();
   const facilityUuid = facilityUuidProp || facilityUuidFromParams;
   const { isRTL } = useDirection(); // RTL
+  const { t } = useTranslation();
 
   const [facilityInfo, setFacilityInfo] = useState({
     facilityName: '',
@@ -42,7 +48,7 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
 
     const loadFacilityInfo = async () => {
       if (!facilityUuid) {
-        setFacilityLoadError('Invalid reporting link.');
+        setFacilityLoadError(t('patient.report.invalid_link'));
         return;
       }
 
@@ -52,17 +58,17 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
         const { data } = await api.get(`/patients/facility-info/${facilityUuid}`);
         if (!mounted) return;
         setFacilityInfo({
-          facilityName: data.facility_name || 'Reporting Facility',
+          facilityName: data.facility_name || t('patient.report.facility_fallback'),
           administration: data.administration || '',
           governorate: data.governorate || '',
         });
       } catch (error) {
         if (!mounted) return;
-        setFacilityInfo({ facilityName: 'Reporting Facility', administration: '', governorate: '' });
+        setFacilityInfo({ facilityName: t('patient.report.facility_fallback'), administration: '', governorate: '' });
         setFacilityLoadError(
           error?.response?.status === 404
-            ? 'Reporting link not recognised.'
-            : (error?.message || 'Unable to load facility details.')
+            ? t('patient.report.link_not_recognised')
+            : (error?.message || t('patient.report.load_error'))
         );
       }
     };
@@ -74,7 +80,9 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
   const submitMutation = useMutation({
     mutationFn: (payload) => incidentService.submitPatientReport(facilityUuid, payload),
     onSuccess: (result) => {
-      setSuccessMessage(`Your report has been received. Reference: ${result?.incident_id || 'N/A'}`);
+      setSuccessMessage(
+        t('patient.report.success', { reference: result?.incident_id || t('patient.report.reference_na') })
+      );
     },
   });
 
@@ -126,7 +134,7 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
         }}
       >
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#0C2340' }}>
-          {facilityName || 'Reporting Facility'}
+          {facilityName || t('patient.report.facility_fallback')}
         </h2>
 
         {hasMeta && (
@@ -179,7 +187,7 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
           color: '#1E3A8A',
         }}
       >
-        Your report is anonymous. No personal information is required.
+        {t('patient.report.anonymous_notice')}
       </div>
 
       <DisclaimerBanner />
@@ -188,48 +196,48 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
 
       <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'grid', gap: 14 }}>
         <label style={{ ...labelStyle, fontSize: 16, fontWeight: 700 }}>
-          Description
+          {t('incidents.detail.fields.description')}
           <textarea
             rows={5}
             style={{ ...fieldStyle, resize: 'vertical', minHeight: 120 }}
-            {...register('description', { required: 'Description is required' })}
+            {...register('description', { required: t('patient.report.description_required') })}
           />
           {errors.description && <div style={errorStyle}>{errors.description.message}</div>}
         </label>
 
         <label style={labelStyle}>
-          Occurrence Date
+          {t('incidents.detail.fields.occurrence_date')}
           <input type="date" style={fieldStyle} {...register('occurrence_date')} />
         </label>
 
         <label style={labelStyle}>
-          Occurrence Time
+          {t('incidents.detail.fields.occurrence_time')}
           <input type="time" style={fieldStyle} {...register('occurrence_time')} />
         </label>
 
         <label style={labelStyle}>
-          Occurrence Location
+          {t('incidents.detail.fields.occurrence_location')}
           <input style={fieldStyle} {...register('occurrence_location')} />
         </label>
 
         <label style={labelStyle}>
-          Reporter Role
+          {t('incidents.new.reporter_role_label')}
           <select style={fieldStyle} {...register('reporter_role')}>
             {REPORTER_ROLE_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
+              <option key={option.value} value={option.value}>
+                {t(option.labelKey)}
               </option>
             ))}
           </select>
         </label>
 
         <label style={labelStyle}>
-          Medical File Number
+          {t('incidents.detail.fields.medical_file_number')}
           <input style={fieldStyle} {...register('medical_file_number')} />
         </label>
 
         {submitMutation.isError && (
-          <div style={errorStyle}>{submitMutation.error?.response?.data?.detail || 'Failed to submit report.'}</div>
+          <div style={errorStyle}>{submitMutation.error?.response?.data?.detail || t('patient.report.submit_error')}</div>
         )}
 
         {successMessage && (
@@ -264,7 +272,7 @@ export default function PatientReportForm({ facilityUuid: facilityUuidProp }) {
             opacity: submitMutation.isPending || !facilityUuid ? 0.65 : 1,
           }}
         >
-          {submitMutation.isPending ? 'Submitting...' : 'Submit Report'}
+          {submitMutation.isPending ? t('common.submitting') : t('patient.report.submit')}
         </button>
       </form>
     </div>

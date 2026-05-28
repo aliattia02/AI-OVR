@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDirection } from '../../hooks/useDirection'; // RTL
 
 const ROWS = ['Major', 'Moderate', 'Minor'];
@@ -16,6 +17,18 @@ const PROBABILITY_WEIGHT = {
   Low: 1,
 };
 
+const SEVERITY_LABEL_KEYS = {
+  Major: 'incidents.severity.major',
+  Moderate: 'incidents.severity.moderate',
+  Minor: 'incidents.severity.minor',
+};
+
+const PROBABILITY_LABEL_KEYS = {
+  High: 'incidents.probability.high',
+  Medium: 'incidents.probability.medium',
+  Low: 'incidents.probability.low',
+};
+
 function getRiskScore(severity, probability) {
   const severityWeight = SEVERITY_WEIGHT[severity];
   const probabilityWeight = PROBABILITY_WEIGHT[probability];
@@ -31,17 +44,18 @@ function getRiskColor(score) {
   return '#9CA3AF';
 }
 
-function getRiskLevel(score) {
-  if (score === null || score === undefined) return 'Not Selected';
-  if (score >= 4) return 'High Risk';
-  if (score === 3) return 'Medium Risk';
-  return 'Low Risk';
+function getRiskLevel(score, t) {
+  if (score === null || score === undefined) return t('incidents.risk.not_selected');
+  if (score >= 4) return t('incidents.risk.high_risk');
+  if (score === 3) return t('incidents.risk.medium_risk');
+  return t('incidents.risk.low_risk');
 }
 
 export default function RiskMatrix({ severity, probability, onChange, readOnly = false }) {
   const selectedScore = useMemo(() => getRiskScore(severity, probability), [severity, probability]);
   const clickable = !readOnly && typeof onChange === 'function';
   const { isRTL } = useDirection(); // RTL
+  const { t } = useTranslation();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -62,7 +76,7 @@ export default function RiskMatrix({ severity, probability, onChange, readOnly =
               <button
                 key={`${rowSeverity}-${colProbability}`}
                 type="button"
-                aria-label={`${rowSeverity} severity, ${colProbability} probability${selected ? ', selected' : ''}`}
+                aria-label={`${t(SEVERITY_LABEL_KEYS[rowSeverity])} ${t('incidents.detail.fields.severity')}, ${t(PROBABILITY_LABEL_KEYS[colProbability])} ${t('incidents.detail.fields.probability')}${selected ? ', selected' : ''}`}
                 aria-current={selected ? 'true' : undefined}
                 onClick={() => {
                   if (!clickable) return;
@@ -89,8 +103,8 @@ export default function RiskMatrix({ severity, probability, onChange, readOnly =
                 }}
               >
                 {selected && <div aria-hidden="true">✓</div>}
-                <div>{rowSeverity}</div>
-                <div>{colProbability}</div>
+                <div>{t(SEVERITY_LABEL_KEYS[rowSeverity])}</div>
+                <div>{t(PROBABILITY_LABEL_KEYS[colProbability])}</div>
                 <div>{score}</div>
               </button>
             );
@@ -106,7 +120,7 @@ export default function RiskMatrix({ severity, probability, onChange, readOnly =
           textAlign: 'start', // RTL
         }}
       >
-        Risk Score: {selectedScore ?? '—'} — {getRiskLevel(selectedScore)}
+        {t('incidents.risk.risk_score_prefix')} {selectedScore ?? t('common.placeholder_dash')}{t('incidents.risk.risk_separator')}{getRiskLevel(selectedScore, t)}
       </div>
     </div>
   );

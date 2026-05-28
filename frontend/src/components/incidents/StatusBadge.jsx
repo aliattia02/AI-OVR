@@ -1,9 +1,11 @@
 import { INCIDENT_STATUSES } from '../../utils/enums';
 import { formatEnumLabel } from '../../utils/formatters';
+import { useTranslation } from 'react-i18next';
 
 export default function StatusBadge({ status }) {
+  const { t } = useTranslation();
   const statusMeta = INCIDENT_STATUSES[status];
-  const label = statusMeta?.label || formatEnumLabel(status) || 'Unknown';
+  const label = statusMeta?.label || formatEnumLabel(status) || t('incidents.status.unknown');
 
   return (
     <span
