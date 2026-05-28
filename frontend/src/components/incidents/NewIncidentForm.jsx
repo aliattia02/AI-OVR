@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useCreateIncident } from '../../hooks/useIncidents';
@@ -22,12 +23,13 @@ function getCurrentTimeString() {
 }
 
 const OCCURRENCE_LOCATION_OPTIONS = [
-  { value: 'telehealth_remote', label: 'Telehealth / Remote' },
+  { value: 'telehealth_remote', labelKey: 'incidents.new.occurrence_location_telehealth' },
 ];
 
 export default function NewIncidentForm() {
   const { user } = useAuth();
   const { dir } = useDirection(); // RTL
+  const { t } = useTranslation();
 
   // Staff and quality_admin belong to exactly one facility — pre-fill and lock
   // their location fields so they cannot submit on behalf of another facility.
@@ -97,7 +99,7 @@ export default function NewIncidentForm() {
         });
       } catch (error) {
         if (!mounted) return;
-        setCascadingError(error?.message || 'Failed to load facility options.');
+        setCascadingError(error?.message || t('incidents.new.facility_options_error'));
       }
     };
 
@@ -154,7 +156,9 @@ export default function NewIncidentForm() {
       result?.ai_metadata?.auto_classification !== undefined
     ) {
       setAiNotice(
-        `AI Classification Applied: ${formatEnumLabel(result.ai_metadata.auto_classification)} — pending Quality Admin review.`
+        t('incidents.ai.applied_notice', {
+          classification: formatEnumLabel(result.ai_metadata.auto_classification),
+        })
       );
     }
   };
@@ -217,7 +221,7 @@ export default function NewIncidentForm() {
       <label style={labelStyle}>
         {label}
         <select style={fieldStyle} {...register(name, required ? { required: `${label} is required` } : {})}>
-          <option value="">Select {label.toLowerCase()}</option>
+          <option value="">{t('incidents.new.select_label', { label: label.toLowerCase() })}</option>
           {options.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
         {errors[name] && <div style={errorStyle}>{errors[name].message}</div>}
@@ -232,7 +236,7 @@ export default function NewIncidentForm() {
 
       <LockedOrSelect
         name="governorate"
-        label="Governorate"
+        label={t('incidents.detail.fields.governorate')}
         options={cascading.governorates}
         required
         locked={isFacilityUser}
@@ -240,7 +244,7 @@ export default function NewIncidentForm() {
 
       <LockedOrSelect
         name="administration"
-        label="Administration"
+        label={t('incidents.detail.fields.administration')}
         options={administrationOptions}
         required
         locked={isFacilityUser}
@@ -248,14 +252,14 @@ export default function NewIncidentForm() {
 
       <LockedOrSelect
         name="facility_name"
-        label="Facility"
+        label={t('common.fields.facility')}
         options={facilityOptions}
         required
         locked={isFacilityUser}
       />
 
       <label style={labelStyle}>
-        Facility Type
+        {t('incidents.new.facility_type_label')}
         {isFacilityUser ? (
           <div style={{ position: 'relative' }}>
             <input
@@ -263,7 +267,7 @@ export default function NewIncidentForm() {
               value={watch('facility_type') || ''}
               readOnly
               tabIndex={-1}
-              {...register('facility_type', { required: 'Facility type is required' })}
+              {...register('facility_type', { required: t('incidents.new.error_facility_type_required') })}
             />
             <span
               style={{
@@ -279,8 +283,8 @@ export default function NewIncidentForm() {
             </span>
           </div>
         ) : (
-          <select style={fieldStyle} {...register('facility_type', { required: 'Facility type is required' })}>
-            <option value="">Select type</option>
+          <select style={fieldStyle} {...register('facility_type', { required: t('incidents.new.error_facility_type_required') })}>
+            <option value="">{t('incidents.new.select_type')}</option>
             {FACILITY_TYPES.map((type) => (
               <option key={type} value={type}>{type}</option>
             ))}
@@ -290,9 +294,9 @@ export default function NewIncidentForm() {
       </label>
 
       <label style={labelStyle}>
-        Reporter Role
-        <select style={fieldStyle} {...register('reporter_role', { required: 'Reporter role is required' })}>
-          <option value="">Select role</option>
+        {t('incidents.new.reporter_role_label')}
+        <select style={fieldStyle} {...register('reporter_role', { required: t('incidents.new.error_reporter_role_required') })}>
+          <option value="">{t('incidents.new.select_role')}</option>
           {REPORTER_ROLES.map((role) => (
             <option key={role} value={role}>
               {role}
@@ -303,61 +307,61 @@ export default function NewIncidentForm() {
       </label>
 
       <label style={labelStyle}>
-        Involved Person
-        <input style={fieldStyle} {...register('involved_person', { required: 'Involved person is required' })} />
+        {t('incidents.new.involved_person_label')}
+        <input style={fieldStyle} {...register('involved_person', { required: t('incidents.new.error_involved_person_required') })} />
         {errors.involved_person && <div style={errorStyle}>{errors.involved_person.message}</div>}
       </label>
 
       <label style={labelStyle}>
-        Occurrence Date
-        <input type="date" style={fieldStyle} {...register('occurrence_date', { required: 'Occurrence date is required' })} />
+        {t('incidents.detail.fields.occurrence_date')}
+        <input type="date" style={fieldStyle} {...register('occurrence_date', { required: t('incidents.new.error_occurrence_date_required') })} />
         {errors.occurrence_date && <div style={errorStyle}>{errors.occurrence_date.message}</div>}
       </label>
 
       <label style={labelStyle}>
-        Occurrence Time
+        {t('incidents.detail.fields.occurrence_time')}
         <input type="time" style={fieldStyle} {...register('occurrence_time')} />
       </label>
 
       <label style={labelStyle}>
-        Occurrence Location
+        {t('incidents.detail.fields.occurrence_location')}
         <select style={fieldStyle} {...register('occurrence_location')}>
-          <option value="">Select location (optional)</option>
+          <option value="">{t('incidents.new.select_location_optional')}</option>
           {OCCURRENCE_LOCATION_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {option.label}
+              {t(option.labelKey)}
             </option>
           ))}
         </select>
       </label>
 
       <label style={labelStyle}>
-        Responsible Manager
+        {t('incidents.new.responsible_manager_label')}
         <input style={fieldStyle} {...register('responsible_manager')} />
       </label>
 
       <label style={labelStyle}>
-        Reporting Department
+        {t('incidents.new.reporting_department_label')}
         <input style={fieldStyle} {...register('reporting_department')} />
       </label>
 
       <label style={{ ...labelStyle, fontSize: 15, fontWeight: 700 }}>
-        Description
+        {t('incidents.detail.fields.description')}
         <textarea
           rows={5}
           style={{ ...fieldStyle, resize: 'vertical' }}
-          {...register('description', { required: 'Description is required' })}
+          {...register('description', { required: t('incidents.new.error_description_required') })}
         />
         {errors.description && <div style={errorStyle}>{errors.description.message}</div>}
       </label>
 
       <label style={labelStyle}>
-        Error Classification
+        {t('incidents.classification.label')}
         <select
           style={fieldStyle}
-          {...register('error_classification', { required: 'Error classification is required' })}
+          {...register('error_classification', { required: t('incidents.new.error_classification_required') })}
         >
-          <option value="">Select classification</option>
+          <option value="">{t('incidents.new.select_classification')}</option>
           {ERROR_CLASSIFICATIONS.map((classification) => (
             <option key={classification} value={classification}>
               {formatEnumLabel(classification)}
@@ -368,14 +372,14 @@ export default function NewIncidentForm() {
       </label>
 
       <label style={labelStyle}>
-        Specific Error
+        {t('incidents.new.specific_error_label')}
         <input style={fieldStyle} {...register('specific_error')} />
       </label>
 
       <label style={labelStyle}>
-        Event Type
-        <select style={fieldStyle} {...register('event_type', { required: 'Event type is required' })}>
-          <option value="">Select event type</option>
+        {t('incidents.event_type.label')}
+        <select style={fieldStyle} {...register('event_type', { required: t('incidents.new.error_event_type_required') })}>
+          <option value="">{t('incidents.new.select_event_type')}</option>
           {EVENT_TYPES.map((eventType) => (
             <option key={eventType} value={eventType}>
               {formatEnumLabel(eventType)}
@@ -386,9 +390,9 @@ export default function NewIncidentForm() {
       </label>
 
       <label style={labelStyle}>
-        Severity
-        <select style={fieldStyle} {...register('severity', { required: 'Severity is required' })}>
-          <option value="">Select severity</option>
+        {t('incidents.severity.label')}
+        <select style={fieldStyle} {...register('severity', { required: t('incidents.new.error_severity_required') })}>
+          <option value="">{t('incidents.new.select_severity')}</option>
           {SEVERITY_OPTIONS.map((severity) => (
             <option key={severity} value={severity}>
               {severity}
@@ -399,27 +403,27 @@ export default function NewIncidentForm() {
       </label>
 
       <label style={labelStyle}>
-        Recommendations
+        {t('incidents.new.recommendations_label')}
         <textarea rows={3} style={{ ...fieldStyle, resize: 'vertical' }} {...register('recommendations')} />
       </label>
 
       <label style={labelStyle}>
-        Notes
+        {t('incidents.new.notes_label')}
         <textarea rows={3} style={{ ...fieldStyle, resize: 'vertical' }} {...register('notes')} />
       </label>
 
       <label style={labelStyle}>
-        Medical File Number
+        {t('incidents.detail.fields.medical_file_number')}
         <input style={fieldStyle} {...register('medical_file_number')} />
-        <div style={{ fontSize: 12, color: '#4B5563' }}>Stored encrypted</div>
+        <div style={{ fontSize: 12, color: '#4B5563' }}>{t('incidents.new.stored_encrypted')}</div>
       </label>
 
       {createIncident.isError && (
-        <div style={errorStyle}>{createIncident.error?.response?.data?.detail || 'Failed to submit incident.'}</div>
+        <div style={errorStyle}>{createIncident.error?.response?.data?.detail || t('incidents.new.error_submit')}</div>
       )}
 
       {createIncident.isSuccess && (
-        <div style={{ fontSize: 13, color: '#065F46', fontWeight: 600 }}>Incident submitted successfully.</div>
+        <div style={{ fontSize: 13, color: '#065F46', fontWeight: 600 }}>{t('incidents.new.success_submit')}</div>
       )}
 
       {aiNotice && (
@@ -454,7 +458,7 @@ export default function NewIncidentForm() {
             opacity: createIncident.isPending ? 0.7 : 1,
           }}
         >
-          {createIncident.isPending ? 'Submitting...' : 'Submit Incident'}
+          {createIncident.isPending ? t('common.submitting') : t('incidents.new.submit')}
         </button>
       </div>
     </form>

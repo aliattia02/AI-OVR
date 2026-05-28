@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ERROR_CLASSIFICATIONS, EVENT_TYPES } from '../../utils/enums';
 import { formatEnumLabel } from '../../utils/formatters';
 
-function formatConfidence(score) {
+function formatConfidence(score, t) {
   if (score === null || score === undefined || Number.isNaN(Number(score))) return '';
   const value = Number(score);
   const percent = value <= 1 ? value * 100 : value;
-  return `${Math.round(percent)}% confidence`;
+  return t('incidents.ai.confidence_value', { percent: Math.round(percent) });
 }
 
 export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = false }) {
+  const { t } = useTranslation();
   const [showOverrideForm, setShowOverrideForm] = useState(false);
   const [chosenClassification, setChosenClassification] = useState('');
   const [chosenEventType, setChosenEventType] = useState('');
@@ -43,12 +45,12 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
           backgroundColor: '#E5E7EB',
         }}
       >
-        ✓ AI Reviewed
+        {t('incidents.ai.reviewed')}
       </span>
     );
   }
 
-  const confidenceLabel = formatConfidence(aiMetadata.classification_score);
+  const confidenceLabel = formatConfidence(aiMetadata.classification_score, t);
 
   const handleAccept = () => {
     onAccept?.(aiMetadata.auto_classification, aiMetadata.auto_event_type ?? null);
@@ -86,21 +88,21 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
           backgroundColor: '#0B7D6B',
         }}
       >
-        AI Suggested
+        {t('incidents.ai.suggested')}
       </div>
 
       <div style={{ fontSize: 13, color: '#1F2937', display: 'flex', flexDirection: 'column', gap: 4 }}>
         <div>
-          <strong>Classification:</strong> {formatEnumLabel(aiMetadata.auto_classification)}
+          <strong>{t('incidents.ai.classification_label')}</strong> {formatEnumLabel(aiMetadata.auto_classification)}
         </div>
         {aiMetadata.auto_event_type && (
           <div>
-            <strong>Event Type:</strong> {formatEnumLabel(aiMetadata.auto_event_type)}
+            <strong>{t('incidents.ai.event_type_label')}</strong> {formatEnumLabel(aiMetadata.auto_event_type)}
           </div>
         )}
         {confidenceLabel && (
           <div>
-            <strong>Confidence:</strong> {confidenceLabel}
+            <strong>{t('incidents.ai.confidence_label')}</strong> {confidenceLabel}
           </div>
         )}
       </div>
@@ -122,7 +124,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                 cursor: 'pointer',
               }}
             >
-              Accept
+              {t('incidents.ai.accept')}
             </button>
 
             <button
@@ -139,7 +141,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                 cursor: 'pointer',
               }}
             >
-              Override
+              {t('incidents.ai.override')}
             </button>
           </div>
 
@@ -213,7 +215,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
                     opacity: isOverrideDisabled ? 0.6 : 1,
                   }}
                 >
-                  Confirm Override
+                  {t('incidents.ai.confirm_override')}
                 </button>
               </div>
             </div>
@@ -222,7 +224,7 @@ export default function AIBadge({ aiMetadata, onAccept, onOverride, readOnly = f
       )}
 
       <div style={{ fontSize: 11, color: '#1F2937', fontStyle: 'italic' }}>
-        AI suggested — Quality Admin decision is final
+        {t('incidents.ai.final_note')}
       </div>
     </div>
   );

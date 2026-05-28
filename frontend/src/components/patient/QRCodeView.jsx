@@ -4,6 +4,7 @@
 // Null facilityUuid shows a fallback message instead of a broken QR code.
 
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 
 const QR_SIZE = 200;
@@ -17,6 +18,7 @@ export default function QRCodeView({ facilityUuid }) {
   const canvasRef = useRef(null);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
+  const { t } = useTranslation();
 
   // Fallback — no UUID yet assigned to this facility
   if (!facilityUuid) {
@@ -32,7 +34,7 @@ export default function QRCodeView({ facilityUuid }) {
           textAlign: 'center',
         }}
       >
-        No patient link has been assigned to this facility yet.
+        {t('patient.qr.no_link_assigned')}
       </div>
     );
   }
@@ -117,7 +119,7 @@ export default function QRCodeView({ facilityUuid }) {
             color: copied ? '#065F46' : '#374151',
           }}
         >
-          {copied ? '✓ Copied!' : copyError ? 'Copy failed' : 'Copy Link'}
+          {copied ? t('patient.qr.copied') : copyError ? t('patient.qr.copy_failed') : t('patient.qr.copy_link')}
         </button>
 
         <button
@@ -128,7 +130,7 @@ export default function QRCodeView({ facilityUuid }) {
             color: '#FFFFFF',
           }}
         >
-          Download QR PNG
+          {t('patient.qr.download_png')}
         </button>
       </div>
     </div>

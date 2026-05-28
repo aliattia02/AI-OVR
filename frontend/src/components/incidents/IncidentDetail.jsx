@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAIFeedback, useIncident, useSaveAssessment, useSaveJCIFields, useUpdateStatus } from '../../hooks/useIncidents';
 import { ACTION_STATUSES } from '../../utils/enums';
@@ -52,13 +53,13 @@ const ARABIC_CORE_FIELDS = [
 
 // Task 3 — JCI & Disclosure constants
 const DISCLOSURE_FIELDS = [
-  { key: 'disclosure_date', label: 'Disclosure Date', type: 'date' },
-  { key: 'disclosure_method', label: 'Disclosure Method', type: 'enum' },
-  { key: 'disclosure_responsible', label: 'Responsible Person', type: 'text' },
-  { key: 'vulnerable_patient', label: 'Vulnerable Patient', type: 'text' },
-  { key: 'vulnerable_population_type', label: 'Vulnerable Population Type', type: 'enum' },
-  { key: 'workplace_violence', label: 'Workplace Violence', type: 'text' },
-  { key: 'medication_error_merp_category', label: 'MERP Category', type: 'text' },
+  { key: 'disclosure_date', labelKey: 'incidents.jci.disclosure_fields.disclosure_date', type: 'date' },
+  { key: 'disclosure_method', labelKey: 'incidents.jci.disclosure_fields.disclosure_method', type: 'enum' },
+  { key: 'disclosure_responsible', labelKey: 'incidents.jci.disclosure_fields.responsible_person', type: 'text' },
+  { key: 'vulnerable_patient', labelKey: 'incidents.jci.disclosure_fields.vulnerable_patient', type: 'text' },
+  { key: 'vulnerable_population_type', labelKey: 'incidents.jci.disclosure_fields.vulnerable_population_type', type: 'enum' },
+  { key: 'workplace_violence', labelKey: 'incidents.jci.disclosure_fields.workplace_violence', type: 'text' },
+  { key: 'medication_error_merp_category', labelKey: 'incidents.jci.disclosure_fields.merp_category', type: 'text' },
 ];
 
 const JCI_CHAPTERS = [
@@ -68,8 +69,32 @@ const JCI_CHAPTERS = [
 
 const JCI_COMPLIANCE_STATUSES = ['Met', 'PartiallyMet', 'NotMet', 'NotApplicable'];
 
-function formatFieldValue(type, value) {
-  if (value === null || value === undefined || value === '') return '—';
+const JCI_CHAPTER_LABELS = {
+  IPSG: 'incidents.jci.chapters.ipsg',
+  ACC: 'incidents.jci.chapters.acc',
+  PFR: 'incidents.jci.chapters.pfr',
+  AOP: 'incidents.jci.chapters.aop',
+  COP: 'incidents.jci.chapters.cop',
+  ASC: 'incidents.jci.chapters.asc',
+  MMU: 'incidents.jci.chapters.mmu',
+  PFE: 'incidents.jci.chapters.pfe',
+  QPS: 'incidents.jci.chapters.qps',
+  PCI: 'incidents.jci.chapters.pci',
+  GLD: 'incidents.jci.chapters.gld',
+  FMS: 'incidents.jci.chapters.fms',
+  SQE: 'incidents.jci.chapters.sqe',
+  MCI: 'incidents.jci.chapters.mci',
+};
+
+const JCI_COMPLIANCE_STATUS_LABELS = {
+  Met: 'incidents.jci.compliance_statuses.met',
+  PartiallyMet: 'incidents.jci.compliance_statuses.partially_met',
+  NotMet: 'incidents.jci.compliance_statuses.not_met',
+  NotApplicable: 'incidents.jci.compliance_statuses.not_applicable',
+};
+
+function formatFieldValue(type, value, placeholder) {
+  if (value === null || value === undefined || value === '') return placeholder;
   if (type === 'date') return formatDate(value) || value;
   if (type === 'datetime') return formatDateTime(value) || value;
   if (type === 'enum') return formatEnumLabel(value) || value;
@@ -97,7 +122,7 @@ function Panel({ title, children, defaultOpen = true }) {
   );
 }
 
-function LockedPanelMessage() {
+function LockedPanelMessage({ message }) {
   return (
     <div
       style={{
@@ -110,18 +135,19 @@ function LockedPanelMessage() {
       }}
     >
       <span role="img" aria-label="locked">🔒</span>
-      <span>Requires Quality Admin access</span>
+      <span>{message}</span>
     </div>
   );
 }
 
 // Task 2 — reusable inline mutation error display
-function InlineError({ mutation, fallback = 'An error occurred. Please try again.' }) {
+function InlineError({ mutation, fallback }) {
   if (!mutation.isError) return null;
   const message =
     mutation.error?.response?.data?.detail ||
     mutation.error?.message ||
     fallback;
+  if (!message) return null;
   return (
     <div
       role="alert"
@@ -144,6 +170,7 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
   const isQualityAdmin = role === 'quality_admin';
   // Task 3 — JCI panel visible to quality_admin and top_management
   const canViewJCI = role === 'quality_admin' || role === 'top_management';
+  const { t } = useTranslation();
 
   const queryClient = useQueryClient();
   const { data: incident, isLoading, error, refetch } = useIncident(incidentId);
@@ -284,7 +311,13 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
   };
 
   if (!incidentId) {
-    return <EmptyState icon="📄" title="No incident selected" subtitle="Choose an incident to view full details." />;
+    return (
+      <EmptyState
+        icon="📄"
+        title={t('incidents.detail.no_selection_title')}
+        subtitle={t('incidents.detail.no_selection_subtitle')}
+      />
+    );
   }
 
   if (isLoading) {
@@ -307,8 +340,8 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
           gap: 10,
         }}
       >
-        <div style={{ color: '#991B1B', fontWeight: 700 }}>Failed to load incident details.</div>
-        <div style={{ color: '#7F1D1D', fontSize: 13 }}>{error?.message || 'Please try again.'}</div>
+        <div style={{ color: '#991B1B', fontWeight: 700 }}>{t('incidents.detail.error_title')}</div>
+        <div style={{ color: '#7F1D1D', fontSize: 13 }}>{error?.message || t('incidents.detail.error_subtitle')}</div>
         <button
           type="button"
           onClick={() => refetch?.()}
@@ -324,14 +357,20 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
             cursor: 'pointer',
           }}
         >
-          Retry
+          {t('common.retry')}
         </button>
       </div>
     );
   }
 
   if (!incident) {
-    return <EmptyState icon="📭" title="Incident not found" subtitle="This incident may no longer be available." />;
+    return (
+      <EmptyState
+        icon="📭"
+        title={t('incidents.detail.not_found_title')}
+        subtitle={t('incidents.detail.not_found_subtitle')}
+      />
+    );
   }
 
   // Shared input/textarea styles
@@ -376,10 +415,10 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
           <div style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 12, color: '#6B7280' }}>
             {incident.incident_id}
           </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#111827' }}>{incident.facility_name || '—'}</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#111827' }}>{incident.facility_name || t('common.placeholder_dash')}</div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', fontSize: 13, color: '#374151' }}>
-            <span>Governorate: {incident.governorate || '—'}</span>
-            <span>Registered: {formatDateTime(incident.registration_date) || '—'}</span>
+            <span>{t('incidents.detail.governorate_label')} {incident.governorate || t('common.placeholder_dash')}</span>
+            <span>{t('incidents.detail.registered_label')} {formatDateTime(incident.registration_date) || t('common.placeholder_dash')}</span>
             <StatusBadge status={incident.status} />
           </div>
         </div>
@@ -398,25 +437,25 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
             cursor: 'pointer',
           }}
         >
-          Back
+          {t('incidents.detail.back')}
         </button>
       </section>
 
       {/* AI Badge */}
-      <Panel title="AI Badge">
+      <Panel title={t('incidents.ai.panel_title')}>
         {isQualityAdmin ? (
           <div style={{ display: 'grid', gap: 8 }}>
             <AIBadge aiMetadata={incident.ai_metadata} onAccept={handleAiAccept} onOverride={handleAiOverride} />
             {/* Task 2 — AI feedback error */}
-            <InlineError mutation={aiFeedback} fallback="Failed to save AI feedback." />
+            <InlineError mutation={aiFeedback} fallback={t('incidents.ai.error_save_feedback')} />
           </div>
         ) : (
-          <LockedPanelMessage />
+          <LockedPanelMessage message={t('incidents.detail.locked_message')} />
         )}
       </Panel>
 
       {/* Incident Details */}
-      <Panel title="Incident Details">
+      <Panel title={t('incidents.detail.incident_details_title')}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
           {detailsItems.map((item) => (
             <div
@@ -439,7 +478,7 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                   wordBreak: 'break-word',
                 }}
               >
-                {formatFieldValue(item.type, item.value)}
+                {formatFieldValue(item.type, item.value, t('common.placeholder_dash'))}
               </div>
             </div>
           ))}
@@ -447,7 +486,7 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
       </Panel>
 
       {/* Risk Assessment */}
-      <Panel title="Risk Assessment">
+      <Panel title={t('incidents.detail.risk_assessment_title')}>
         {isQualityAdmin ? (
           <div style={{ display: 'grid', gap: 10 }}>
             <RiskMatrix
@@ -466,23 +505,23 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                 disabled={assessmentMutation.isPending || !assessment.severity || !assessment.probability}
                 style={saveButtonStyle(assessmentMutation.isPending || !assessment.severity || !assessment.probability)}
               >
-                {assessmentMutation.isPending ? 'Saving...' : 'Save'}
+                {assessmentMutation.isPending ? t('incidents.detail.saving') : t('incidents.detail.save')}
               </button>
             </div>
             {/* Task 2 — assessment error */}
             <InlineError mutation={assessmentMutation} fallback="Failed to save assessment." />
           </div>
         ) : (
-          <LockedPanelMessage />
+          <LockedPanelMessage message={t('incidents.detail.locked_message')} />
         )}
       </Panel>
 
       {/* CAPA */}
-      <Panel title="CAPA">
+      <Panel title={t('incidents.action.panel_title')}>
         {isQualityAdmin ? (
           <div style={{ display: 'grid', gap: 10 }}>
             <label style={labelStyle}>
-              Corrective Action
+              {t('incidents.action.corrective_action')}
               <textarea
                 rows={3}
                 value={capaForm.corrective_action}
@@ -496,7 +535,7 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
             </label>
 
             <label style={labelStyle}>
-              Preventive Action
+              {t('incidents.action.preventive_action')}
               <textarea
                 rows={3}
                 value={capaForm.preventive_action}
@@ -510,7 +549,7 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10 }}>
               <label style={labelStyle}>
-                Action Date
+                {t('incidents.action.action_date')}
                 <input
                   type="date"
                   value={capaForm.action_date}
@@ -523,7 +562,7 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
               </label>
 
               <label style={labelStyle}>
-                Action Time
+                {t('incidents.action.action_time')}
                 <input
                   type="time"
                   value={capaForm.action_time}
@@ -536,7 +575,7 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
               </label>
 
               <label style={labelStyle}>
-                Action Status
+                {t('incidents.action.action_status')}
                 <select
                   value={capaForm.action_status}
                   onChange={(event) => {
@@ -561,28 +600,28 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                 disabled={saveActionsMutation.isPending}
                 style={saveButtonStyle(saveActionsMutation.isPending)}
               >
-                {saveActionsMutation.isPending ? 'Saving...' : 'Save'}
+                {saveActionsMutation.isPending ? t('incidents.detail.saving') : t('incidents.detail.save')}
               </button>
             </div>
             {/* Task 2 — CAPA error */}
-            <InlineError mutation={saveActionsMutation} fallback="Failed to save CAPA." />
+            <InlineError mutation={saveActionsMutation} fallback={t('incidents.action.error_save')} />
           </div>
         ) : (
-          <LockedPanelMessage />
+          <LockedPanelMessage message={t('incidents.detail.locked_message')} />
         )}
       </Panel>
 
       {/* Status Workflow */}
-      <Panel title="Status Workflow">
+      <Panel title={t('incidents.detail.status_workflow_title')}>
         {isQualityAdmin ? (
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 13, color: '#374151', fontWeight: 600 }}>Current status:</span>
+              <span style={{ fontSize: 13, color: '#374151', fontWeight: 600 }}>{t('incidents.detail.current_status_label')}</span>
               <StatusBadge status={incident.status} />
             </div>
 
             {legalNextStates.length === 0 ? (
-              <div style={{ fontSize: 13, color: '#6B7280' }}>No legal next states.</div>
+              <div style={{ fontSize: 13, color: '#6B7280' }}>{t('incidents.detail.no_legal_next_states')}</div>
             ) : (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {legalNextStates.map((nextStatus) => (
@@ -612,12 +651,12 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
             <InlineError mutation={updateStatus} fallback="Failed to update status." />
           </div>
         ) : (
-          <LockedPanelMessage />
+          <LockedPanelMessage message={t('incidents.detail.locked_message')} />
         )}
       </Panel>
 
       {/* Audit Trail */}
-      <Panel title="Audit Trail">
+      <Panel title={t('incidents.detail.audit_trail_title')}>
         {Array.isArray(incident.audit_trail) && incident.audit_trail.length > 0 ? (
           <div style={{ display: 'grid', gap: 8 }}>
             {incident.audit_trail.map((entry, index) => (
@@ -625,19 +664,19 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                 key={`${entry?.timestamp || 'audit'}-${index}`}
                 style={{ borderLeft: '3px solid #D1D5DB', paddingLeft: 10, display: 'grid', gap: 2 }}
               >
-                <div style={{ fontSize: 12, color: '#4B5563' }}>{formatDateTime(entry?.timestamp) || '—'}</div>
-                <div style={{ fontSize: 13, color: '#111827', fontWeight: 600 }}>{formatEnumLabel(entry?.action) || '—'}</div>
-                <div style={{ fontSize: 12, color: '#374151' }}>User: {entry?.user_id || '—'}</div>
+                <div style={{ fontSize: 12, color: '#4B5563' }}>{formatDateTime(entry?.timestamp) || t('common.placeholder_dash')}</div>
+                <div style={{ fontSize: 13, color: '#111827', fontWeight: 600 }}>{formatEnumLabel(entry?.action) || t('common.placeholder_dash')}</div>
+                <div style={{ fontSize: 12, color: '#374151' }}>{t('incidents.detail.audit_user_label')} {entry?.user_id || t('common.placeholder_dash')}</div>
               </div>
             ))}
           </div>
         ) : (
-          <div style={{ fontSize: 13, color: '#6B7280' }}>No audit entries available.</div>
+          <div style={{ fontSize: 13, color: '#6B7280' }}>{t('incidents.detail.no_audit_entries')}</div>
         )}
       </Panel>
 
       {/* Final Report */}
-      <Panel title="Final Report">
+      <Panel title={t('incidents.final.panel_title')}>
         {isQualityAdmin ? (
           <div style={{ display: 'grid', gap: 10 }}>
             <textarea
@@ -657,29 +696,29 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                 disabled={submitFinalMutation.isPending || !finalReportText.trim()}
                 style={saveButtonStyle(submitFinalMutation.isPending || !finalReportText.trim())}
               >
-                {submitFinalMutation.isPending ? 'Submitting...' : 'Submit'}
+                {submitFinalMutation.isPending ? t('common.submitting') : t('incidents.final.submit')}
               </button>
             </div>
             {/* Task 2 — final report error */}
-            <InlineError mutation={submitFinalMutation} fallback="Failed to submit final report." />
+            <InlineError mutation={submitFinalMutation} fallback={t('incidents.final.error_submit')} />
           </div>
         ) : (
-          <LockedPanelMessage />
+          <LockedPanelMessage message={t('incidents.detail.locked_message')} />
         )}
       </Panel>
 
       {/* Task 3 — JCI & Disclosure panel */}
-      <Panel title="JCI & Disclosure" defaultOpen={false}>
+      <Panel title={t('incidents.jci.panel_title')} defaultOpen={false}>
         {canViewJCI ? (
           <div style={{ display: 'grid', gap: 16 }}>
 
             {/* Group A — read-only disclosure fields */}
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 10 }}>
-                Disclosure Information
+                {t('incidents.jci.disclosure_info_title')}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
-                {DISCLOSURE_FIELDS.map(({ key, label, type }) => (
+                {DISCLOSURE_FIELDS.map(({ key, labelKey, type }) => (
                   <div
                     key={key}
                     style={{
@@ -691,8 +730,8 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                       gap: 6,
                     }}
                   >
-                    <div style={{ fontSize: 12, color: '#4B5563', fontWeight: 700 }}>{label}</div>
-                    <div style={{ fontSize: 13, color: '#111827' }}>{formatFieldValue(type, incident[key])}</div>
+                    <div style={{ fontSize: 12, color: '#4B5563', fontWeight: 700 }}>{t(labelKey)}</div>
+                    <div style={{ fontSize: 13, color: '#111827' }}>{formatFieldValue(type, incident[key], t('common.placeholder_dash'))}</div>
                   </div>
                 ))}
               </div>
@@ -703,12 +742,12 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
             {/* Group B — editable JCI compliance fields */}
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 10 }}>
-                JCI Compliance
+                {t('incidents.jci.compliance_title')}
               </div>
               <div style={{ display: 'grid', gap: 10 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
                   <label style={labelStyle}>
-                    JCI Chapter
+                    {t('incidents.jci.chapter_label')}
                     <select
                       value={jciForm.jci_chapter}
                       onChange={(event) => {
@@ -717,15 +756,15 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                       }}
                       style={inputStyle}
                     >
-                      <option value="">— Select chapter —</option>
+                      <option value="">{t('incidents.jci.select_chapter')}</option>
                       {JCI_CHAPTERS.map((ch) => (
-                        <option key={ch} value={ch}>{ch}</option>
+                        <option key={ch} value={ch}>{t(JCI_CHAPTER_LABELS[ch] || '') || ch}</option>
                       ))}
                     </select>
                   </label>
 
                   <label style={labelStyle}>
-                    Compliance Status
+                    {t('incidents.jci.compliance_status_label')}
                     <select
                       value={jciForm.jci_compliance_status}
                       onChange={(event) => {
@@ -734,16 +773,16 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                       }}
                       style={inputStyle}
                     >
-                      <option value="">— Select status —</option>
+                      <option value="">{t('incidents.jci.select_status')}</option>
                       {JCI_COMPLIANCE_STATUSES.map((s) => (
-                        <option key={s} value={s}>{formatEnumLabel(s)}</option>
+                        <option key={s} value={s}>{t(JCI_COMPLIANCE_STATUS_LABELS[s] || '') || formatEnumLabel(s)}</option>
                       ))}
                     </select>
                   </label>
                 </div>
 
                 <label style={labelStyle}>
-                  Standard
+                  {t('incidents.jci.standard_label')}
                   <input
                     type="text"
                     value={jciForm.jci_standard}
@@ -751,13 +790,13 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                       setJciForm((prev) => ({ ...prev, jci_standard: event.target.value }));
                       saveJCIFieldsMutation.reset();
                     }}
-                    placeholder="e.g. IPSG.1"
+                    placeholder={t('incidents.jci.standard_placeholder')}
                     style={inputStyle}
                   />
                 </label>
 
                 <label style={labelStyle}>
-                  Measurable Element
+                  {t('incidents.jci.measurable_element_label')}
                   <input
                     type="text"
                     value={jciForm.jci_measurable_element}
@@ -765,13 +804,13 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                       setJciForm((prev) => ({ ...prev, jci_measurable_element: event.target.value }));
                       saveJCIFieldsMutation.reset();
                     }}
-                    placeholder="e.g. ME 1"
+                    placeholder={t('incidents.jci.measurable_element_placeholder')}
                     style={inputStyle}
                   />
                 </label>
 
                 <label style={labelStyle}>
-                  Evidence
+                  {t('incidents.jci.evidence_label')}
                   <textarea
                     rows={3}
                     value={jciForm.jci_evidence}
@@ -784,7 +823,7 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                 </label>
 
                 <label style={labelStyle}>
-                  Gap Analysis
+                  {t('incidents.jci.gap_analysis_label')}
                   <textarea
                     rows={3}
                     value={jciForm.jci_gap_analysis}
@@ -797,7 +836,7 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                 </label>
 
                 <label style={labelStyle}>
-                  Action Plan
+                  {t('incidents.jci.action_plan_label')}
                   <textarea
                     rows={3}
                     value={jciForm.jci_action_plan}
@@ -816,16 +855,16 @@ export default function IncidentDetail({ incidentId, role, onBack }) {
                     disabled={saveJCIFieldsMutation.isPending}
                     style={saveButtonStyle(saveJCIFieldsMutation.isPending)}
                   >
-                    {saveJCIFieldsMutation.isPending ? 'Saving...' : 'Save JCI'}
+                    {saveJCIFieldsMutation.isPending ? t('incidents.detail.saving') : t('incidents.jci.save_jci')}
                   </button>
                 </div>
                 {/* Task 2 — JCI save error */}
-                <InlineError mutation={saveJCIFieldsMutation} fallback="Failed to save JCI fields." />
+                <InlineError mutation={saveJCIFieldsMutation} fallback={t('incidents.jci.error_save')} />
               </div>
             </div>
           </div>
         ) : (
-          <LockedPanelMessage />
+          <LockedPanelMessage message={t('incidents.detail.locked_message')} />
         )}
       </Panel>
     </div>

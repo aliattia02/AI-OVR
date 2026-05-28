@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Modal from './Modal';
 import { setToken, resetSessionTimers } from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Task 5 — Session Expiry Warning
@@ -22,6 +23,7 @@ export default function SessionExpiryWarning() {
   const [loading, setLoading] = useState(false);
   const [refreshError, setRefreshError] = useState('');
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const onWarning = () => {
@@ -57,7 +59,7 @@ export default function SessionExpiryWarning() {
       setOpen(false);
     } catch {
       // Refresh failed — the session is truly gone; fall through to the login page.
-      setRefreshError('Could not extend your session. Please log in again.');
+      setRefreshError(t('auth.session.error_refresh'));
     } finally {
       setLoading(false);
     }
@@ -80,15 +82,15 @@ export default function SessionExpiryWarning() {
 
   return (
     <Modal
-      title={expired ? 'Session Expired' : 'Session Expiring Soon'}
+      title={expired ? t('auth.session.title_expired') : t('auth.session.title_expiring')}
       // Prevent accidental dismissal when the session is already gone.
       onClose={expired ? undefined : () => setOpen(false)}
       size="sm"
     >
       <p style={{ margin: '0 0 4px', color: '#374151', fontSize: 14, lineHeight: 1.5 }}>
         {expired
-          ? 'Your session has expired due to inactivity.'
-          : 'Your session will expire in 2 minutes due to inactivity. Would you like to stay logged in?'}
+          ? t('auth.session.message_expired')
+          : t('auth.session.message_expiring')}
       </p>
 
       {refreshError && (
@@ -132,7 +134,7 @@ export default function SessionExpiryWarning() {
             opacity: loading ? 0.6 : 1,
           }}
         >
-          Log Out Now
+          {t('auth.session.button_logout')}
         </button>
 
         {!expired && (
@@ -152,7 +154,7 @@ export default function SessionExpiryWarning() {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? 'Refreshing…' : 'Stay Logged In'}
+            {loading ? t('auth.session.button_refreshing') : t('auth.session.button_stay_logged_in')}
           </button>
         )}
       </div>

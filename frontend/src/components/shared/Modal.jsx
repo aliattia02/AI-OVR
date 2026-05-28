@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const SIZE_MAP = {
   sm: 420,
@@ -11,6 +12,7 @@ export default function Modal({ title, children, onClose, size = 'md' }) {
   const dialogRef = useRef(null);
   const onCloseRef = useRef(onClose);
   const titleId = useId();
+  const { t } = useTranslation();
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -113,7 +115,7 @@ export default function Modal({ title, children, onClose, size = 'md' }) {
           <button
             type="button"
             onClick={() => onClose?.()}
-            aria-label="Close modal"
+            aria-label={t('common.close_modal')}
             style={{
               position: 'absolute', // RTL
               insetInlineEnd: 12, // RTL

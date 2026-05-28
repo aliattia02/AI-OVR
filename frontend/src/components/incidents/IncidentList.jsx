@@ -11,6 +11,7 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useIncidents } from '../../hooks/useIncidents';
 import { INCIDENT_STATUSES, SEVERITY_OPTIONS } from '../../utils/enums';
@@ -84,13 +85,19 @@ const C = {
 
 // ── Utility helpers ────────────────────────────────────────────────────────────
 
-function fmt(val) {
-  if (val == null || val === '') return '—';
+const toSnakeCase = (value) =>
+  String(value || '')
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .replace(/[\s-]+/g, '_')
+    .toLowerCase();
+
+function fmt(val, placeholder) {
+  if (val == null || val === '') return placeholder;
   return String(val);
 }
 
-function fmtDate(val) {
-  if (!val) return '—';
+function fmtDate(val, placeholder) {
+  if (!val) return placeholder;
   try {
     return new Date(val).toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
@@ -108,46 +115,46 @@ function riskColor(score) {
   return '#6B7280';
 }
 
-function riskLabel(score) {
-  if (score == null) return '—';
-  if (score >= 7)  return `${score} · Critical`;
-  if (score >= 5)  return `${score} · High`;
-  if (score >= 3)  return `${score} · Medium`;
-  return `${score} · Low`;
+function riskLabel(score, t) {
+  if (score == null) return t('common.placeholder_dash');
+  if (score >= 7)  return t('incidents.risk.score_critical', { score });
+  if (score >= 5)  return t('incidents.risk.score_high', { score });
+  if (score >= 3)  return t('incidents.risk.score_medium', { score });
+  return t('incidents.risk.score_low', { score });
 }
 
 // Export helpers ---------------------------------------------------------------
 
-function escapeCSV(val) {
-  const s = fmt(val);
+function escapeCSV(val, placeholder) {
+  const s = fmt(val, placeholder);
   if (s.includes(',') || s.includes('"') || s.includes('\n')) {
     return `"${s.replace(/"/g, '""')}"`;
   }
   return s;
 }
 
-const CSV_COLUMNS = [
-  { key: 'incident_id',          label: 'Incident ID' },
-  { key: 'status',               label: 'Status' },
-  { key: 'severity',             label: 'Severity' },
-  { key: 'error_classification', label: 'Classification' },
-  { key: 'event_type',           label: 'Event Type' },
-  { key: 'facility_name',        label: 'Facility' },
-  { key: 'facility_type',        label: 'Facility Type' },
-  { key: 'governorate',          label: 'Governorate' },
-  { key: 'administration',       label: 'Administration' },
-  { key: 'involved_person',      label: 'Person Involved' },
-  { key: 'reporter_role',        label: 'Reporter Role' },
-  { key: 'occurrence_date',      label: 'Occurrence Date' },
-  { key: 'registration_date',    label: 'Creation Date' },
-  { key: 'risk_score',           label: 'Risk Score' },
-  { key: 'description',          label: 'Description' },
+const buildCSVColumns = (t) => [
+  { key: 'incident_id',          label: t('incidents.detail.fields.incident_id') },
+  { key: 'status',               label: t('incidents.status.label') },
+  { key: 'severity',             label: t('incidents.severity.label') },
+  { key: 'error_classification', label: t('incidents.classification.column_label') },
+  { key: 'event_type',           label: t('incidents.event_type.label') },
+  { key: 'facility_name',        label: t('common.fields.facility') },
+  { key: 'facility_type',        label: t('incidents.new.facility_type_label') },
+  { key: 'governorate',          label: t('incidents.detail.fields.governorate') },
+  { key: 'administration',       label: t('incidents.detail.fields.administration') },
+  { key: 'involved_person',      label: t('incidents.list.person_involved_label') },
+  { key: 'reporter_role',        label: t('incidents.new.reporter_role_label') },
+  { key: 'occurrence_date',      label: t('incidents.detail.fields.occurrence_date') },
+  { key: 'registration_date',    label: t('common.fields.creation_date') },
+  { key: 'risk_score',           label: t('incidents.risk.risk_score_label') },
+  { key: 'description',          label: t('incidents.detail.fields.description') },
 ];
 
-function downloadCSV(rows) {
-  const header = CSV_COLUMNS.map(c => c.label).join(',');
+function downloadCSV(rows, columns, placeholder) {
+  const header = columns.map(c => c.label).join(',');
   const body = rows.map(r =>
-    CSV_COLUMNS.map(c => escapeCSV(r[c.key])).join(',')
+    columns.map(c => escapeCSV(r[c.key], placeholder)).join(',')
   ).join('\n');
   const blob = new Blob([`\uFEFF${header}\n${body}`], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -205,7 +212,7 @@ function FilterInput({ label, value, onChange, type = 'text', placeholder = '' }
   );
 }
 
-function FilterSelect({ label, value, onChange, options, isRTL }) { // RTL
+function FilterSelect({ label, value, onChange, options, isRTL, allLabel }) { // RTL
   return (
     <label style={{ display: 'grid', gap: 4 }}>
       <span style={{ fontSize: 11, fontWeight: 700, color: C.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -230,7 +237,7 @@ function FilterSelect({ label, value, onChange, options, isRTL }) { // RTL
           paddingInlineEnd: 28, // RTL
         }}
       >
-        <option value="all">All</option>
+        <option value="all">{allLabel}</option>
         {options.map(opt => (
           <option key={opt.value || opt} value={opt.value || opt}>
             {opt.label || opt}
@@ -241,7 +248,7 @@ function FilterSelect({ label, value, onChange, options, isRTL }) { // RTL
   );
 }
 
-function LockedFilterChip({ label, value }) {
+function LockedFilterChip({ label, value, lockedLabel, placeholder }) {
   return (
     <div style={{ display: 'grid', gap: 4 }}>
       <span style={{ fontSize: 11, fontWeight: 700, color: C.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -269,17 +276,17 @@ function LockedFilterChip({ label, value }) {
           whiteSpace: 'nowrap',
           flexShrink: 0,
         }}>
-          Locked
+          {lockedLabel}
         </span>
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {value || '—'}
+          {value || placeholder}
         </span>
       </div>
     </div>
   );
 }
 
-function DateRangeFilter({ label, from, to, onFromChange, onToChange }) {
+function DateRangeFilter({ label, from, to, onFromChange, onToChange, fromLabel, toLabel }) {
   return (
     <div style={{ display: 'grid', gap: 4 }}>
       <span style={{ fontSize: 11, fontWeight: 700, color: C.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -304,13 +311,13 @@ function DateRangeFilter({ label, from, to, onFromChange, onToChange }) {
         />
       </div>
       <div style={{ display: 'flex', gap: 8, fontSize: 10, color: C.textMuted, paddingTop: 1 }}>
-        <span>From</span>
+        <span>{fromLabel}</span>
         <span
           style={{
             marginInlineStart: 'auto', // RTL
           }}
         >
-          To
+          {toLabel}
         </span>
       </div>
     </div>
@@ -384,6 +391,8 @@ function activeFilterCount(filters) {
 export default function IncidentList({ onIncidentClick, role }) {
   const { tier, user } = useAuth();
   const { isRTL } = useDirection(); // RTL
+  const { t } = useTranslation();
+  const placeholderDash = t('common.placeholder_dash');
 
   // Tier-2 users are scoped to their own facility — lock location filters.
   const isFacilityScoped = tier === 2;
@@ -424,6 +433,40 @@ export default function IncidentList({ onIncidentClick, role }) {
   const facilityTypeOptions = useMemo(() => {
     return [...new Set(rawResults.map(r => r.facility_type).filter(Boolean))].sort();
   }, [rawResults]);
+
+  const csvColumns = useMemo(() => buildCSVColumns(t), [t]);
+
+  const classificationOptions = useMemo(
+    () => ERROR_CLASSIFICATION_OPTIONS.map((value) => ({
+      value,
+      label: t(`incidents.list.classification_options.${toSnakeCase(value)}`),
+    })),
+    [t],
+  );
+
+  const eventTypeOptions = useMemo(
+    () => EVENT_TYPE_OPTIONS.map((value) => ({
+      value,
+      label: t(`incidents.list.event_type_options.${toSnakeCase(value)}`),
+    })),
+    [t],
+  );
+
+  const severityOptions = useMemo(
+    () => SEVERITY_OPTS.map((value) => ({
+      value,
+      label: t(`incidents.severity.${toSnakeCase(value)}`),
+    })),
+    [t],
+  );
+
+  const incidentStatusOptions = useMemo(
+    () => INCIDENT_STATUS_OPTIONS.map((value) => ({
+      value,
+      label: t(`incidents.status.${toSnakeCase(value)}`),
+    })),
+    [t],
+  );
 
   // ── Client-side filtering ──────────────────────────────────────────────────
   const filteredIncidents = useMemo(() => {
@@ -521,9 +564,9 @@ export default function IncidentList({ onIncidentClick, role }) {
 
   const handleExportCSV = useCallback(() => {
     setExporting('csv');
-    try { downloadCSV(sortedIncidents); }
+    try { downloadCSV(sortedIncidents, csvColumns, placeholderDash); }
     finally { setTimeout(() => setExporting(null), 800); }
-  }, [sortedIncidents]);
+  }, [sortedIncidents, csvColumns, placeholderDash]);
 
   const handleExportXLSX = useCallback(async () => {
     setExporting('xlsx');
@@ -540,11 +583,11 @@ export default function IncidentList({ onIncidentClick, role }) {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      alert('XLSX export failed. Please try again.');
+      alert(t('incidents.list.export_xlsx_failed'));
     } finally {
       setTimeout(() => setExporting(null), 800);
     }
-  }, []);
+  }, [t]);
 
   const advFilterCount = activeFilterCount(filters);
 
@@ -552,9 +595,9 @@ export default function IncidentList({ onIncidentClick, role }) {
   if (error) {
     return (
       <div style={{ border: `1px solid ${C.dangerBorder}`, backgroundColor: C.dangerBg, borderRadius: 12, padding: 20, display: 'grid', gap: 10 }}>
-        <div style={{ color: C.dangerText, fontWeight: 700 }}>Failed to load incidents.</div>
-        <div style={{ color: '#7F1D1D', fontSize: 13 }}>{error?.message || 'Please try again.'}</div>
-        <button type="button" onClick={() => refetch?.()} style={btnStyle(C.brand)}>Retry</button>
+        <div style={{ color: C.dangerText, fontWeight: 700 }}>{t('incidents.list.error_title')}</div>
+        <div style={{ color: '#7F1D1D', fontSize: 13 }}>{error?.message || t('incidents.list.error_subtitle')}</div>
+        <button type="button" onClick={() => refetch?.()} style={btnStyle(C.brand)}>{t('common.retry')}</button>
       </div>
     );
   }
@@ -584,7 +627,7 @@ export default function IncidentList({ onIncidentClick, role }) {
             type="search"
             value={filters.query}
             onChange={e => setFilter('query', e.target.value)}
-            placeholder="Search by ID, description, person, facility…"
+            placeholder={t('incidents.list.quick_search_placeholder')}
             style={{
               width: '100%',
               border: `1px solid ${C.border}`,
@@ -616,7 +659,7 @@ export default function IncidentList({ onIncidentClick, role }) {
           }}
         >
           <span style={{ fontSize: 13 }}>⚙</span>
-          Advanced Search
+          {t('incidents.list.advanced_search')}
           {advFilterCount > 0 && (
             <span style={{ backgroundColor: C.yellow, color: '#fff', borderRadius: 999, fontSize: 10, fontWeight: 800, padding: '1px 6px', lineHeight: 1.6 }}>
               {advFilterCount}
@@ -635,7 +678,7 @@ export default function IncidentList({ onIncidentClick, role }) {
 
         {advFilterCount > 0 && (
           <button type="button" onClick={clearFilters} style={{ ...btnStyle('#F3F4F6'), color: C.textMid, border: `1px solid ${C.border}`, fontSize: 12 }}>
-            ✕ Clear filters
+            {t('incidents.list.clear_filters')}
           </button>
         )}
 
@@ -650,7 +693,7 @@ export default function IncidentList({ onIncidentClick, role }) {
             marginInlineStart: 'auto', // RTL
           }}
         >
-          Rows:
+          {t('incidents.list.rows_label')}
           <select
             value={pageSize}
             onChange={e => { setPageSize(Number(e.target.value)); setPage(0); }}
@@ -667,7 +710,7 @@ export default function IncidentList({ onIncidentClick, role }) {
           disabled={exporting === 'csv' || sortedIncidents.length === 0}
           style={{ ...btnStyle(C.bg), border: `1px solid ${C.border}`, color: C.textMid, display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, opacity: sortedIncidents.length === 0 ? 0.4 : 1 }}
         >
-          {exporting === 'csv' ? '⏳' : '⬇'} CSV
+          {exporting === 'csv' ? '⏳' : '⬇'} {t('incidents.list.export_csv')}
         </button>
         <button
           type="button"
@@ -675,7 +718,7 @@ export default function IncidentList({ onIncidentClick, role }) {
           disabled={exporting === 'xlsx'}
           style={{ ...btnStyle(C.brand), color: '#fff', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}
         >
-          {exporting === 'xlsx' ? '⏳' : '⬇'} XLSX
+          {exporting === 'xlsx' ? '⏳' : '⬇'} {t('incidents.list.export_xlsx')}
         </button>
       </div>
 
@@ -698,10 +741,10 @@ export default function IncidentList({ onIncidentClick, role }) {
           gap: 14,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: C.brand }}>Advanced Filters</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.brand }}>{t('incidents.list.advanced_filters')}</span>
             {advFilterCount > 0 && (
               <button type="button" onClick={clearFilters} style={{ background: 'none', border: 'none', color: C.brand, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
-                Clear all
+                {t('incidents.list.clear_all')}
               </button>
             )}
           </div>
@@ -709,103 +752,134 @@ export default function IncidentList({ onIncidentClick, role }) {
           {/* Row 1: Location */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
             {isFacilityScoped ? (
-              <LockedFilterChip label="Governorate" value={user?.governorate} />
+              <LockedFilterChip
+                label={t('incidents.detail.fields.governorate')}
+                value={user?.governorate}
+                lockedLabel={t('incidents.list.locked')}
+                placeholder={placeholderDash}
+              />
             ) : (
               <FilterSelect
-                label="Governorate"
+                label={t('incidents.detail.fields.governorate')}
                 value={filters.governorate}
                 onChange={v => setFilter('governorate', v)}
                 options={governorateOptions}
                 isRTL={isRTL} // RTL
+                allLabel={t('incidents.list.all_option')}
               />
             )}
             {isFacilityScoped ? (
-              <LockedFilterChip label="Administration" value={user?.administration} />
+              <LockedFilterChip
+                label={t('incidents.detail.fields.administration')}
+                value={user?.administration}
+                lockedLabel={t('incidents.list.locked')}
+                placeholder={placeholderDash}
+              />
             ) : (
               <FilterSelect
-                label="Administration"
+                label={t('incidents.detail.fields.administration')}
                 value={filters.administration}
                 onChange={v => setFilter('administration', v)}
                 options={administrationOptions}
                 isRTL={isRTL} // RTL
+                allLabel={t('incidents.list.all_option')}
               />
             )}
             {isFacilityScoped ? (
-              <LockedFilterChip label="Facility Type" value={user?.facility_type} />
+              <LockedFilterChip
+                label={t('incidents.new.facility_type_label')}
+                value={user?.facility_type}
+                lockedLabel={t('incidents.list.locked')}
+                placeholder={placeholderDash}
+              />
             ) : (
               <FilterSelect
-                label="Facility Type"
+                label={t('incidents.new.facility_type_label')}
                 value={filters.facilityType}
                 onChange={v => setFilter('facilityType', v)}
                 options={facilityTypeOptions}
                 isRTL={isRTL} // RTL
+                allLabel={t('incidents.list.all_option')}
               />
             )}
             {isFacilityScoped ? (
-              <LockedFilterChip label="Facility Name" value={user?.facility_name} />
+              <LockedFilterChip
+                label={t('incidents.detail.fields.facility_name')}
+                value={user?.facility_name}
+                lockedLabel={t('incidents.list.locked')}
+                placeholder={placeholderDash}
+              />
             ) : (
               <FilterInput
-                label="Facility Name"
+                label={t('incidents.detail.fields.facility_name')}
                 value={filters.facilityName}
                 onChange={v => setFilter('facilityName', v)}
-                placeholder="Type to search…"
+                placeholder={t('incidents.list.facility_name_placeholder')}
               />
             )}
             <FilterInput
-              label="Person Involved"
+              label={t('incidents.list.person_involved_label')}
               value={filters.involvedPerson}
               onChange={v => setFilter('involvedPerson', v)}
-              placeholder="Name or ID…"
+              placeholder={t('incidents.list.person_involved_placeholder')}
             />
           </div>
 
           {/* Row 2: Classification */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
             <FilterSelect
-              label="Error Classification"
+              label={t('incidents.classification.label')}
               value={filters.errorClassification}
               onChange={v => setFilter('errorClassification', v)}
-              options={ERROR_CLASSIFICATION_OPTIONS}
+              options={classificationOptions}
               isRTL={isRTL} // RTL
+              allLabel={t('incidents.list.all_option')}
             />
             <FilterSelect
-              label="Event Type"
+              label={t('incidents.event_type.label')}
               value={filters.eventType}
               onChange={v => setFilter('eventType', v)}
-              options={EVENT_TYPE_OPTIONS}
+              options={eventTypeOptions}
               isRTL={isRTL} // RTL
+              allLabel={t('incidents.list.all_option')}
             />
             <FilterSelect
-              label="Severity"
+              label={t('incidents.severity.label')}
               value={filters.severity}
               onChange={v => setFilter('severity', v)}
-              options={SEVERITY_OPTS}
+              options={severityOptions}
               isRTL={isRTL} // RTL
+              allLabel={t('incidents.list.all_option')}
             />
             <FilterSelect
-              label="Incident Status"
+              label={t('incidents.list.incident_status_label')}
               value={filters.status}
               onChange={v => setFilter('status', v)}
-              options={INCIDENT_STATUS_OPTIONS}
+              options={incidentStatusOptions}
               isRTL={isRTL} // RTL
+              allLabel={t('incidents.list.all_option')}
             />
           </div>
 
           {/* Row 3: Date ranges */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
             <DateRangeFilter
-              label="Creation Date"
+              label={t('common.fields.creation_date')}
               from={filters.creationFrom}
               to={filters.creationTo}
               onFromChange={v => setFilter('creationFrom', v)}
               onToChange={v => setFilter('creationTo', v)}
+              fromLabel={t('common.from')}
+              toLabel={t('common.to')}
             />
             <DateRangeFilter
-              label="Occurrence Date"
+              label={t('incidents.detail.fields.occurrence_date')}
               from={filters.occurrenceFrom}
               to={filters.occurrenceTo}
               onFromChange={v => setFilter('occurrenceFrom', v)}
               onToChange={v => setFilter('occurrenceTo', v)}
+              fromLabel={t('common.from')}
+              toLabel={t('common.to')}
             />
           </div>
         </div>
@@ -814,13 +888,13 @@ export default function IncidentList({ onIncidentClick, role }) {
       {/* ── Results summary ────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: C.textMuted }}>
         <span>
-          Showing <strong style={{ color: C.text }}>{sortedIncidents.length.toLocaleString()}</strong>
+          {t('incidents.list.showing')} <strong style={{ color: C.text }}>{sortedIncidents.length.toLocaleString()}</strong>
           {sortedIncidents.length !== rawResults.length && (
-            <> of <strong style={{ color: C.text }}>{rawResults.length.toLocaleString()}</strong> loaded</>
+            <> {t('incidents.list.of')} <strong style={{ color: C.text }}>{rawResults.length.toLocaleString()}</strong> {t('incidents.list.loaded')}</>
           )}
-          {' '}incidents
+          {' '}{t('incidents.list.incidents')}
         </span>
-        {isLoading && <span style={{ color: C.brand, fontWeight: 600 }}>Loading…</span>}
+        {isLoading && <span style={{ color: C.brand, fontWeight: 600 }}>{t('incidents.list.loading')}</span>}
       </div>
 
       {/* ── Table ─────────────────────────────────────────────────────────── */}
@@ -835,16 +909,16 @@ export default function IncidentList({ onIncidentClick, role }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr>
-                <ColHeader label="Incident ID"     sortKey="incident_id"          sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label="Status"          sortKey="status"               sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label="Severity"        sortKey="severity"             sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label="Classification"  sortKey="error_classification" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label="Event Type"      sortKey="event_type"           sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label="Facility"        sortKey="facility_name"        sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label="Governorate"     sortKey="governorate"          sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label="Risk"            sortKey="risk_score"           sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label="Occurrence"      sortKey="occurrence_date"      sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label="Created"         sortKey="registration_date"    sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.detail.fields.incident_id')} sortKey="incident_id" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.status.label')} sortKey="status" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.severity.label')} sortKey="severity" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.classification.column_label')} sortKey="error_classification" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.event_type.label')} sortKey="event_type" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('common.fields.facility')} sortKey="facility_name" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.detail.fields.governorate')} sortKey="governorate" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.risk.label')} sortKey="risk_score" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.list.column_occurrence')} sortKey="occurrence_date" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.list.column_created')} sortKey="registration_date" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
               </tr>
             </thead>
             <tbody>
@@ -855,8 +929,8 @@ export default function IncidentList({ onIncidentClick, role }) {
                   <td colSpan={10} style={{ padding: 48, textAlign: 'center' }}>
                     <EmptyState
                       icon="🗂️"
-                      title="No incidents found"
-                      subtitle="Try adjusting your search or filter criteria."
+                      title={t('incidents.list.empty_title')}
+                      subtitle={t('incidents.list.empty_subtitle')}
                     />
                   </td>
                 </tr>
@@ -894,10 +968,10 @@ export default function IncidentList({ onIncidentClick, role }) {
             disabled={page === 0}
             style={paginationBtn(page === 0)}
           >
-            ← Previous
+            {t('incidents.list.pagination_previous')}
           </button>
           <span style={{ fontSize: 12, color: C.textMid, fontWeight: 600 }}>
-            Page {page + 1}
+            {t('incidents.list.pagination_page')} {page + 1}
           </span>
           <button
             type="button"
@@ -905,7 +979,7 @@ export default function IncidentList({ onIncidentClick, role }) {
             disabled={!hasNextPage}
             style={paginationBtn(!hasNextPage)}
           >
-            Next →
+            {t('incidents.list.pagination_next')}
           </button>
         </div>
       )}
@@ -918,6 +992,8 @@ export default function IncidentList({ onIncidentClick, role }) {
 function IncidentRow({ incident: inc, idx, onClick, role }) {
   const [hovered, setHovered] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const placeholderDash = t('common.placeholder_dash');
 
   function handleRowClick() {
     const id = inc?.incident_id || inc?.id;
@@ -948,10 +1024,10 @@ function IncidentRow({ incident: inc, idx, onClick, role }) {
       {/* Incident ID */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: C.brand }}>
-          {fmt(inc?.incident_id)}
+          {fmt(inc?.incident_id, placeholderDash)}
         </span>
         {inc?.ai_metadata?.auto_classification && (
-          <span style={{ display: 'block', fontSize: 10, color: C.textMuted, marginTop: 2 }}>AI ✓</span>
+          <span style={{ display: 'block', fontSize: 10, color: C.textMuted, marginTop: 2 }}>{t('incidents.list.ai_marker')}</span>
         )}
       </td>
 
@@ -968,47 +1044,47 @@ function IncidentRow({ incident: inc, idx, onClick, role }) {
       {/* Classification */}
       <td style={{ padding: '11px 14px', maxWidth: 160 }}>
         <span style={{ fontSize: 12, color: C.textMid, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {fmt(inc?.error_classification)}
+          {fmt(inc?.error_classification, placeholderDash)}
         </span>
       </td>
 
       {/* Event Type */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
-        <span style={{ fontSize: 12, color: C.textMid }}>{fmt(inc?.event_type)}</span>
+        <span style={{ fontSize: 12, color: C.textMid }}>{fmt(inc?.event_type, placeholderDash)}</span>
       </td>
 
       {/* Facility */}
       <td style={{ padding: '11px 14px', maxWidth: 180 }}>
         <span style={{ fontSize: 12, color: C.text, fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {fmt(inc?.facility_name)}
+          {fmt(inc?.facility_name, placeholderDash)}
         </span>
-        <span style={{ fontSize: 11, color: C.textMuted }}>{fmt(inc?.facility_type)}</span>
+        <span style={{ fontSize: 11, color: C.textMuted }}>{fmt(inc?.facility_type, placeholderDash)}</span>
       </td>
 
       {/* Governorate */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
-        <span style={{ fontSize: 12, color: C.textMid }}>{fmt(inc?.governorate)}</span>
+        <span style={{ fontSize: 12, color: C.textMid }}>{fmt(inc?.governorate, placeholderDash)}</span>
       </td>
 
       {/* Risk */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         {score != null ? (
           <span style={{ fontSize: 12, fontWeight: 700, color: riskColor(score) }}>
-            {riskLabel(score)}
+            {riskLabel(score, t)}
           </span>
         ) : (
-          <span style={{ fontSize: 12, color: C.textMuted }}>—</span>
+          <span style={{ fontSize: 12, color: C.textMuted }}>{placeholderDash}</span>
         )}
       </td>
 
       {/* Occurrence date */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
-        <span style={{ fontSize: 12, color: C.textMid }}>{fmtDate(inc?.occurrence_date)}</span>
+        <span style={{ fontSize: 12, color: C.textMid }}>{fmtDate(inc?.occurrence_date, placeholderDash)}</span>
       </td>
 
       {/* Creation date */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
-        <span style={{ fontSize: 12, color: C.textMid }}>{fmtDate(inc?.registration_date)}</span>
+        <span style={{ fontSize: 12, color: C.textMid }}>{fmtDate(inc?.registration_date, placeholderDash)}</span>
       </td>
     </tr>
   );
@@ -1024,6 +1100,8 @@ const SEVERITY_STYLES = {
 
 function SeverityPill({ severity }) {
   const s = SEVERITY_STYLES[severity] || { bg: '#F3F4F6', color: '#374151', border: '#E5E7EB' };
+  const { t } = useTranslation();
+  const label = severity ? t(`incidents.severity.${toSnakeCase(severity)}`) : t('common.placeholder_dash');
   return (
     <span style={{
       display: 'inline-block',
@@ -1035,7 +1113,7 @@ function SeverityPill({ severity }) {
       color: s.color,
       border: `1px solid ${s.border}`,
     }}>
-      {severity || '—'}
+      {label}
     </span>
   );
 }
