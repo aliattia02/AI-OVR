@@ -15,6 +15,11 @@ import MFAVerify from './pages/MFAVerify';
 import PatientReport from './pages/PatientReport';
 import Reports from './pages/Reports';
 import WorkflowPage from './pages/WorkflowPage';
+import AboutPage from './pages/public/AboutPage';
+import IncidentReportsPage from './pages/public/IncidentReportsPage';
+import LandingPage from './pages/public/LandingPage';
+import StatisticsPage from './pages/public/StatisticsPage';
+import StoryLibraryPage from './pages/public/StoryLibraryPage';
 
 const PATH_BY_VIEW = {
   dashboard: '/dashboard',
@@ -79,7 +84,7 @@ function IncidentDetailRoute() {
 
 function FallbackRedirect() {
   const { isAuthenticated } = useAuth();
-  return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />;
+  return <Navigate to={isAuthenticated ? '/dashboard' : '/'} replace />;
 }
 
 // Task 4: workflow is now accessible to all four managerial roles.
@@ -97,6 +102,13 @@ export default function App() {
 
         {/* Forced password-change on first login (no layout — full-page) */}
         <Route path="/change-password" element={<ChangePassword />} />
+
+        {/* Public routes (no auth required) */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/public/incidents" element={<IncidentReportsPage />} />
+        <Route path="/public/statistics" element={<StatisticsPage />} />
+        <Route path="/public/stories" element={<StoryLibraryPage />} />
+        <Route path="/public/about" element={<AboutPage />} />
 
         <Route
           element={
