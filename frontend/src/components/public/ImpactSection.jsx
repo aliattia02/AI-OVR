@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 const C = {
   navy: "#0C2340",
   teal: "#0B7D6B",
-  tealLight: "#E0F5F1",
   g200: "#E5E7EB",
 };
 

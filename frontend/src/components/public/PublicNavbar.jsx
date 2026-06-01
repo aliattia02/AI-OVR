@@ -6,7 +6,6 @@ const C = {
   teal: "#0B7D6B",
   tealLight: "#E0F5F1",
   g200: "#E5E7EB",
-  g400: "#9CA3AF",
   g800: "#1F2937",
 };
 
