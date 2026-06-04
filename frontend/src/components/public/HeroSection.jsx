@@ -36,7 +36,36 @@ export default function HeroSection() {
         fontFamily: '"Segoe UI", system-ui, sans-serif',
       }}
     >
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <div
+        style={{
+          maxWidth: 1100,
+          margin: "0 auto",
+          display: "flex",
+          alignItems: "center",
+          gap: isMobile ? 0 : 48,
+        }}
+      >
+        {/* ── Logo (left side) ── */}
+        {!isMobile && (
+          <div style={{ flexShrink: 0 }}>
+            <img
+              src="/ehaegypt_logo.jpeg"
+              alt="EHA Egypt"
+              style={{
+                width: 180,
+                height: 180,
+                objectFit: "contain",
+                borderRadius: 16,
+                background: "#fff",
+                padding: 12,
+                boxShadow: "0 8px 24px rgba(12,35,64,0.10)",
+              }}
+            />
+          </div>
+        )}
+
+        {/* ── Text + stats column ── */}
+        <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ color: C.teal, fontWeight: 700, fontSize: 14, marginBottom: 12 }}>
           منصة الإبلاغ عن الأحداث والحوادث
         </div>
@@ -99,7 +128,7 @@ export default function HeroSection() {
           style={{
             marginTop: 32,
             display: "grid",
-            gridTemplateColumns: isMobile ? "1fr" : "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))",
             gap: 16,
           }}
         >
@@ -128,7 +157,8 @@ export default function HeroSection() {
             </div>
           ))}
         </div>
-      </div>
+        </div> {/* end text column */}
+      </div> {/* end flex wrapper */}
     </section>
   );
 }

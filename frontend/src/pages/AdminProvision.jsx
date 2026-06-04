@@ -290,7 +290,6 @@ function ProvisionResultCard({ result }) {
             <CopyButton text={patientLink} />
           </div>
         </div>
-        {/* Task 7 — QR code for the patient submission link */}
         <div style={{ marginBottom: 16 }}>
           <div
             style={{
@@ -530,254 +529,6 @@ function GovAdminSelector({ facilities, role, governorate, administration, onCha
   );
 }
 
-// ─── Users tab ───────────────────────────────────────────────────────────────
-
-const ROLE_BADGE_COLORS = {
-  top_management:       { bg: '#EDE9FE', text: '#5B21B6' },
-  governorate_manager:  { bg: '#DBEAFE', text: '#1E40AF' },
-  administration_manager: { bg: '#CFFAFE', text: '#0E7490' },
-  quality_admin:        { bg: '#D1FAE5', text: '#065F46' },
-  staff:                { bg: '#F3F4F6', text: '#374151' },
-};
-
-function RoleBadge({ role }) {
-  const colors = ROLE_BADGE_COLORS[role] ?? { bg: '#F3F4F6', text: '#374151' };
-  return (
-    <span
-      style={{
-        display: 'inline-block',
-        padding: '2px 8px',
-        borderRadius: 99,
-        fontSize: 11,
-        fontWeight: 600,
-        background: colors.bg,
-        color: colors.text,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {ROLE_LABELS[role] ?? role}
-    </span>
-  );
-}
-
-function StatusDot({ active }) {
-  return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-      <span
-        style={{
-          width: 7,
-          height: 7,
-          borderRadius: '50%',
-          background: active ? '#10B981' : '#D1D5DB',
-          display: 'inline-block',
-          flexShrink: 0,
-        }}
-      />
-      <span style={{ fontSize: 12, color: active ? '#065F46' : '#9CA3AF' }}>
-        {active ? 'Active' : 'Inactive'}
-      </span>
-    </span>
-  );
-}
-
-function UsersTab() {
-  const { user } = useAuth();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [search, setSearch] = useState('');
-  const [filterRole, setFilterRole] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
-
-  useEffect(() => {
-    // Wait until AuthContext has confirmed the session and token is set.
-    // Without this guard the request fires before setToken() is called,
-    // lands unauthenticated, and gets a 401.
-    if (!user) return;
-
-    api
-      .get('/users', { params: { limit: 200 } })
-      .then(({ data }) => setUsers(data))
-      .catch(() => setError('Failed to load users. Check your connection or permissions.'))
-      .finally(() => setLoading(false));
-  }, [user]);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return users.filter((u) => {
-      if (filterRole && u.role !== filterRole) return false;
-      if (filterStatus === 'active' && !u.is_active) return false;
-      if (filterStatus === 'inactive' && u.is_active) return false;
-      if (!q) return true;
-      return (
-        (u.full_name ?? '').toLowerCase().includes(q) ||
-        (u.email ?? '').toLowerCase().includes(q) ||
-        (u.facility_name ?? '').toLowerCase().includes(q) ||
-        (u.governorate ?? '').toLowerCase().includes(q)
-      );
-    });
-  }, [users, search, filterRole, filterStatus]);
-
-  if (loading) {
-    return <p style={{ ...styles.loadingText, marginTop: 12 }}>Loading users…</p>;
-  }
-
-  if (error) {
-    return <div style={{ ...styles.error, marginTop: 12 }}>{error}</div>;
-  }
-
-  return (
-    <div>
-      {/* ── Toolbar ── */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 10,
-          marginBottom: 16,
-          alignItems: 'center',
-        }}
-      >
-        <input
-          type="search"
-          placeholder="Search by name, email, facility…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            ...styles.input,
-            flex: '1 1 200px',
-            marginBottom: 0,
-            padding: '8px 12px',
-          }}
-        />
-        <select
-          value={filterRole}
-          onChange={(e) => setFilterRole(e.target.value)}
-          style={{ ...styles.select, flex: '0 1 190px', padding: '8px 12px' }}
-        >
-          <option value="">All roles</option>
-          <option value="top_management">Top Management</option>
-          <option value="governorate_manager">Governorate Manager</option>
-          <option value="administration_manager">Administration Manager</option>
-          <option value="quality_admin">Quality Admin</option>
-          <option value="staff">Staff</option>
-        </select>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          style={{ ...styles.select, flex: '0 1 140px', padding: '8px 12px' }}
-        >
-          <option value="">All statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
-
-      {/* ── Count ── */}
-      <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 10 }}>
-        {filtered.length} of {users.length} user{users.length !== 1 ? 's' : ''}
-      </div>
-
-      {/* ── List ── */}
-      {filtered.length === 0 ? (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '40px 0',
-            fontSize: 14,
-            color: 'var(--color-text-secondary)',
-          }}
-        >
-          No users match your filters.
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {filtered.map((u) => (
-            <div
-              key={u.user_id}
-              style={{
-                border: '1px solid var(--color-border-primary)',
-                borderRadius: 10,
-                background: 'var(--color-surface-primary)',
-                padding: '12px 14px',
-              }}
-            >
-              {/* Top row: name + status */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
-                  gap: 8,
-                  marginBottom: 6,
-                }}
-              >
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--color-text-primary)' }}>
-                    {u.full_name || '—'}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: 'var(--color-text-secondary)',
-                      fontFamily: 'monospace',
-                      marginTop: 1,
-                    }}
-                  >
-                    {u.email || '—'}
-                  </div>
-                </div>
-                <StatusDot active={u.is_active} />
-              </div>
-
-              {/* Meta row: role + tier + location */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  gap: 6,
-                  marginTop: 4,
-                }}
-              >
-                <RoleBadge role={u.role} />
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    padding: '2px 7px',
-                    borderRadius: 99,
-                    background: 'var(--color-background-secondary)',
-                    color: 'var(--color-text-secondary)',
-                    border: '1px solid var(--color-border-secondary)',
-                  }}
-                >
-                  Tier {u.tier}
-                </span>
-                {u.facility_name && (
-                  <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
-                    · {u.facility_name}
-                  </span>
-                )}
-                {u.administration && (
-                  <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
-                    · {u.administration}
-                  </span>
-                )}
-                {u.governorate && (
-                  <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
-                    · {u.governorate}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── QR Codes tab ────────────────────────────────────────────────────────────
 
 function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
@@ -843,7 +594,6 @@ function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
                   overflow: 'hidden',
                 }}
               >
-                {/* Row header — clickable toggle */}
                 <button
                   onClick={() => setExpandedId(isOpen ? null : f.facility_id)}
                   style={{
@@ -881,7 +631,6 @@ function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
                   </span>
                 </button>
 
-                {/* Expanded QR panel */}
                 {isOpen && (
                   <div
                     style={{
@@ -907,7 +656,7 @@ function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
 function TabBar({ active, onChange }) {
   const tabs = [
     { id: 'provision', label: 'Provisioning' },
-    { id: 'users',     label: 'Users' },
+    // { id: 'users', label: 'Users' },  // hidden for now
     { id: 'qr-codes',  label: 'QR Codes' },
   ];
   return (
@@ -955,7 +704,6 @@ function TabBar({ active, onChange }) {
 export default function AdminProvision() {
   const [activeTab, setActiveTab] = useState('provision');
 
-  // Shared facility data — loaded once, consumed by both provisioning sections
   const [facilities, setFacilities] = useState([]);
   const [facilitiesLoading, setFacilitiesLoading] = useState(true);
   const [facilitiesError, setFacilitiesError] = useState('');
@@ -1054,9 +802,6 @@ export default function AdminProvision() {
       </p>
 
       <TabBar active={activeTab} onChange={setActiveTab} />
-
-      {/* ── Users tab ──────────────────────────────────────────────────── */}
-      {activeTab === 'users' && <UsersTab />}
 
       {/* ── QR Codes tab ───────────────────────────────────────────────── */}
       {activeTab === 'qr-codes' && (
