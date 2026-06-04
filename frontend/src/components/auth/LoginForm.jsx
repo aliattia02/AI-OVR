@@ -76,22 +76,58 @@ export default function LoginForm() {
       <div style={{ width: "100%", maxWidth: 420 }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
+
+          {/* Logo row: EHAEGY + divider + E·OVR */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              width: 56,
-              height: 56,
-              borderRadius: 14,
-              background: C.navy,
+              gap: 14,
               marginBottom: 16,
             }}
           >
-            <span style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.03em" }}>
-              {t("common.brand_mark")}
-            </span>
+            {/* EHAEGY circular logo */}
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                overflow: "hidden",
+                border: `1.5px solid ${C.g200}`,
+                flexShrink: 0,
+                boxShadow: "0 2px 10px rgba(12,35,64,0.10)",
+              }}
+            >
+              <img
+                src="/ehaegypt_logo.jpeg"
+                alt="الهيئة العامة للرعاية الصحية"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
+
+            {/* Divider */}
+            <div style={{ width: 1, height: 36, background: C.g200, flexShrink: 0 }} />
+
+            {/* E·OVR mark */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 56,
+                height: 56,
+                borderRadius: 14,
+                background: C.navy,
+                flexShrink: 0,
+              }}
+            >
+              <span style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.03em" }}>
+                {t("common.brand_mark")}
+              </span>
+            </div>
           </div>
+
           <div style={{ fontSize: 26, fontWeight: 800, color: C.navy, letterSpacing: "-0.02em" }}>
             {t("common.brand_name")}
           </div>

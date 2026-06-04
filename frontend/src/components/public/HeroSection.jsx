@@ -14,7 +14,6 @@ const STATS = [
   { value: "1,247", label: "تقرير هذا الشهر" },
   { value: "89%", label: "تحسّن في الاستجابة" },
   { value: "34", label: "إجراء وقائي اتُّخذ" },
-  { value: "0", label: "عقوبة على الإبلاغ", highlight: true },
 ];
 
 export default function HeroSection() {
