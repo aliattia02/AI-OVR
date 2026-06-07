@@ -118,14 +118,18 @@ def _claims_from_user_doc(user_doc: dict[str, Any]) -> dict[str, Any]:
 
 
 def _to_user_response(user_doc: dict[str, Any]) -> UserResponse:
+    # Use .get() for every nullable field — provisioned accounts (quality_admin,
+    # staff_reporter) store email as null; tier users omit facility_name /
+    # administration / governorate.  Keying with [] would raise KeyError and the
+    # old strict validators would reject None before we got there.
     return UserResponse(
         user_id=user_doc["user_id"],
-        email=user_doc["email"],
+        email=user_doc.get("email"),
         full_name=user_doc["full_name"],
         role=UserRole(user_doc["role"]),
-        facility_name=user_doc["facility_name"],
-        administration=user_doc["administration"],
-        governorate=user_doc["governorate"],
+        facility_name=user_doc.get("facility_name"),
+        administration=user_doc.get("administration"),
+        governorate=user_doc.get("governorate"),
         tier=user_doc["tier"],
         is_active=user_doc.get("is_active", True),
     )
@@ -193,14 +197,18 @@ async def login(
     await auth_service.store_refresh_token(user.user_id, refresh_token, db)
     _set_refresh_cookie(response, refresh_token)
 
+    # UserInDB was built via model_construct (no validation), so any attribute
+    # can be None at runtime for provisioned accounts.  Use getattr with a
+    # sentinel to stay safe — None is now accepted by the Optional fields in
+    # UserResponse.
     user_response = UserResponse(
         user_id=user.user_id,
-        email=user.email,
+        email=getattr(user, "email", None),
         full_name=user.full_name,
         role=user.role,
-        facility_name=user.facility_name,
-        administration=user.administration,
-        governorate=user.governorate,
+        facility_name=getattr(user, "facility_name", None),
+        administration=getattr(user, "administration", None),
+        governorate=getattr(user, "governorate", None),
         tier=user.tier,
         is_active=user.is_active,
     )

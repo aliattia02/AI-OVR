@@ -59,8 +59,28 @@ class UserInDB(UserBase):
     refresh_tokens: list[dict[str, Any]] = Field(default_factory=list)
 
 
-class UserResponse(UserBase):
-    """User document serialised for API responses (no credentials)."""
+class UserResponse(BaseModel):
+    """User document serialised for API responses (no credentials).
+
+    Intentionally does NOT inherit UserBase so that nullable fields on
+    provisioned / higher-tier accounts (email, facility_name, administration,
+    governorate) are expressed as Optional here without weakening the strict
+    creation-time validation in UserBase / UserCreate.
+
+    Background: quality_admin and staff_reporter accounts are provisioned
+    without an email address (stored as null in MongoDB).  Governorate /
+    administration managers have no facility_name.  Top-management accounts
+    have neither facility_name nor administration.  Using non-Optional EmailStr
+    or str for these fields caused a Pydantic ValidationError (→ FastAPI 500)
+    in both the login endpoint and any list_users query.
+    """
 
     user_id: str
+    email: Optional[EmailStr] = None
+    full_name: str
+    role: UserRole
+    facility_name: Optional[str] = None
+    administration: Optional[str] = None
+    governorate: Optional[str] = None
+    tier: int
     is_active: bool
