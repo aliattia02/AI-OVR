@@ -7,6 +7,12 @@
  *   - Expandable Advanced Search panel with all filter dimensions
  *   - Export: CSV (client-side, respects active filters) + XLSX (backend /exports/excel)
  *   - Sortable columns
+ *
+ * GAHAR migration changes:
+ *   - SEVERITY_OPTS: added 'Catastrophic' as highest severity tier
+ *   - riskColor: updated for SAC 1–3 scale (replaces JCI 1–9 thresholds)
+ *   - riskLabel: updated for SAC 3/2/1 labels (Critical/Intermediate/Low)
+ *   - SEVERITY_STYLES: added Catastrophic pill style
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -58,7 +64,8 @@ const INCIDENT_STATUS_OPTIONS = [
   'Completed',
 ];
 
-const SEVERITY_OPTS = ['Major', 'Moderate', 'Minor'];
+// GAHAR 4-level severity (Catastrophic added as highest tier)
+const SEVERITY_OPTS = ['Catastrophic', 'Major', 'Moderate', 'Minor'];
 
 // ── Palette & design tokens ────────────────────────────────────────────────────
 
@@ -107,20 +114,27 @@ function fmtDate(val, placeholder) {
   }
 }
 
+/**
+ * Maps a GAHAR SAC score (1–3) to a badge color.
+ * SAC 3 = Critical (red), SAC 2 = Intermediate (amber), SAC 1 = Low (green).
+ */
 function riskColor(score) {
   if (score == null) return C.textMuted;
-  if (score >= 7)  return '#DC2626';
-  if (score >= 5)  return '#D97706';
-  if (score >= 3)  return '#0B7D6B';
-  return '#6B7280';
+  if (score === 3)  return '#DC2626'; // Critical
+  if (score === 2)  return '#D97706'; // Intermediate
+  if (score === 1)  return '#059669'; // Low
+  return C.textMuted;
 }
 
+/**
+ * Maps a GAHAR SAC score (1–3) to a translated label string.
+ */
 function riskLabel(score, t) {
   if (score == null) return t('common.placeholder_dash');
-  if (score >= 7)  return t('incidents.risk.score_critical', { score });
-  if (score >= 5)  return t('incidents.risk.score_high', { score });
-  if (score >= 3)  return t('incidents.risk.score_medium', { score });
-  return t('incidents.risk.score_low', { score });
+  if (score === 3)  return t('incidents.risk.sac3_critical',     { score });
+  if (score === 2)  return t('incidents.risk.sac2_intermediate', { score });
+  if (score === 1)  return t('incidents.risk.sac1_low',          { score });
+  return t('common.placeholder_dash');
 }
 
 // Export helpers ---------------------------------------------------------------
@@ -312,13 +326,7 @@ function DateRangeFilter({ label, from, to, onFromChange, onToChange, fromLabel,
       </div>
       <div style={{ display: 'flex', gap: 8, fontSize: 10, color: C.textMuted, paddingTop: 1 }}>
         <span>{fromLabel}</span>
-        <span
-          style={{
-            marginInlineStart: 'auto', // RTL
-          }}
-        >
-          {toLabel}
-        </span>
+        <span style={{ marginInlineStart: 'auto' }}>{toLabel}</span>
       </div>
     </div>
   );
@@ -349,12 +357,7 @@ function ColHeader({ label, sortKey, sortBy, sortDir, onSort }) {
     >
       {label}
       {active && (
-        <span
-          style={{
-            marginInlineStart: 4, // RTL
-            opacity: 0.8,
-          }}
-        >
+        <span style={{ marginInlineStart: 4, opacity: 0.8 }}>
           {sortDir === 'asc' ? '↑' : '↓'}
         </span>
       )}
@@ -383,7 +386,7 @@ const EMPTY_FILTERS = {
 
 function activeFilterCount(filters) {
   return Object.entries(filters).filter(([k, v]) => {
-    if (k === 'query') return false; // quick search handled separately
+    if (k === 'query') return false;
     return v !== 'all' && v !== '';
   }).length;
 }
@@ -394,34 +397,29 @@ export default function IncidentList({ onIncidentClick, role }) {
   const { t } = useTranslation();
   const placeholderDash = t('common.placeholder_dash');
 
-  // Tier-2 users are scoped to their own facility — lock location filters.
   const isFacilityScoped = tier === 2;
 
-  // ── Server-side pagination state
   const [page,     setPage]     = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  // ── Filter & search state
-  const [filters,      setFilters]      = useState(EMPTY_FILTERS);
-  const [advOpen,      setAdvOpen]      = useState(false);
-  const [sortBy,       setSortBy]       = useState('registration_date');
-  const [sortDir,      setSortDir]      = useState('desc');
-  const [exporting,    setExporting]    = useState(null); // 'csv' | 'xlsx' | null
+  const [filters,   setFilters]   = useState(EMPTY_FILTERS);
+  const [advOpen,   setAdvOpen]   = useState(false);
+  const [sortBy,    setSortBy]    = useState('registration_date');
+  const [sortDir,   setSortDir]   = useState('desc');
+  const [exporting, setExporting] = useState(null);
 
   const advRef = useRef(null);
 
-  // Fetch up to pageSize records from server
   const { data, isLoading, error, refetch } = useIncidents({ page, pageSize });
 
   const rawResults = Array.isArray(data) ? data : [];
   const hasNextPage = rawResults.length >= pageSize;
 
-  // ── Collect dynamic dropdown options from loaded data ─────────────────────
-  const governorateOptions = useMemo(() => {
-    return [...new Set(rawResults.map(r => r.governorate).filter(Boolean))].sort();
-  }, [rawResults]);
+  const governorateOptions = useMemo(
+    () => [...new Set(rawResults.map(r => r.governorate).filter(Boolean))].sort(),
+    [rawResults],
+  );
 
-  // Administrations cascade from the selected governorate filter
   const administrationOptions = useMemo(() => {
     const source = filters.governorate !== 'all'
       ? rawResults.filter(r => r.governorate === filters.governorate)
@@ -429,10 +427,10 @@ export default function IncidentList({ onIncidentClick, role }) {
     return [...new Set(source.map(r => r.administration).filter(Boolean))].sort();
   }, [rawResults, filters.governorate]);
 
-  // Facility types derived from loaded incidents — stays in sync with real data
-  const facilityTypeOptions = useMemo(() => {
-    return [...new Set(rawResults.map(r => r.facility_type).filter(Boolean))].sort();
-  }, [rawResults]);
+  const facilityTypeOptions = useMemo(
+    () => [...new Set(rawResults.map(r => r.facility_type).filter(Boolean))].sort(),
+    [rawResults],
+  );
 
   const csvColumns = useMemo(() => buildCSVColumns(t), [t]);
 
@@ -470,14 +468,13 @@ export default function IncidentList({ onIncidentClick, role }) {
 
   // ── Client-side filtering ──────────────────────────────────────────────────
   const filteredIncidents = useMemo(() => {
-    const q    = filters.query.trim().toLowerCase();
-    const cFr  = filters.creationFrom  ? new Date(filters.creationFrom)  : null;
-    const cTo  = filters.creationTo    ? new Date(filters.creationTo + 'T23:59:59') : null;
-    const oFr  = filters.occurrenceFrom ? new Date(filters.occurrenceFrom) : null;
-    const oTo  = filters.occurrenceTo  ? new Date(filters.occurrenceTo + 'T23:59:59') : null;
+    const q   = filters.query.trim().toLowerCase();
+    const cFr = filters.creationFrom   ? new Date(filters.creationFrom)                    : null;
+    const cTo = filters.creationTo     ? new Date(filters.creationTo + 'T23:59:59')        : null;
+    const oFr = filters.occurrenceFrom ? new Date(filters.occurrenceFrom)                  : null;
+    const oTo = filters.occurrenceTo   ? new Date(filters.occurrenceTo + 'T23:59:59')      : null;
 
     return rawResults.filter(inc => {
-      // Quick search — description, incident_id, involved person
       if (q) {
         const haystack = [inc.description, inc.incident_id, inc.involved_person, inc.facility_name]
           .map(v => String(v || '').toLowerCase()).join(' ');
@@ -492,7 +489,6 @@ export default function IncidentList({ onIncidentClick, role }) {
       if (filters.errorClassification !== 'all' && inc.error_classification !== filters.errorClassification) return false;
       if (filters.eventType !== 'all' && inc.event_type !== filters.eventType) return false;
       if (filters.severity !== 'all' && inc.severity !== filters.severity) return false;
-      // Date ranges
       if (cFr || cTo) {
         const d = inc.registration_date ? new Date(inc.registration_date) : null;
         if (!d) return false;
@@ -515,13 +511,11 @@ export default function IncidentList({ onIncidentClick, role }) {
       let av = a[sortBy], bv = b[sortBy];
       if (av == null) av = '';
       if (bv == null) bv = '';
-      // Numeric sort for risk_score
       if (sortBy === 'risk_score') {
         av = Number(av) || 0;
         bv = Number(bv) || 0;
         return sortDir === 'asc' ? av - bv : bv - av;
       }
-      // Date sort
       if (sortBy === 'registration_date' || sortBy === 'occurrence_date') {
         av = av ? new Date(av).getTime() : 0;
         bv = bv ? new Date(bv).getTime() : 0;
@@ -539,7 +533,6 @@ export default function IncidentList({ onIncidentClick, role }) {
   function setFilter(key, value) {
     setFilters(prev => {
       const next = { ...prev, [key]: value };
-      // Cascade resets
       if (key === 'governorate' && value !== prev.governorate) {
         next.administration = 'all';
       }
@@ -602,323 +595,154 @@ export default function IncidentList({ onIncidentClick, role }) {
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: 'grid', gap: 12, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
-
-      {/* ── Top bar: Quick search + controls ─────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+    <div
+      style={{
+        display: 'grid',
+        gap: 12,
+        direction: isRTL ? 'rtl' : 'ltr', // RTL
+      }}
+    >
+      {/* ── Top bar ───────────────────────────────────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         {/* Quick search */}
-        <div style={{ position: 'relative', flex: '1 1 260px', minWidth: 220 }}>
-          <span
-            style={{
-              position: 'absolute',
-              insetInlineStart: 11, // RTL
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: C.textMuted,
-              fontSize: 14,
-              pointerEvents: 'none',
-            }}
-          >
-            🔍
-          </span>
+        <div style={{ position: 'relative', flex: '1 1 200px', minWidth: 160 }}>
           <input
             type="search"
             value={filters.query}
             onChange={e => setFilter('query', e.target.value)}
-            placeholder={t('incidents.list.quick_search_placeholder')}
+            placeholder={t('incidents.list.search_placeholder')}
             style={{
               width: '100%',
               border: `1px solid ${C.border}`,
               borderRadius: 8,
-              paddingBlock: 9, // RTL
-              paddingInlineStart: 34, // RTL
-              paddingInlineEnd: 12, // RTL
+              padding: '8px 12px 8px 34px',
               fontSize: 13,
               color: C.text,
-              boxSizing: 'border-box',
-              outline: 'none',
               backgroundColor: C.bg,
-              textAlign: 'start', // RTL
+              outline: 'none',
+              boxSizing: 'border-box',
             }}
-            onFocus={e => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brandLight}`; }}
-            onBlur={e => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
+            onFocus={e => { e.target.style.borderColor = C.borderFocus; }}
+            onBlur={e => { e.target.style.borderColor = C.border; }}
           />
+          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: C.textMuted, pointerEvents: 'none' }}>🔍</span>
         </div>
 
-        {/* Advanced Search toggle */}
+        {/* Advanced search toggle */}
         <button
           type="button"
           onClick={() => setAdvOpen(o => !o)}
           style={{
-            ...btnStyle(advOpen ? C.brand : C.bg),
+            ...btnStyle(advOpen ? C.brand : C.bgAlt),
+            color: advOpen ? '#FFFFFF' : C.text,
             border: `1px solid ${advOpen ? C.brand : C.border}`,
-            color: advOpen ? '#fff' : C.textMid,
-            display: 'flex', alignItems: 'center', gap: 6, position: 'relative',
+            position: 'relative',
           }}
         >
-          <span style={{ fontSize: 13 }}>⚙</span>
-          {t('incidents.list.advanced_search')}
+          {t('incidents.list.filter_button')}
           {advFilterCount > 0 && (
-            <span style={{ backgroundColor: C.yellow, color: '#fff', borderRadius: 999, fontSize: 10, fontWeight: 800, padding: '1px 6px', lineHeight: 1.6 }}>
+            <span style={{
+              position: 'absolute', top: -6, insetInlineEnd: -6, // RTL
+              backgroundColor: C.danger, color: '#FFFFFF',
+              borderRadius: 999, width: 16, height: 16,
+              fontSize: 9, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
               {advFilterCount}
             </span>
           )}
-          <span
-            style={{
-              fontSize: 10,
-              opacity: 0.7,
-              marginInlineStart: 2, // RTL
-            }}
-          >
-            {advOpen ? '▲' : '▼'}
-          </span>
         </button>
 
         {advFilterCount > 0 && (
-          <button type="button" onClick={clearFilters} style={{ ...btnStyle('#F3F4F6'), color: C.textMid, border: `1px solid ${C.border}`, fontSize: 12 }}>
+          <button type="button" onClick={clearFilters} style={{ ...btnStyle(C.dangerBg), color: C.dangerText, border: `1px solid ${C.dangerBorder}` }}>
             {t('incidents.list.clear_filters')}
           </button>
         )}
 
-        {/* Page size */}
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 12,
-            color: C.textMuted,
-            marginInlineStart: 'auto', // RTL
-          }}
-        >
-          {t('incidents.list.rows_label')}
+        <div style={{ marginInlineStart: 'auto', display: 'flex', gap: 8, flexWrap: 'wrap' }}> {/* RTL */}
+          {/* Page size */}
           <select
             value={pageSize}
             onChange={e => { setPageSize(Number(e.target.value)); setPage(0); }}
-            style={{ border: `1px solid ${C.border}`, borderRadius: 6, padding: '6px 8px', fontSize: 12, color: C.text, backgroundColor: C.bg, cursor: 'pointer' }}
+            style={{ border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 10px', fontSize: 12, color: C.textMid, backgroundColor: C.bg, cursor: 'pointer' }}
           >
-            {PAGE_SIZE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+            {PAGE_SIZE_OPTIONS.map(n => (
+              <option key={n} value={n}>{t('incidents.list.page_size', { n })}</option>
+            ))}
           </select>
-        </label>
 
-        {/* Export buttons */}
-        <button
-          type="button"
-          onClick={handleExportCSV}
-          disabled={exporting === 'csv' || sortedIncidents.length === 0}
-          style={{ ...btnStyle(C.bg), border: `1px solid ${C.border}`, color: C.textMid, display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, opacity: sortedIncidents.length === 0 ? 0.4 : 1 }}
-        >
-          {exporting === 'csv' ? '⏳' : '⬇'} {t('incidents.list.export_csv')}
-        </button>
-        <button
-          type="button"
-          onClick={handleExportXLSX}
-          disabled={exporting === 'xlsx'}
-          style={{ ...btnStyle(C.brand), color: '#fff', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}
-        >
-          {exporting === 'xlsx' ? '⏳' : '⬇'} {t('incidents.list.export_xlsx')}
-        </button>
-      </div>
-
-      {/* ── Advanced Search Panel ─────────────────────────────────────────── */}
-      <div
-        ref={advRef}
-        style={{
-          overflow: 'hidden',
-          maxHeight: advOpen ? 600 : 0,
-          opacity: advOpen ? 1 : 0,
-          transition: 'max-height 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease',
-        }}
-      >
-        <div style={{
-          border: `1px solid ${C.brand}`,
-          borderRadius: 12,
-          backgroundColor: C.brandLight,
-          padding: '18px 20px',
-          display: 'grid',
-          gap: 14,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: C.brand }}>{t('incidents.list.advanced_filters')}</span>
-            {advFilterCount > 0 && (
-              <button type="button" onClick={clearFilters} style={{ background: 'none', border: 'none', color: C.brand, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
-                {t('incidents.list.clear_all')}
-              </button>
-            )}
-          </div>
-
-          {/* Row 1: Location */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
-            {isFacilityScoped ? (
-              <LockedFilterChip
-                label={t('incidents.detail.fields.governorate')}
-                value={user?.governorate}
-                lockedLabel={t('incidents.list.locked')}
-                placeholder={placeholderDash}
-              />
-            ) : (
-              <FilterSelect
-                label={t('incidents.detail.fields.governorate')}
-                value={filters.governorate}
-                onChange={v => setFilter('governorate', v)}
-                options={governorateOptions}
-                isRTL={isRTL} // RTL
-                allLabel={t('incidents.list.all_option')}
-              />
-            )}
-            {isFacilityScoped ? (
-              <LockedFilterChip
-                label={t('incidents.detail.fields.administration')}
-                value={user?.administration}
-                lockedLabel={t('incidents.list.locked')}
-                placeholder={placeholderDash}
-              />
-            ) : (
-              <FilterSelect
-                label={t('incidents.detail.fields.administration')}
-                value={filters.administration}
-                onChange={v => setFilter('administration', v)}
-                options={administrationOptions}
-                isRTL={isRTL} // RTL
-                allLabel={t('incidents.list.all_option')}
-              />
-            )}
-            {isFacilityScoped ? (
-              <LockedFilterChip
-                label={t('incidents.new.facility_type_label')}
-                value={user?.facility_type}
-                lockedLabel={t('incidents.list.locked')}
-                placeholder={placeholderDash}
-              />
-            ) : (
-              <FilterSelect
-                label={t('incidents.new.facility_type_label')}
-                value={filters.facilityType}
-                onChange={v => setFilter('facilityType', v)}
-                options={facilityTypeOptions}
-                isRTL={isRTL} // RTL
-                allLabel={t('incidents.list.all_option')}
-              />
-            )}
-            {isFacilityScoped ? (
-              <LockedFilterChip
-                label={t('incidents.detail.fields.facility_name')}
-                value={user?.facility_name}
-                lockedLabel={t('incidents.list.locked')}
-                placeholder={placeholderDash}
-              />
-            ) : (
-              <FilterInput
-                label={t('incidents.detail.fields.facility_name')}
-                value={filters.facilityName}
-                onChange={v => setFilter('facilityName', v)}
-                placeholder={t('incidents.list.facility_name_placeholder')}
-              />
-            )}
-            <FilterInput
-              label={t('incidents.list.person_involved_label')}
-              value={filters.involvedPerson}
-              onChange={v => setFilter('involvedPerson', v)}
-              placeholder={t('incidents.list.person_involved_placeholder')}
-            />
-          </div>
-
-          {/* Row 2: Classification */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
-            <FilterSelect
-              label={t('incidents.classification.label')}
-              value={filters.errorClassification}
-              onChange={v => setFilter('errorClassification', v)}
-              options={classificationOptions}
-              isRTL={isRTL} // RTL
-              allLabel={t('incidents.list.all_option')}
-            />
-            <FilterSelect
-              label={t('incidents.event_type.label')}
-              value={filters.eventType}
-              onChange={v => setFilter('eventType', v)}
-              options={eventTypeOptions}
-              isRTL={isRTL} // RTL
-              allLabel={t('incidents.list.all_option')}
-            />
-            <FilterSelect
-              label={t('incidents.severity.label')}
-              value={filters.severity}
-              onChange={v => setFilter('severity', v)}
-              options={severityOptions}
-              isRTL={isRTL} // RTL
-              allLabel={t('incidents.list.all_option')}
-            />
-            <FilterSelect
-              label={t('incidents.list.incident_status_label')}
-              value={filters.status}
-              onChange={v => setFilter('status', v)}
-              options={incidentStatusOptions}
-              isRTL={isRTL} // RTL
-              allLabel={t('incidents.list.all_option')}
-            />
-          </div>
-
-          {/* Row 3: Date ranges */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
-            <DateRangeFilter
-              label={t('common.fields.creation_date')}
-              from={filters.creationFrom}
-              to={filters.creationTo}
-              onFromChange={v => setFilter('creationFrom', v)}
-              onToChange={v => setFilter('creationTo', v)}
-              fromLabel={t('common.from')}
-              toLabel={t('common.to')}
-            />
-            <DateRangeFilter
-              label={t('incidents.detail.fields.occurrence_date')}
-              from={filters.occurrenceFrom}
-              to={filters.occurrenceTo}
-              onFromChange={v => setFilter('occurrenceFrom', v)}
-              onToChange={v => setFilter('occurrenceTo', v)}
-              fromLabel={t('common.from')}
-              toLabel={t('common.to')}
-            />
-          </div>
+          {/* Exports */}
+          <button type="button" onClick={handleExportCSV} disabled={exporting === 'csv'} style={{ ...btnStyle('#F3FAF8'), color: C.brand, border: `1px solid ${C.brand}`, opacity: exporting === 'csv' ? 0.6 : 1 }}>
+            {exporting === 'csv' ? t('common.exporting') : t('incidents.list.export_csv')}
+          </button>
+          <button type="button" onClick={handleExportXLSX} disabled={exporting === 'xlsx'} style={{ ...btnStyle(C.brand), color: '#FFFFFF', opacity: exporting === 'xlsx' ? 0.6 : 1 }}>
+            {exporting === 'xlsx' ? t('common.exporting') : t('incidents.list.export_xlsx')}
+          </button>
         </div>
       </div>
 
-      {/* ── Results summary ────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: C.textMuted }}>
-        <span>
-          {t('incidents.list.showing')} <strong style={{ color: C.text }}>{sortedIncidents.length.toLocaleString()}</strong>
-          {sortedIncidents.length !== rawResults.length && (
-            <> {t('incidents.list.of')} <strong style={{ color: C.text }}>{rawResults.length.toLocaleString()}</strong> {t('incidents.list.loaded')}</>
+      {/* ── Advanced search panel ─────────────────────────────────────────── */}
+      {advOpen && (
+        <div
+          ref={advRef}
+          style={{
+            border: `1px solid ${C.border}`,
+            borderRadius: 10,
+            backgroundColor: C.bgAlt,
+            padding: 16,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+            gap: 12,
+          }}
+        >
+          {isFacilityScoped ? (
+            <>
+              <LockedFilterChip label={t('incidents.detail.fields.governorate')} value={user?.governorate} lockedLabel={t('incidents.list.locked_label')} placeholder={placeholderDash} />
+              <LockedFilterChip label={t('incidents.detail.fields.administration')} value={user?.administration} lockedLabel={t('incidents.list.locked_label')} placeholder={placeholderDash} />
+            </>
+          ) : (
+            <>
+              <FilterSelect label={t('incidents.detail.fields.governorate')} value={filters.governorate} onChange={v => setFilter('governorate', v)} options={governorateOptions} isRTL={isRTL} allLabel={t('incidents.list.all_governorates')} />
+              <FilterSelect label={t('incidents.detail.fields.administration')} value={filters.administration} onChange={v => setFilter('administration', v)} options={administrationOptions} isRTL={isRTL} allLabel={t('incidents.list.all_administrations')} />
+            </>
           )}
-          {' '}{t('incidents.list.incidents')}
-        </span>
-        {isLoading && <span style={{ color: C.brand, fontWeight: 600 }}>{t('incidents.list.loading')}</span>}
+
+          <FilterSelect label={t('incidents.new.facility_type_label')} value={filters.facilityType} onChange={v => setFilter('facilityType', v)} options={facilityTypeOptions} isRTL={isRTL} allLabel={t('incidents.list.all_types')} />
+          <FilterInput label={t('common.fields.facility')} value={filters.facilityName} onChange={v => setFilter('facilityName', v)} placeholder={t('incidents.list.search_facility_placeholder')} />
+          <FilterSelect label={t('incidents.status.label')} value={filters.status} onChange={v => setFilter('status', v)} options={incidentStatusOptions} isRTL={isRTL} allLabel={t('incidents.list.all_statuses')} />
+          <FilterInput label={t('incidents.list.person_involved_label')} value={filters.involvedPerson} onChange={v => setFilter('involvedPerson', v)} />
+          <FilterSelect label={t('incidents.classification.label')} value={filters.errorClassification} onChange={v => setFilter('errorClassification', v)} options={classificationOptions} isRTL={isRTL} allLabel={t('incidents.list.all_classifications')} />
+          <FilterSelect label={t('incidents.event_type.label')} value={filters.eventType} onChange={v => setFilter('eventType', v)} options={eventTypeOptions} isRTL={isRTL} allLabel={t('incidents.list.all_event_types')} />
+          <FilterSelect label={t('incidents.severity.label')} value={filters.severity} onChange={v => setFilter('severity', v)} options={severityOptions} isRTL={isRTL} allLabel={t('incidents.list.all_severities')} />
+          <DateRangeFilter label={t('common.fields.creation_date')} from={filters.creationFrom} to={filters.creationTo} onFromChange={v => setFilter('creationFrom', v)} onToChange={v => setFilter('creationTo', v)} fromLabel={t('common.from')} toLabel={t('common.to')} />
+          <DateRangeFilter label={t('incidents.detail.fields.occurrence_date')} from={filters.occurrenceFrom} to={filters.occurrenceTo} onFromChange={v => setFilter('occurrenceFrom', v)} onToChange={v => setFilter('occurrenceTo', v)} fromLabel={t('common.from')} toLabel={t('common.to')} />
+        </div>
+      )}
+
+      {/* ── Results summary ───────────────────────────────────────────────── */}
+      <div style={{ fontSize: 12, color: C.textMuted, fontWeight: 600 }}>
+        {isLoading
+          ? t('incidents.list.loading')
+          : t('incidents.list.results_count', { count: filteredIncidents.length, total: rawResults.length })}
       </div>
 
       {/* ── Table ─────────────────────────────────────────────────────────── */}
-      <div style={{
-        border: `1px solid ${C.border}`,
-        borderRadius: 12,
-        overflow: 'hidden',
-        boxShadow: C.shadow,
-        backgroundColor: C.bg,
-      }}>
-        <div style={{ overflowX: 'auto', maxHeight: 640 }}>
+      <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', boxShadow: C.shadow }}>
+        <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr>
-                <ColHeader label={t('incidents.detail.fields.incident_id')} sortKey="incident_id" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label={t('incidents.status.label')} sortKey="status" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label={t('incidents.severity.label')} sortKey="severity" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.detail.fields.incident_id')} sortKey="incident_id"        sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.status.label')}              sortKey="status"             sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.severity.label')}            sortKey="severity"           sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                 <ColHeader label={t('incidents.classification.column_label')} sortKey="error_classification" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label={t('incidents.event_type.label')} sortKey="event_type" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label={t('common.fields.facility')} sortKey="facility_name" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label={t('incidents.detail.fields.governorate')} sortKey="governorate" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label={t('incidents.risk.label')} sortKey="risk_score" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label={t('incidents.list.column_occurrence')} sortKey="occurrence_date" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                <ColHeader label={t('incidents.list.column_created')} sortKey="registration_date" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.event_type.label')}          sortKey="event_type"         sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('common.fields.facility')}              sortKey="facility_name"      sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.detail.fields.governorate')} sortKey="governorate"        sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.risk.label')}                sortKey="risk_score"         sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.list.column_occurrence')}    sortKey="occurrence_date"    sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <ColHeader label={t('incidents.list.column_created')}       sortKey="registration_date"  sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
               </tr>
             </thead>
             <tbody>
@@ -952,33 +776,14 @@ export default function IncidentList({ onIncidentClick, role }) {
 
       {/* ── Pagination ────────────────────────────────────────────────────── */}
       {!isLoading && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            paddingTop: 2,
-            flexDirection: isRTL ? 'row-reverse' : 'row', // RTL
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setPage(p => Math.max(0, p - 1))}
-            disabled={page === 0}
-            style={paginationBtn(page === 0)}
-          >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 2, flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+          <button type="button" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} style={paginationBtn(page === 0)}>
             {t('incidents.list.pagination_previous')}
           </button>
           <span style={{ fontSize: 12, color: C.textMid, fontWeight: 600 }}>
             {t('incidents.list.pagination_page')} {page + 1}
           </span>
-          <button
-            type="button"
-            onClick={() => setPage(p => p + 1)}
-            disabled={!hasNextPage}
-            style={paginationBtn(!hasNextPage)}
-          >
+          <button type="button" onClick={() => setPage(p => p + 1)} disabled={!hasNextPage} style={paginationBtn(!hasNextPage)}>
             {t('incidents.list.pagination_next')}
           </button>
         </div>
@@ -998,15 +803,11 @@ function IncidentRow({ incident: inc, idx, onClick, role }) {
   function handleRowClick() {
     const id = inc?.incident_id || inc?.id;
     if (!id) return;
-    // Call the parent callback if provided (e.g. for modal mode), then navigate
     onClick?.(id);
     navigate(`/incidents/${id}`);
   }
 
-  const rowBg = hovered
-    ? C.brandLight
-    : idx % 2 === 0 ? C.bg : C.bgAlt;
-
+  const rowBg = hovered ? C.brandLight : idx % 2 === 0 ? C.bg : C.bgAlt;
   const score = inc?.risk_score;
 
   return (
@@ -1014,14 +815,8 @@ function IncidentRow({ incident: inc, idx, onClick, role }) {
       onClick={handleRowClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        borderBottom: `1px solid ${C.border}`,
-        backgroundColor: rowBg,
-        cursor: 'pointer',
-        transition: 'background-color 0.1s ease',
-      }}
+      style={{ borderBottom: `1px solid ${C.border}`, backgroundColor: rowBg, cursor: 'pointer', transition: 'background-color 0.1s ease' }}
     >
-      {/* Incident ID */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: C.brand }}>
           {fmt(inc?.incident_id, placeholderDash)}
@@ -1031,29 +826,24 @@ function IncidentRow({ incident: inc, idx, onClick, role }) {
         )}
       </td>
 
-      {/* Status */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         <StatusBadge status={inc?.status} />
       </td>
 
-      {/* Severity */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         <SeverityPill severity={inc?.severity} />
       </td>
 
-      {/* Classification */}
       <td style={{ padding: '11px 14px', maxWidth: 160 }}>
         <span style={{ fontSize: 12, color: C.textMid, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {fmt(inc?.error_classification, placeholderDash)}
         </span>
       </td>
 
-      {/* Event Type */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         <span style={{ fontSize: 12, color: C.textMid }}>{fmt(inc?.event_type, placeholderDash)}</span>
       </td>
 
-      {/* Facility */}
       <td style={{ padding: '11px 14px', maxWidth: 180 }}>
         <span style={{ fontSize: 12, color: C.text, fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {fmt(inc?.facility_name, placeholderDash)}
@@ -1061,12 +851,10 @@ function IncidentRow({ incident: inc, idx, onClick, role }) {
         <span style={{ fontSize: 11, color: C.textMuted }}>{fmt(inc?.facility_type, placeholderDash)}</span>
       </td>
 
-      {/* Governorate */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         <span style={{ fontSize: 12, color: C.textMid }}>{fmt(inc?.governorate, placeholderDash)}</span>
       </td>
 
-      {/* Risk */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         {score != null ? (
           <span style={{ fontSize: 12, fontWeight: 700, color: riskColor(score) }}>
@@ -1077,12 +865,10 @@ function IncidentRow({ incident: inc, idx, onClick, role }) {
         )}
       </td>
 
-      {/* Occurrence date */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         <span style={{ fontSize: 12, color: C.textMid }}>{fmtDate(inc?.occurrence_date, placeholderDash)}</span>
       </td>
 
-      {/* Creation date */}
       <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
         <span style={{ fontSize: 12, color: C.textMid }}>{fmtDate(inc?.registration_date, placeholderDash)}</span>
       </td>
@@ -1092,10 +878,12 @@ function IncidentRow({ incident: inc, idx, onClick, role }) {
 
 // ── Severity pill ──────────────────────────────────────────────────────────────
 
+// GAHAR 4-level severity styles (Catastrophic added)
 const SEVERITY_STYLES = {
-  Major:    { bg: '#FEF2F2', color: '#991B1B', border: '#FECACA' },
-  Moderate: { bg: '#FFFBEB', color: '#92400E', border: '#FDE68A' },
-  Minor:    { bg: '#F0FDF4', color: '#166534', border: '#BBF7D0' },
+  Catastrophic: { bg: '#FEF2F2', color: '#7F1D1D', border: '#FECACA' },
+  Major:        { bg: '#FEF2F2', color: '#991B1B', border: '#FECACA' },
+  Moderate:     { bg: '#FFFBEB', color: '#92400E', border: '#FDE68A' },
+  Minor:        { bg: '#F0FDF4', color: '#166534', border: '#BBF7D0' },
 };
 
 function SeverityPill({ severity }) {

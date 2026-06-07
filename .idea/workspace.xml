@@ -5,16 +5,52 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/frontend/public/ehaegypt_logo.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/public/stories/betsy-lehman.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/public/stories/emily-jerry.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/public/stories/placeholder-story.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/diagnose.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/migrate_gahar_probability.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/context/AuthContext.context.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/AdminProvision_full.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/IncidentReportsPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/auth/LoginForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/auth/LoginForm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/public/HeroSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/public/HeroSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/facility.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/facility.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/incident.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/incident.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/incidents.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/incidents.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/users.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/users.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/auth_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/auth_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/facility_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/facility_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/incident_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/incident_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/utils/enums.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/utils/enums.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/utils/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/utils/helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/scripts/Facilities.csv" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/Facilities.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/scripts/import_facilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/import_facilities.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/analytics/DashboardFilterBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/analytics/DashboardFilterBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/incidents/IncidentList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/incidents/NewIncidentForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/incidents/NewIncidentForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/incidents/RiskMatrix.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/incidents/RiskMatrix.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/patient/PatientReportForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/patient/PatientReportForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/public/FooterSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/public/FooterSection.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/public/PublicNavbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/public/PublicNavbar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/public/StoriesSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/public/StoriesSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/shared/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/shared/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/shared/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/shared/Sidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/workflow/WorkflowView.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/workflow/WorkflowView.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/context/AuthContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/context/AuthContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useIncidents.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useIncidents.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/locales/ar/translation.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/locales/ar/translation.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/locales/en/translation.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/locales/en/translation.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminProvision.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminProvision.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Analytics.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Analytics.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/WorkflowPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/WorkflowPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/public/LandingPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/public/LandingPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/public/StoryLibraryPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/public/StoryLibraryPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/incidents.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/incidents.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/utils/enums.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/utils/enums.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +99,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/aliat/Projects/AI-OVR/frontend/public",
+    "last_opened_file_path": "C:/Users/aliat/Projects/AI-OVR/backend",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -74,9 +110,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\aliat\Projects\AI-OVR\backend" />
+      <recent name="C:\Users\aliat\Projects\AI-OVR\frontend\src\context" />
+      <recent name="C:\Users\aliat\Projects\AI-OVR\backend\scripts" />
+      <recent name="C:\Users\aliat\Projects\AI-OVR\frontend\src\pages" />
       <recent name="C:\Users\aliat\Projects\AI-OVR\frontend\public" />
-      <recent name="C:\Users\aliat\Projects\AI-OVR\frontend\src\components\analytics" />
-      <recent name="C:\Users\aliat\Projects\AI-OVR\frontend\src\components\shared" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\aliat\Projects\AI-OVR\frontend\public\stories" />
@@ -119,6 +157,10 @@
       <workItem from="1780275261211" duration="2827000" />
       <workItem from="1780396861558" duration="790000" />
       <workItem from="1780480190560" duration="10189000" />
+      <workItem from="1780649178192" duration="18000" />
+      <workItem from="1780687243133" duration="18181000" />
+      <workItem from="1780740599707" duration="42036000" />
+      <workItem from="1780844033382" duration="8166000" />
     </task>
     <servers />
   </component>

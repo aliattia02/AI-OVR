@@ -24,7 +24,10 @@ class FacilityInDB(BaseModel):
     facility_type: FacilityType
     administration: str
     facility_name: str
-    patient_link_uuid: str        # UUID v4 — never expose on public endpoints
+    facility_type_en: Optional[str] = None      # English label e.g. "Hospital"
+    administration_en: Optional[str] = None     # English label e.g. "Aswan Administration"
+    facility_name_en: Optional[str] = None      # English label e.g. "Aswan Specialized Hospital"
+    patient_link_uuid: str                       # UUID v4 — never expose on public endpoints
     created_at: datetime
 
 
@@ -39,6 +42,9 @@ class FacilityResponse(BaseModel):
     facility_type: FacilityType
     administration: str
     facility_name: str
+    facility_type_en: Optional[str] = None
+    administration_en: Optional[str] = None
+    facility_name_en: Optional[str] = None
     patient_link_uuid: str
     created_at: datetime
 
@@ -53,4 +59,7 @@ class FacilitySafeResponse(BaseModel):
     facility_type: FacilityType
     administration: str
     facility_name: str
+    facility_type_en: Optional[str] = None
+    administration_en: Optional[str] = None
+    facility_name_en: Optional[str] = None
     created_at: datetime

@@ -25,14 +25,11 @@ export default function LandingPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Keep dir + lang in sync, reset both on unmount
+  // Keep dir + lang in sync while on the public landing page
   useEffect(() => {
     document.documentElement.dir = "rtl";
     document.documentElement.lang = "ar";
-    return () => {
-      document.documentElement.dir = "ltr";
-      document.documentElement.lang = "en";
-    };
+    // No cleanup — App.jsx handles direction globally based on i18n language
   }, []);
 
   useEffect(() => {

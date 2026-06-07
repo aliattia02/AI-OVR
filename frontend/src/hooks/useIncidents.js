@@ -45,23 +45,26 @@ function logJwt() {
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 
 export function useIncidents(params = {}) {
-  const { page = 0, pageSize = 20 } = params;
+  const { page = 0, pageSize = 20, filters = {} } = params;
   const skip = page * pageSize;
 
   logJwt();
 
   return useQuery({
-    queryKey: ['incidents', { page, pageSize }],
+    // filters included in key so React Query refetches whenever they change
+    queryKey: ['incidents', { page, pageSize, ...filters }],
     queryFn: async () => {
-      log(`fetching skip=${skip} limit=${pageSize}`);
+      log(`fetching skip=${skip} limit=${pageSize}`, filters);
       try {
-        const data = await incidentService.getAll({ skip, limit: pageSize });
+        const data = await incidentService.getAll({ skip, limit: pageSize, ...filters });
         log(`response → ${Array.isArray(data) ? data.length + ' items' : typeof data}`, data);
         if (Array.isArray(data) && data.length === 0)
           console.warn('[incidents] 200 OK but empty array — check scope_filter vs stored documents');
         return data;
       } catch (err) {
         const status = err?.response?.status;
+        // Error logging is always-on (not gated by DEBUG) so that production
+        // failures appear in the browser console without needing a redeploy.
         console.error('[incidents] request failed', {
           status,
           data:    err?.response?.data,
@@ -69,13 +72,24 @@ export function useIncidents(params = {}) {
         });
         if (status === 304) console.warn('[incidents] 304 → stale cache; deploy Cache-Control: no-store fix');
         if (status === 422) console.warn('[incidents] 422 → Pydantic validation error; check Render logs for bad field value');
+        if (status === 500) console.warn('[incidents] 500 → backend exception; check Render/server logs — likely a Pydantic ValidationError on a DB document (e.g. legacy probability or jci_* field)');
         if (status === 401) console.warn('[incidents] 401 → JWT missing or expired');
         if (status === 403) console.warn('[incidents] 403 → role/tier not permitted');
         if (!err.response)  console.warn('[incidents] no response → network failure or Render cold-start');
         throw err;
       }
     },
-    throwOnError: true,
+    // throwOnError must be false (or omitted) so that React Query populates the
+    // `error` return value and lets IncidentList render its error banner.
+    //
+    // When throwOnError is true, React Query throws the error into the React
+    // render tree instead of returning it via { error }.  Since IncidentList
+    // reads `const { data, isLoading, error } = useIncidents(...)` and only
+    // shows the error UI when `if (error)`, a thrown error bypasses that check
+    // entirely — no ErrorBoundary is wrapping IncidentList, so React swallows
+    // the throw silently, isLoading never resolves to false, and the page hangs
+    // indefinitely with zero console output.
+    throwOnError: false,
     retry: 1,
   });
 }
@@ -126,10 +140,11 @@ export function useAIFeedback() {
   });
 }
 
-export function useSaveJCIFields() {
+// ── GAHAR migration: replaces useSaveJCIFields ────────────────────────────────
+export function useSaveGAHARFields() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }) => incidentService.saveJCIFields(id, payload),
+    mutationFn: ({ id, payload }) => incidentService.saveGAHARFields(id, payload),
     onSuccess: (_data, variables) =>
       queryClient.invalidateQueries({ queryKey: ['incident', variables.id] }),
   });

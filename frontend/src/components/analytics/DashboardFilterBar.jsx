@@ -11,6 +11,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
 import { useTranslation } from 'react-i18next';
+import { ERROR_CLASSIFICATIONS } from '../../utils/enums';
+import { formatEnumLabel } from '../../utils/formatters';
 
 // ── Design tokens (match the rest of the app) ─────────────────────────────────
 const C = {
@@ -43,10 +45,10 @@ function useCascadingFacilities() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-const selectStyle = (hasValue) => ({
+const selectStyle = (hasValue, isRtl) => ({
   border: `1px solid ${C.border}`,
   borderRadius: 7,
-  padding: '7px 28px 7px 10px',
+  padding: isRtl ? '7px 10px 7px 28px' : '7px 28px 7px 10px',
   fontSize: 13,
   color: hasValue ? C.text : C.textMuted,
   backgroundColor: C.bg,
@@ -54,9 +56,11 @@ const selectStyle = (hasValue) => ({
   cursor: 'pointer',
   appearance: 'none',
   width: '100%',
+  textAlign: isRtl ? 'right' : 'left',
+  direction: isRtl ? 'rtl' : 'ltr',
   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
   backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 9px center',
+  backgroundPosition: isRtl ? 'left 9px center' : 'right 9px center',
   transition: 'border-color 0.15s',
   minWidth: 0,
 });
@@ -141,7 +145,33 @@ function DateRange({ label, from, to, onFromChange, onToChange, fromLabel, toLab
  */
 export default function DashboardFilterBar({ filters, onFiltersChange, isLoading = false, lockedFacilityName = null }) {
   const { data: cascading, isLoading: cascadingLoading } = useCascadingFacilities();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+
+  // ── EN label helpers ──────────────────────────────────────────────────────
+  //
+  // administrations_en shape: { [gov]: { [ar_admin]: en_admin } }
+  // Flatten into a single { ar_admin: en_admin } lookup.
+  const adminEnMap = useMemo(() => {
+    const m = {};
+    for (const govMap of Object.values(cascading?.administrations_en ?? {})) {
+      Object.assign(m, govMap);
+    }
+    return m;
+  }, [cascading]);
+
+  // facilities_en shape: { [ar_admin]: { [ar_name]: en_name } }
+  // Flatten into a single { ar_name: en_name } lookup.
+  const facilityEnMap = useMemo(() => {
+    const m = {};
+    for (const nameMap of Object.values(cascading?.facilities_en ?? {})) {
+      Object.assign(m, nameMap);
+    }
+    return m;
+  }, [cascading]);
+
+  // facility_types_en shape: { [ar_type]: en_type }
+  const facilityTypesEn = cascading?.facility_types_en ?? {};
 
   // ── Derived option lists ───────────────────────────────────────────────────
   //
@@ -216,14 +246,15 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
 
   const clearAll = useCallback(() => {
     onFiltersChange({
-      governorate:     '',
-      administration:  '',
-      facility_type:   '',
-      facility_name:   '',
-      creation_from:   '',
-      creation_to:     '',
-      occurrence_from: '',
-      occurrence_to:   '',
+      governorate:          '',
+      administration:       '',
+      facility_type:        '',
+      facility_name:        '',
+      creation_from:        '',
+      creation_to:          '',
+      occurrence_from:      '',
+      occurrence_to:        '',
+      error_classification: '',
     });
   }, [onFiltersChange]);
 
@@ -301,13 +332,13 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
             value={filters.governorate}
             onChange={e => set('governorate', e.target.value)}
             disabled={cascadingLoading}
-            style={selectStyle(!!filters.governorate)}
+            style={selectStyle(!!filters.governorate, isAr)}
             onFocus={e => { e.target.style.borderColor = C.brand; }}
             onBlur={e => { e.target.style.borderColor = C.border; }}
           >
             <option value="">{t('analytics.filters.all_governorates')}</option>
             {governorateOptions.map(g => (
-              <option key={g} value={g}>{g}</option>
+              <option key={g} value={g}>{t(`common.governorates.${g.toLowerCase()}`, g.replace(/_/g, ' '))}</option>
             ))}
           </select>
         </FilterGroup>
@@ -318,13 +349,15 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
             value={filters.administration}
             onChange={e => set('administration', e.target.value)}
             disabled={cascadingLoading || administrationOptions.length === 0}
-            style={selectStyle(!!filters.administration)}
+            style={selectStyle(!!filters.administration, isAr)}
             onFocus={e => { e.target.style.borderColor = C.brand; }}
             onBlur={e => { e.target.style.borderColor = C.border; }}
           >
             <option value="">{t('analytics.filters.all_administrations')}</option>
             {administrationOptions.map(a => (
-              <option key={a} value={a}>{a}</option>
+              // value = Arabic canonical (what the backend filters on)
+              // label = English from administrations_en, falls back to Arabic
+              <option key={a} value={a}>{isAr ? a : (adminEnMap[a] || a)}</option>
             ))}
           </select>
         </FilterGroup>
@@ -335,13 +368,14 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
             value={filters.facility_type}
             onChange={e => set('facility_type', e.target.value)}
             disabled={cascadingLoading || facilityTypeOptions.length === 0}
-            style={selectStyle(!!filters.facility_type)}
+            style={selectStyle(!!filters.facility_type, isAr)}
             onFocus={e => { e.target.style.borderColor = C.brand; }}
             onBlur={e => { e.target.style.borderColor = C.border; }}
           >
             <option value="">{t('analytics.filters.all_types')}</option>
-            {facilityTypeOptions.map(t => (
-              <option key={t} value={t}>{t}</option>
+            {facilityTypeOptions.map(ft => (
+              // value = Arabic type (مستشفى/مركز/وحدة); label = English from facility_types_en
+              <option key={ft} value={ft}>{isAr ? ft : (facilityTypesEn[ft] || ft)}</option>
             ))}
           </select>
         </FilterGroup>
@@ -381,7 +415,7 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
               value={filters.facility_name}
               onChange={e => set('facility_name', e.target.value)}
               disabled={cascadingLoading || facilityNameOptions.length === 0}
-              style={selectStyle(!!filters.facility_name)}
+              style={selectStyle(!!filters.facility_name, isAr)}
               onFocus={e => { e.target.style.borderColor = C.brand; }}
               onBlur={e => { e.target.style.borderColor = C.border; }}
             >
@@ -391,7 +425,8 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
                   : t('analytics.filters.all_facilities')}
               </option>
               {facilityNameOptions.map(name => (
-                <option key={name} value={name}>{name}</option>
+                // value = Arabic canonical; label = English from facilities_en
+                <option key={name} value={name}>{isAr ? name : (facilityEnMap[name] || name)}</option>
               ))}
             </select>
           )}
@@ -418,6 +453,27 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
           fromLabel={t('common.from')}
           toLabel={t('common.to')}
         />
+
+        {/* Error Classification — mirrors ERROR_CLASSIFICATIONS in enums.js */}
+        <FilterGroup label={t('incidents.classification.label')}>
+          <select
+            value={filters.error_classification ?? ''}
+            onChange={e => set('error_classification', e.target.value)}
+            style={selectStyle(!!filters.error_classification, isAr)}
+            onFocus={e => { e.target.style.borderColor = C.brand; }}
+            onBlur={e => { e.target.style.borderColor = C.border; }}
+          >
+            <option value="">{t('analytics.filters.all_classifications')}</option>
+            {ERROR_CLASSIFICATIONS.map((cls, idx) => (
+              <option key={cls} value={cls}>
+                {idx + 1}. {t(
+                  `incidents.classification.${cls.toLowerCase()}`,
+                  { defaultValue: formatEnumLabel(cls) }
+                )}
+              </option>
+            ))}
+          </select>
+        </FilterGroup>
 
       </div>
     </div>

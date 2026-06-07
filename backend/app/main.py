@@ -7,6 +7,8 @@ import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+import time
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -83,6 +85,35 @@ app = FastAPI(
 
 cors_origins = _resolve_cors_origins()
 _validate_startup_settings(cors_origins)
+
+# ── DEBUG middleware (remove before production) ───────────────────────────────
+@app.middleware("http")
+async def debug_request_logger(request: Request, call_next):
+    start = time.time()
+    origin = request.headers.get("origin", "no-origin")
+    logger.warning(
+        ">>> REQUEST  %s %s  |  origin=%s  |  client=%s",
+        request.method,
+        request.url.path,
+        origin,
+        request.client,
+    )
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        logger.error(">>> HANDLER CRASHED: %s", exc, exc_info=True)
+        raise
+    elapsed = (time.time() - start) * 1000
+    logger.warning(
+        "<<< RESPONSE %s %s  |  status=%s  |  %.0f ms",
+        request.method,
+        request.url.path,
+        response.status_code,
+        elapsed,
+    )
+    return response
+# ─────────────────────────────────────────────────────────────────────────────
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
@@ -100,6 +131,12 @@ app.include_router(exports.router)
 app.include_router(users.router)
 app.include_router(ai.router)
 app.include_router(health.router)
+
+
+@app.get("/ping")
+async def ping() -> dict[str, str]:
+    """Instant health check — no DB, no auth. Use to verify backend is reachable."""
+    return {"pong": "ok", "cors_origins": str(cors_origins)}
 
 
 @app.get("/")

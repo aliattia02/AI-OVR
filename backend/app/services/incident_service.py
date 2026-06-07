@@ -1,4 +1,10 @@
-"""backend/app/services/incident_service.py — Business logic for incident CRUD operations, status transitions, and workflow in E·OVR."""
+"""backend/app/services/incident_service.py — Business logic for incident CRUD operations, status transitions, and workflow in E·OVR.
+
+GAHAR migration changes:
+  - Removed import of compute_risk_score from app.utils.helpers (JCI 1–9 scale).
+  - Added _SAC_MATRIX lookup table and _compute_sac_score() helper (GAHAR 1–3 scale).
+  - save_assessment() now writes risk_score as a SAC integer (1, 2, or 3).
+"""
 
 from __future__ import annotations
 
@@ -13,10 +19,63 @@ from app.services import ai_service
 from app.utils.enums import ActionStatus, IncidentStatus, Probability, ReporterType, Severity
 from app.utils.helpers import (
     build_audit_entry,
-    compute_risk_score,
     generate_incident_id,
     get_scope_filter,
+    # NOTE: compute_risk_score (JCI 1–9 scale) is intentionally NOT imported here.
+    # SAC scoring is now handled by _compute_sac_score() below.
 )
+
+# ── GAHAR SAC lookup table ────────────────────────────────────────────────────
+# Mirrors the frontend SAC_MATRIX in RiskMatrix.jsx exactly.
+# Rows = Severity (Catastrophic → Minor), Cols = Probability (Frequent → Remote).
+# Score 3 = Critical, 2 = Intermediate, 1 = Low.
+
+_SAC_MATRIX: dict[str, dict[str, int]] = {
+    Severity.Catastrophic.value: {
+        Probability.Frequent.value:   3,
+        Probability.Occasional.value: 3,
+        Probability.Uncommon.value:   3,
+        Probability.Remote.value:     3,
+    },
+    Severity.Major.value: {
+        Probability.Frequent.value:   3,
+        Probability.Occasional.value: 2,
+        Probability.Uncommon.value:   2,
+        Probability.Remote.value:     2,
+    },
+    Severity.Moderate.value: {
+        Probability.Frequent.value:   2,
+        Probability.Occasional.value: 1,
+        Probability.Uncommon.value:   1,
+        Probability.Remote.value:     1,
+    },
+    Severity.Minor.value: {
+        Probability.Frequent.value:   1,
+        Probability.Occasional.value: 1,
+        Probability.Uncommon.value:   1,
+        Probability.Remote.value:     1,
+    },
+}
+
+
+def _compute_sac_score(severity: Severity | str, probability: Probability | str) -> int:
+    """Return the GAHAR SAC score (1–3) for a severity/probability combination.
+
+    Looks up the pre-defined 4×4 SAC matrix.  Falls back to 1 (lowest risk) if
+    either axis value is unrecognised, so an unexpected enum value never causes
+    a 500 error — it will just be flagged as Low.
+
+    Args:
+        severity:    A :class:`~app.utils.enums.Severity` value or its string representation.
+        probability: A :class:`~app.utils.enums.Probability` value or its string representation.
+
+    Returns:
+        Integer SAC score: 3 (Critical), 2 (Intermediate), or 1 (Low).
+    """
+    sev_key  = severity.value  if isinstance(severity,  Severity)    else str(severity)
+    prob_key = probability.value if isinstance(probability, Probability) else str(probability)
+    return _SAC_MATRIX.get(sev_key, {}).get(prob_key, 1)
+
 
 # ── Status transition table ───────────────────────────────────────────────────
 # Defines the only legal one-step status transitions.
@@ -206,23 +265,26 @@ async def get_incident_by_id(
     claims: dict,
     db: AsyncIOMotorDatabase,
 ) -> IncidentInDB | None:
-    """Return a single incident by its human-readable ``incident_id``, scoped to role.
+    """Return a single incident by its human-readable ID, scoped to the caller's tier.
 
     Args:
-        incident_id: The human-readable reference code (e.g. ``"OVR-2026-001"``).
+        incident_id: Human-readable reference code (e.g. ``"OVR-2026-001"``).
         role:        The caller's :class:`~app.utils.enums.UserRole` string value.
         claims:      JWT payload / token claims dictionary.
         db:          Async Motor database instance.
 
     Returns:
-        The :class:`IncidentInDB` if found and in scope, otherwise ``None``.
+        An :class:`IncidentInDB` if found and accessible; ``None`` otherwise.
     """
     scope_filter = get_scope_filter(role, claims)
-    query = {"incident_id": incident_id, **scope_filter}
-    doc = await db["incidents"].find_one(query)
+    scope_filter["incident_id"] = incident_id
+    doc = await db["incidents"].find_one(scope_filter)
     if doc is None:
         return None
-    return _doc_to_incident(doc)
+    doc = dict(doc)
+    if "_id" in doc:
+        doc["_id"] = str(doc["_id"])
+    return IncidentInDB(**doc)
 
 
 async def update_status(
@@ -231,12 +293,7 @@ async def update_status(
     user_id: str,
     db: AsyncIOMotorDatabase,
 ) -> bool:
-    """Transition an incident's status, enforcing the allowed transition table.
-
-    Legal transitions::
-
-        Created → InProgress → Evaluating → ActionTaken → Completed
-                                Evaluating ↔ MoreInfoNeeded
+    """Attempt a status transition and persist it if the transition is legal.
 
     Args:
         incident_id: Human-readable reference code.
@@ -279,27 +336,31 @@ async def save_assessment(
     user_id: str,
     db: AsyncIOMotorDatabase,
 ) -> bool:
-    """Store the risk assessment and compute the composite risk score.
+    """Store the risk assessment and compute the GAHAR SAC score (1–3).
+
+    GAHAR migration: risk_score is now a SAC integer (1 = Low, 2 = Intermediate,
+    3 = Critical) computed from the 4×4 lookup table, replacing the previous
+    JCI multiply-based score (1–9).
 
     Args:
         incident_id: Human-readable reference code.
-        severity:    Clinical severity of the incident.
-        probability: Likelihood of recurrence.
+        severity:    GAHAR clinical severity of the incident.
+        probability: GAHAR likelihood of recurrence.
         user_id:     ID of the user saving the assessment.
         db:          Async Motor database instance.
 
     Returns:
         ``True`` if the document was updated; ``False`` if not found.
     """
-    risk_score = compute_risk_score(severity, probability)
+    sac_score = _compute_sac_score(severity, probability)
     audit_entry = build_audit_entry(user_id=user_id, action="assessment_saved")
     result = await db["incidents"].update_one(
         {"incident_id": incident_id},
         {
             "$set": {
-                "severity": Severity(severity).value,
+                "severity":   Severity(severity).value,
                 "probability": Probability(probability).value,
-                "risk_score": risk_score,
+                "risk_score": sac_score,
             },
             "$push": {"audit_trail": audit_entry},
         },

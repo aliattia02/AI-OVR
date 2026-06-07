@@ -1,8 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import Spinner from '../components/shared/Spinner';
 import * as authService from '../services/auth';
+import { AuthContext } from './AuthContext.context';
 
-export const AuthContext = createContext(undefined);
+export { AuthContext } from './AuthContext.context';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -112,3 +113,6 @@ export function useAuth() {
   }
   return context;
 }
+
+// Re-export so callers that import AuthContext from this file still work.
+// (AuthContext.context.js is the source of truth.)

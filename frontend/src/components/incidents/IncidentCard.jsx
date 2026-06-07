@@ -99,7 +99,6 @@ export default function IncidentCard({ incident, onClick }) {
               display: 'inline-block',
             }}
           />
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#0B7D6B' }}>{t('incidents.ai.pending_review')}</span>
         </div>
       )}
     </div>

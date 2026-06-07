@@ -1,4 +1,12 @@
-"""backend/app/routers/incidents.py — API routes for incident creation, retrieval, and workflow management in E·OVR."""
+"""backend/app/routers/incidents.py — API routes for incident creation, retrieval, and workflow management in E·OVR.
+
+GAHAR migration changes:
+  - Removed imports of JCIChapter, JCIComplianceStatus from app.models.incident.
+  - Added imports of GAHARSection, GAHARComplianceStatus from app.models.incident.
+  - Replaced JCIFieldsBody with GAHARFieldsBody (all jci_* fields renamed to gahar_*).
+  - Endpoint /jci-fields renamed to /gahar-fields.
+  - Handler save_jci_fields renamed to save_gahar_fields.
+"""
 
 from __future__ import annotations
 
@@ -13,10 +21,10 @@ from app.db.database import get_database
 from app.middleware.auth_middleware import require_role
 from app.models.incident import (
     DisclosureMethod,
+    GAHARComplianceStatus,  # GAHAR migration: replaces JCIComplianceStatus
+    GAHARSection,           # GAHAR migration: replaces JCIChapter
     IncidentCreate,
     IncidentResponse,
-    JCIChapter,
-    JCIComplianceStatus,
     VulnerablePopulationType,
 )
 from app.services import email_service, facility_service, incident_service
@@ -195,7 +203,7 @@ async def save_assessment(
     claims: dict = Depends(require_role(UserRole.quality_admin)),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> dict:
-    """Set severity and probability; risk_score is computed server-side."""
+    """Set severity and probability; SAC risk_score (1–3) is computed server-side."""
     updated = await incident_service.save_assessment(
         incident_id=incident_id,
         severity=body.severity,
@@ -241,32 +249,33 @@ async def save_actions(
     return {"updated": True}
 
 
-# ── JCI compliance fields ─────────────────────────────────────────────────────
-# Single unified handler covering all JCI 8th Edition fields:
-#   - Compliance metadata  (jci_chapter, jci_standard, jci_measurable_element,
-#                           jci_compliance_status, jci_evidence, jci_gap_analysis,
-#                           jci_action_plan)
+# ── GAHAR compliance fields ───────────────────────────────────────────────────
+# Single unified handler covering all GAHAR accreditation fields:
+#   - Compliance metadata  (gahar_section, gahar_gsr_code, gahar_standard_code,
+#                           gahar_compliance_status, gahar_evidence,
+#                           gahar_gap_analysis, gahar_action_plan)
 #   - Disclosure & patient safety fields  (disclosure_date, disclosure_method,
 #                           disclosure_responsible, vulnerable_patient,
 #                           vulnerable_population_type, workplace_violence,
 #                           medication_error_merp_category)
 #
-# Previously two PATCH handlers were registered on the same route; FastAPI
-# silently used only the last one, making the compliance fields unreachable.
-# Both field sets are now merged into JCIFieldsBody so a single handler serves
-# all JCI-related updates.  Only fields explicitly included in the request body
-# are written (exclude_unset=True).
+# Only fields explicitly included in the request body are written
+# (exclude_unset=True).  Restricted to quality_admin and above.
+#
+# GAHAR migration: this handler replaces the previous /jci-fields endpoint
+# (save_jci_fields / JCIFieldsBody).  The disclosure fields are accreditation-
+# agnostic and are therefore retained unchanged.
 
-class JCIFieldsBody(BaseModel):
-    # JCI 8th Edition compliance metadata
-    jci_chapter: JCIChapter | None = None
-    jci_standard: str | None = None
-    jci_measurable_element: str | None = None
-    jci_compliance_status: JCIComplianceStatus | None = None
-    jci_evidence: str | None = None
-    jci_gap_analysis: str | None = None
-    jci_action_plan: str | None = None
-    # Disclosure & patient-safety supplementary fields
+class GAHARFieldsBody(BaseModel):
+    # GAHAR accreditation section & standard metadata
+    gahar_section: GAHARSection | None = None
+    gahar_gsr_code: str | None = None             # e.g. "GSR.01" – "GSR.29"
+    gahar_standard_code: str | None = None        # book code e.g. "ACT.03"
+    gahar_compliance_status: GAHARComplianceStatus | None = None
+    gahar_evidence: str | None = None
+    gahar_gap_analysis: str | None = None
+    gahar_action_plan: str | None = None
+    # Disclosure & patient-safety supplementary fields (accreditation-agnostic)
     disclosure_date: Optional[date] = None
     disclosure_method: Optional[DisclosureMethod] = None
     disclosure_responsible: Optional[str] = None
@@ -276,10 +285,10 @@ class JCIFieldsBody(BaseModel):
     medication_error_merp_category: Optional[str] = None
 
 
-@router.patch("/{incident_id}/jci-fields", response_model=dict)
-async def save_jci_fields(
+@router.patch("/{incident_id}/gahar-fields", response_model=dict)
+async def save_gahar_fields(
     incident_id: str,
-    body: JCIFieldsBody,
+    body: GAHARFieldsBody,
     claims: dict = Depends(
         require_role(
             UserRole.quality_admin,
@@ -290,7 +299,7 @@ async def save_jci_fields(
     ),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> dict:
-    """Persist JCI 8th Edition compliance and disclosure metadata for an incident.
+    """Persist GAHAR accreditation compliance and disclosure metadata for an incident.
 
     Only fields supplied in the request body are written; omitted fields are
     left unchanged.  Restricted to quality_admin and above.
@@ -299,9 +308,9 @@ async def save_jci_fields(
     if not updates:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No JCI fields provided.",
+            detail="No GAHAR fields provided.",
         )
-    audit_entry = build_audit_entry(user_id=claims["user_id"], action="jci_fields_saved")
+    audit_entry = build_audit_entry(user_id=claims["user_id"], action="gahar_fields_saved")
     result = await db["incidents"].update_one(
         {"incident_id": incident_id},
         {

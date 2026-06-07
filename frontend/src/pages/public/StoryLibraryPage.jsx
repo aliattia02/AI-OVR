@@ -818,7 +818,7 @@ export default function StoryLibraryPage() {
               }}
             >
               لا يُفيد التاريخ من لم يقرأه —<br />
-              ولا يُفيد الخطأ الطبي من لم يُبلَّغ عنه.
+              ولا يُفيد الخطأ الطبي ما لم يُبلَّغ عنه.
             </p>
             <p style={{ margin: 0, fontSize: 13, color: C.g400 }}>
               — مكتبة قصص E·OVR

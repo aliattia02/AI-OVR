@@ -1,4 +1,9 @@
 // frontend/src/components/shared/Sidebar.jsx
+//
+// Change vs. previous version:
+//  - Removed standalone { id: 'analytics' } from all roles — analytics is now
+//    embedded inside IncidentReportsPage (see pages/IncidentReportsPage.jsx).
+
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
@@ -6,38 +11,37 @@ import { USER_ROLES } from '../../utils/enums';
 import { analyticsService } from '../../services/analytics';
 import { useDirection } from '../../hooks/useDirection';
 
-// Nav item ids map to translation keys under nav.items.*
 const ROLE_VIEWS = {
   patient: [
     { id: 'report-incident', labelKey: 'nav.items.report_incident' },
   ],
   staff: [
-    { id: 'new-report',  labelKey: 'nav.items.new_report' },
-    { id: 'reports',     labelKey: 'nav.items.my_reports' },
+    { id: 'new-report', labelKey: 'nav.items.new_report' },
+    { id: 'reports',    labelKey: 'nav.items.my_reports' },
   ],
   quality_admin: [
-    { id: 'dashboard',   labelKey: 'common.page_titles.dashboard' },
-    { id: 'new-report',  labelKey: 'nav.items.new_report' },
-    { id: 'reports',     labelKey: 'nav.items.reports' },
-    { id: 'analytics',   labelKey: 'common.page_titles.analytics' },
-    { id: 'workflow',    labelKey: 'nav.items.workflow' },
+    { id: 'dashboard',        labelKey: 'common.page_titles.dashboard' },
+    { id: 'new-report',       labelKey: 'nav.items.new_report' },
+    { id: 'reports',          labelKey: 'nav.items.reports' },
+    { id: 'incident-reports', labelKey: 'common.page_titles.incident_reports' },
+    { id: 'workflow',         labelKey: 'nav.items.workflow' },
   ],
   administration_manager: [
-    { id: 'dashboard',   labelKey: 'common.page_titles.dashboard' },
-    { id: 'reports',     labelKey: 'nav.items.reports' },
-    { id: 'analytics',   labelKey: 'common.page_titles.analytics' },
-    { id: 'workflow',    labelKey: 'nav.items.workflow' },
+    { id: 'dashboard',        labelKey: 'common.page_titles.dashboard' },
+    { id: 'reports',          labelKey: 'nav.items.reports' },
+    { id: 'incident-reports', labelKey: 'common.page_titles.incident_reports' },
+    { id: 'workflow',         labelKey: 'nav.items.workflow' },
   ],
   governorate_manager: [
-    { id: 'dashboard',   labelKey: 'common.page_titles.dashboard' },
-    { id: 'reports',     labelKey: 'nav.items.reports' },
-    { id: 'analytics',   labelKey: 'common.page_titles.analytics' },
-    { id: 'workflow',    labelKey: 'nav.items.workflow' },
+    { id: 'dashboard',        labelKey: 'common.page_titles.dashboard' },
+    { id: 'reports',          labelKey: 'nav.items.reports' },
+    { id: 'incident-reports', labelKey: 'common.page_titles.incident_reports' },
+    { id: 'workflow',         labelKey: 'nav.items.workflow' },
   ],
   top_management: [
     { id: 'dashboard',        labelKey: 'common.page_titles.dashboard' },
     { id: 'reports',          labelKey: 'nav.items.reports' },
-    { id: 'analytics',        labelKey: 'common.page_titles.analytics' },
+    { id: 'incident-reports', labelKey: 'common.page_titles.incident_reports' },
     { id: 'workflow',         labelKey: 'nav.items.workflow' },
     { id: 'admin-provision',  labelKey: 'nav.items.user_provisioning' },
   ],
@@ -57,8 +61,8 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
     staleTime: 60_000,
   });
 
-  const aiProvider     = String(health?.ai_provider || '').trim().toLowerCase();
-  const aiModelName    = health?.ai_model || health?.model_name || health?.model || health?.ai_provider || 'Configured';
+  const aiProvider      = String(health?.ai_provider || '').trim().toLowerCase();
+  const aiModelName     = health?.ai_model || health?.model_name || health?.model || health?.ai_provider || 'Configured';
   const aiNotConfigured = !aiProvider || aiProvider === 'none';
 
   return (
@@ -73,6 +77,7 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
         flexDirection: 'column',
         minHeight: '100vh',
         padding: '16px 12px',
+        direction: isRTL ? 'rtl' : 'ltr',
       }}
     >
       {/* Header */}
@@ -83,8 +88,7 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.90)', fontWeight: 600 }}>
           {t('nav.app_tagline')}
         </div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.68)' }}>
-        </div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.68)' }} />
 
         {role === 'patient' && (
           <div
@@ -108,7 +112,6 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
       <nav style={{ marginTop: 18, display: 'grid', gap: 4 }}>
         {navItems.map((item) => {
           const label    = t(item.labelKey);
-          // currentView may carry the old English label from ROLE_VIEWS — match by id
           const isActive = currentView === item.id || currentView === item.labelKey;
           return (
             <button
@@ -128,7 +131,7 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                flexDirection: isRTL ? 'row-reverse' : 'row',
+                width: '100%',
               }}
             >
               {label}
@@ -168,9 +171,7 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
             color: aiNotConfigured ? '#FCD34D' : '#86EFAC',
           }}
         >
-          {aiNotConfigured
-            ? t('nav.ai_status_not_configured')
-            : t('nav.ai_status_configured', { model: aiModelName })}
+
         </div>
 
         <button
@@ -190,6 +191,20 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
         >
           {t('nav.sign_out')}
         </button>
+
+        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>
+          by{' '}
+          <a
+            href="https://medlytico.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontWeight: 600 }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}
+          >
+            medlytico.com
+          </a>
+        </div>
       </div>
     </aside>
   );

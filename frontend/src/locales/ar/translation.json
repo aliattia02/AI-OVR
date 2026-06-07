@@ -9,12 +9,16 @@
     "from": "من",
     "to": "إلى",
     "placeholder_dash": "—",
+    "yes": "نعم",
+    "no": "لا",
+    "optional": "اختياري",
     "submitting": "جارٍ الإرسال...",
     "tier_label": "المستوى {{tier}}",
     "locked_label": "مغلق",
     "disclaimer": "يُستخدم هذا التقرير حصريًا لتحسين الجودة — وليس للإجراءات القانونية. هوية المُبلغ محمية.",
     "page_titles": {
-      "dashboard": "لوحة القيادة",
+      "dashboard": "لوحة التحكم",
+      "incident_reports": "تقارير الحوادث",
       "analytics": "التحليلات"
     },
     "dashboard_welcome": {
@@ -50,6 +54,12 @@
       "port_said": "بورسعيد",
       "south_sinai": "جنوب سيناء",
       "suez": "السويس"
+    },
+    "exporting": "جارٍ التصدير…",
+    "facility_types": {
+      "hospital": "مستشفى",
+      "health_center": "مركز صحي",
+      "health_unit": "وحدة صحية"
     }
   },
   "auth": {
@@ -194,7 +204,20 @@
         "sentinel_event": "حدث جسيم",
         "no_harm": "لا ضرر",
         "unsafe_condition": "حالة غير آمنة"
-      }
+      },
+      "search_placeholder": "ابحث بالمعرّف أو الوصف أو الشخص أو المنشأة…",
+      "filter_button": "بحث متقدم",
+      "page_size": "{{n}} صفوف",
+      "all_governorates": "جميع المحافظات",
+      "all_administrations": "جميع الإدارات",
+      "all_types": "جميع الأنواع",
+      "search_facility_placeholder": "اكتب للبحث…",
+      "all_statuses": "جميع الحالات",
+      "all_classifications": "جميع التصنيفات",
+      "all_event_types": "جميع أنواع الأحداث",
+      "all_severities": "جميع مستويات الخطورة",
+      "results_count": "عرض {{count}} من أصل {{total}} حادثة",
+      "locked_label": "مقفل"
     },
     "card": {
       "aria_incident_id": "حادث {{id}}",
@@ -226,6 +249,14 @@
       "generic_error": "حدث خطأ. يرجى المحاولة مرة أخرى.",
       "save": "حفظ",
       "saving": "جارٍ الحفظ...",
+      "sections": {
+        "identity": "الحادثة",
+        "timing": "التوقيت",
+        "reporter": "المُبلِّغ والمعني",
+        "classification": "التصنيف",
+        "narratives": "التفاصيل",
+        "medication_safety": "سلامة الدواء"
+      },
       "fields": {
         "incident_id": "معرف الحادث",
         "status": "الحالة",
@@ -249,10 +280,15 @@
         "specific_error": "خطأ محدد",
         "event_type": "نوع الحدث",
         "risk_score": "درجة المخاطرة",
+        "severity": "الخطورة",
+        "probability": "الاحتمالية",
         "recommendations": "التوصيات",
         "notes": "ملاحظات",
         "medical_file_number": "رقم الملف الطبي",
-        "action_status": "حالة الإجراء"
+        "action_status": "حالة الإجراء",
+        "event_discovery_method": "طريقة اكتشاف الحدث",
+        "medication_stage_of_error": "مرحلة خطأ الدواء",
+        "medication_merp_category": "فئة MERP للدواء"
       }
     },
     "new": {
@@ -272,7 +308,9 @@
       "select_classification": "اختر التصنيف",
       "select_event_type": "اختر نوع الحدث",
       "select_severity": "اختر الخطورة",
-      "occurrence_location_telehealth": "الرعاية الصحية عن بعد / عن بعد",
+      "select_probability_optional": "اختر الاحتمالية (اختياري)",
+      "probability_hint": "تقييم مبدئي — يمكن لمسؤول الجودة المراجعة لاحقاً",
+      "occurrence_location_telehealth": "الرعاية الصحية عن بُعد",
       "stored_encrypted": "مخزن مشفر",
       "error_facility_type_required": "نوع المنشأة مطلوب",
       "error_reporter_role_required": "دور المُبلغ مطلوب",
@@ -284,7 +322,14 @@
       "error_severity_required": "الخطورة مطلوبة",
       "error_submit": "فشل تقديم الحادث.",
       "success_submit": "تم تقديم الحادث بنجاح.",
-      "submit": "تقديم الحادث"
+      "submit": "تقديم الحادث",
+      "event_discovery_method_label": "طريقة اكتشاف الحدث",
+      "medication_safety_subtitle": "تفاصيل سلامة الدواء",
+      "medication_stage_label": "مرحلة الخطأ",
+      "merp_category_label": "تصنيف NCC MERP",
+      "select_discovery_method_optional": "اختر طريقة الاكتشاف (اختياري)",
+      "select_merp_optional": "اختر الفئة (اختياري)",
+      "select_stage_optional": "اختر المرحلة (اختياري)"
     },
     "status": {
       "label": "الحالة",
@@ -300,13 +345,15 @@
       "label": "الخطورة",
       "minor": "طفيف",
       "moderate": "متوسط",
-      "major": "كبير"
+      "major": "كبير",
+      "catastrophic": "كارثي"
     },
     "probability": {
       "label": "الاحتمالية",
-      "low": "منخفض",
-      "medium": "متوسط",
-      "high": "مرتفع"
+      "frequent": "متكرر",
+      "occasional": "عرضي",
+      "uncommon": "نادر نسبياً",
+      "remote": "نادر جداً"
     },
     "risk": {
       "label": "المخاطر",
@@ -317,10 +364,9 @@
       "high_risk": "مخاطر عالية",
       "medium_risk": "مخاطر متوسطة",
       "low_risk": "مخاطر منخفضة",
-      "critical": "حرج",
-      "high": "عالي",
-      "medium": "متوسط",
-      "low": "منخفض",
+      "sac3_critical": "حرج",
+      "sac2_intermediate": "متوسط",
+      "sac1_low": "منخفض",
       "score_critical": "{{score}} · حرج",
       "score_high": "{{score}} · عالي",
       "score_medium": "{{score}} · متوسط",
@@ -339,17 +385,83 @@
     "classification": {
       "label": "تصنيف الخطأ",
       "column_label": "التصنيف",
-      "medication": "دواء",
-      "administrative": "إداري",
-      "clinical": "سريري",
-      "equipment": "معدات",
-      "infection_control": "مكافحة العدوى",
-      "falls": "سقوط",
-      "documentation": "توثيق",
-      "behavior": "سلوك"
+      "patientsafety": "سلامة المريض",
+      "medicationsafety": "سلامة الدواء",
+      "infectionprevention": "الوقاية من العدوى ومكافحتها",
+      "bloodtransfusion": "نقل الدم",
+      "laboratory": "المختبر",
+      "radiologydiagnostic": "الأشعة والتشخيص",
+      "medicalequipment": "المعدات الطبية",
+      "facilityenvironmental": "السلامة البيئية والمنشآت",
+      "occupationalhealthstaff": "الصحة المهنية وسلامة الموظفين",
+      "security": "الأمن",
+      "informationtechnology": "تكنولوجيا المعلومات",
+      "administrativeprocess": "العمليات الإدارية",
+      "patientexperiencecomplaints": "تجربة المريض والشكاوى",
+      "firedisaster": "الحريق والكوارث"
+    },
+    "reporter_role": {
+      "nurse": "ممرض / ممرضة",
+      "physician": "طبيب",
+      "pharmacist": "صيدلاني",
+      "lab_technician": "فني مختبر",
+      "radiology_technician": "فني أشعة",
+      "administrative_staff": "موظف إداري",
+      "other": "أخرى"
+    },
+    "discovery_method": {
+      "selfreported": "إبلاغ ذاتي",
+      "supervisorreported": "إبلاغ من المشرف",
+      "patientcomplaint": "شكوى مريض",
+      "auditfinding": "نتيجة تدقيق",
+      "incidentinvestigation": "تحقيق في الحادث",
+      "other": "أخرى"
+    },
+    "medication_stage": {
+      "prescribing": "الوصف الطبي",
+      "transcribing": "النسخ والطلب",
+      "dispensing": "الصرف",
+      "preparation": "التحضير",
+      "administration": "الإعطاء",
+      "monitoring": "المراقبة"
+    },
+    "merp_category": {
+      "a": "أ — ظروف قد تؤدي إلى خطأ (لم يقع أي خطأ)",
+      "b": "ب — وقع خطأ لم يصل إلى المريض",
+      "c": "ج — وصل الخطأ إلى المريض دون ضرر",
+      "d": "د — وصل الخطأ وتطلّب مراقبة لتأكيد عدم الضرر",
+      "e": "هـ — ضرر مؤقت يستلزم تدخلاً",
+      "f": "و — ضرر مؤقت أدى إلى دخول أو إطالة الإقامة",
+      "g": "ز — ضرر دائم للمريض",
+      "h": "ح — تدخل منقذ للحياة",
+      "i": "ط — وفاة المريض"
+    },
+    "occurrence_location": {
+      "emergency_room": "غرفة الطوارئ",
+      "icu": "وحدة العناية المركزة",
+      "operating_room": "غرفة العمليات",
+      "recovery_room": "غرفة الإفاقة",
+      "inpatient_ward": "جناح المرضى الداخليين",
+      "outpatient_clinic": "العيادة الخارجية",
+      "radiology": "قسم الأشعة",
+      "laboratory": "المختبر",
+      "pharmacy": "الصيدلية",
+      "maternity_ward": "جناح الأمومة",
+      "pediatric_ward": "جناح الأطفال",
+      "cardiac_care": "وحدة الرعاية القلبية",
+      "corridor": "الممر / المنطقة المشتركة",
+      "examination_room": "غرفة الفحص",
+      "treatment_room": "غرفة العلاج",
+      "waiting_area": "منطقة الانتظار",
+      "reception": "الاستقبال",
+      "nursing_station": "محطة التمريض",
+      "patient_room": "غرفة المريض",
+      "procedure_room": "غرفة الإجراءات",
+      "administrative_area": "المنطقة الإدارية",
+      "telehealth_remote": "الرعاية الصحية عن بُعد"
     },
     "action": {
-      "panel_title": "CAPA",
+      "panel_title": "الإجراءات التصحيحية والوقائية",
       "corrective_action": "إجراء تصحيحي",
       "preventive_action": "إجراء وقائي",
       "action_date": "تاريخ الإجراء",
@@ -358,7 +470,7 @@
       "status_pending": "معلق",
       "status_in_progress": "قيد التقدم",
       "status_completed": "مكتمل",
-      "error_save": "فشل حفظ CAPA."
+      "error_save": "فشل حفظ الإجراءات التصحيحية والوقائية."
     },
     "ai": {
       "panel_title": "شارة الذكاء الاصطناعي",
@@ -376,10 +488,15 @@
       "applied_notice": "تم تطبيق تصنيف الذكاء الاصطناعي: {{classification}} — بانتظار مراجعة مسؤول الجودة.",
       "error_save_feedback": "فشل حفظ ملاحظات الذكاء الاصطناعي."
     },
-    "jci": {
-      "panel_title": "JCI والإفصاح",
+    "final": {
+      "panel_title": "التقرير النهائي",
+      "submit": "إرسال",
+      "error_submit": "فشل إرسال التقرير النهائي."
+    },
+    "gahar": {
+      "panel_title": "امتثال GAHAR والإفصاح",
       "disclosure_info_title": "معلومات الإفصاح",
-      "compliance_title": "الامتثال لمعايير JCI",
+      "compliance_title": "الامتثال لمعايير GAHAR",
       "disclosure_fields": {
         "disclosure_date": "تاريخ الإفصاح",
         "disclosure_method": "طريقة الإفصاح",
@@ -389,46 +506,96 @@
         "workplace_violence": "العنف في مكان العمل",
         "merp_category": "فئة MERP"
       },
-      "chapter_label": "فصل JCI",
+      "section_label": "قسم GAHAR",
+      "select_section": "— اختر القسم —",
       "compliance_status_label": "حالة الامتثال",
-      "select_chapter": "— اختر الفصل —",
       "select_status": "— اختر الحالة —",
-      "standard_label": "المعيار",
-      "standard_placeholder": "مثال: IPSG.1",
-      "measurable_element_label": "العنصر القابل للقياس",
-      "measurable_element_placeholder": "مثال: ME 1",
+      "gsr_code_label": "رمز GSR",
+      "gsr_code_placeholder": "مثال: GSR.01",
+      "standard_code_label": "رمز المعيار",
+      "standard_code_placeholder": "مثال: ACT.03",
       "evidence_label": "الأدلة",
       "gap_analysis_label": "تحليل الفجوات",
       "action_plan_label": "خطة العمل",
-      "save_jci": "حفظ JCI",
-      "error_save": "فشل حفظ حقول JCI.",
-      "chapters": {
-        "ipsg": "IPSG",
-        "acc": "ACC",
-        "pfr": "PFR",
-        "aop": "AOP",
-        "cop": "COP",
-        "asc": "ASC",
-        "mmu": "MMU",
-        "pfe": "PFE",
-        "qps": "QPS",
-        "pci": "PCI",
-        "gld": "GLD",
-        "fms": "FMS",
-        "sqe": "SQE",
-        "mci": "MCI"
+      "save_gahar": "حفظ GAHAR",
+      "error_save": "فشل حفظ حقول GAHAR.",
+      "sections": {
+        "pcc": "ثقافة التمحور حول المريض",
+        "act": "الوصول والاستمرارية والانتقال",
+        "icd": "تقديم الرعاية المتكاملة",
+        "css": "الخدمات الحرجة والخاصة",
+        "das": "الخدمات التشخيصية والمساندة",
+        "sas": "الجراحة والتخدير والتخدير الخفيف",
+        "mms": "إدارة سلامة الأدوية",
+        "efs": "سلامة البيئة والمنشآت",
+        "ipc": "الوقاية من العدوى ومكافحتها",
+        "ogm": "حوكمة المنظمة وإدارتها",
+        "cai": "تقييم المجتمع والمشاركة فيه",
+        "wfm": "إدارة القوى العاملة",
+        "imt": "إدارة المعلومات والتكنولوجيا",
+        "qpi": "الجودة وتحسين الأداء"
       },
       "compliance_statuses": {
         "met": "متحقق",
         "partially_met": "متحقق جزئيًا",
         "not_met": "غير متحقق",
         "not_applicable": "غير قابل للتطبيق"
+      },
+      "disclosure_methods": {
+        "verbal": "شفهي",
+        "written": "كتابي",
+        "not_yet": "لم يتم الإفصاح بعد"
+      },
+      "vulnerable_types": {
+        "pediatric": "الأطفال",
+        "elderly": "كبار السن",
+        "mental_health": "الصحة النفسية",
+        "end_of_life": "نهاية الحياة",
+        "other": "أخرى"
+      },
+      "save_button": "حفظ GAHAR",
+      "saving": "جارٍ الحفظ…",
+      "locked_message": "بيانات امتثال GAHAR مقيدة لمسؤولي الجودة والإدارة العليا.",
+      "fields": {
+        "section": "قسم GAHAR",
+        "gsr_code": "رمز GSR",
+        "standard_code": "رمز المعيار",
+        "compliance_status": "حالة الامتثال",
+        "evidence": "الأدلة",
+        "gap_analysis": "تحليل الفجوات",
+        "action_plan": "خطة العمل",
+        "disclosure_date": "تاريخ الإفصاح",
+        "disclosure_method": "طريقة الإفصاح",
+        "responsible_person": "الشخص المسؤول",
+        "vulnerable_patient": "مريض ضعيف",
+        "vulnerable_population_type": "نوع الفئات الضعيفة",
+        "workplace_violence": "العنف في مكان العمل",
+        "merp_category": "فئة MERP"
       }
     },
-    "final": {
-      "panel_title": "التقرير النهائي",
-      "submit": "إرسال",
-      "error_submit": "فشل إرسال التقرير النهائي."
+    "public_reports": {
+      "page_heading": "سجل شفاف لحوادث سلامة المرضى",
+      "category_breakdown_title": "توزيع الحوادث حسب التصنيف",
+      "filtered_badge": "✓ مُصفَّى",
+      "data_note": "* الأرقام تعكس البيانات الفعلية المُبلَّغ عنها",
+      "principles": {
+        "confidentiality_title": "سرية تامة",
+        "confidentiality_desc": "لا تُكشف هوية المُبلِّغ أبدًا",
+        "fast_response_title": "استجابة سريعة",
+        "fast_response_desc": "متابعة خلال 24 ساعة",
+        "actionable_data_title": "بيانات قابلة للتحليل",
+        "actionable_data_desc": "لتحديد الأنماط ومنع التكرار"
+      },
+      "categories": {
+        "medication_errors": "أخطاء الدواء",
+        "clinical_errors": "أخطاء سريرية",
+        "administrative": "إدارية",
+        "equipment": "المعدات",
+        "hospital_infection": "عدوى المستشفى",
+        "patient_falls": "سقوط المرضى",
+        "documentation_errors": "أخطاء التوثيق",
+        "behavioral": "سلوكية"
+      }
     }
   },
   "analytics": {
@@ -452,7 +619,7 @@
       "no_data": "لا توجد بيانات متاحة لهذا البعد."
     },
     "filters": {
-      "title": "فلاتر لوحة القيادة",
+      "title": "فلاتر لوحة التحكم",
       "active_count": "{{count}} نشط",
       "updating": "جارٍ التحديث…",
       "clear_all": "✕ مسح الكل",
@@ -466,6 +633,21 @@
   },
   "patient": {
     "report": {
+         "page_title": "الإبلاغ عن حادث",
+      "page_subtitle": "أبلغ عن حادث بشكل مجهول دون الحاجة إلى تسجيل الدخول",
+      "section_when_where": "متى وأين؟",
+      "section_about_you": "معلومات المُبلِّغ",
+      "description_hint": "صِف ما حدث بأكبر قدر من التفاصيل — كل معلومة مفيدة",
+      "description_placeholder": "اكتب وصفاً تفصيلياً للحادث...",
+      "date_hint": "اختياري — اترك فارغاً إذا لم تكن متأكداً",
+      "time_hint": "اختياري",
+      "divider_location": "موقع الحادث",
+      "location_placeholder": "مثال: غرفة الطوارئ، الجناح الثالث...",
+      "location_hint": "صِف المكان الذي وقع فيه الحادث (اختياري)",
+      "reporter_role_required": "دور المُبلغ مطلوب",
+      "reporter_role_hint": "اختر صفتك فيما يخص هذا الحادث",
+      "medical_file_placeholder": "رقم الملف الطبي (اختياري)",
+
       "facility_fallback": "منشأة الإبلاغ",
       "invalid_link": "رابط إبلاغ غير صالح.",
       "link_not_recognised": "رابط الإبلاغ غير معروف.",
@@ -517,7 +699,8 @@
       "loading_facilities": "جارٍ تحميل المنشآت…",
       "loading_location_options": "جارٍ تحميل خيارات الموقع…",
       "facility_data_error": "فشل تحميل بيانات المنشأة. تحقق من اتصالك أو أذوناتك.",
-      "id_label": "المعرف:"
+      "id_label": "المعرف:",
+      "exporting": "جارٍ التصدير…"
     },
     "facility_provision": {
       "section_title": "توفير بيانات اعتماد المنشأة",
@@ -586,15 +769,15 @@
         }
       },
       "evaluating": {
-        "description": "يتم تعيين مصفوفة المخاطر وصياغة CAPA.",
+        "description": "يتم تعيين مصفوفة المخاطر وصياغة الإجراءات التصحيحية والوقائية.",
         "actions": {
           "assessments": "يتم تقييم الخطورة والاحتمالية.",
           "risk_documented": "يتم توثيق درجة المخاطرة ومستوى الأولوية.",
-"capa_draft": "يتم إعداد مسودة الإجراءات التصحيحية والوقائية (CAPA)."
+          "capa_draft": "يتم إعداد مسودة الإجراءات التصحيحية والوقائية."
         }
       },
       "action_taken": {
-        "description": "يتم تنفيذ CAPA بواسطة المنشأة.",
+        "description": "يتم تنفيذ الإجراءات التصحيحية والوقائية بواسطة المنشأة.",
         "actions": {
           "actions_executed": "يتم تنفيذ الإجراءات المعتمدة من قبل الفرق المسؤولة.",
           "evidence_collected": "يتم جمع أدلة التنفيذ.",
@@ -614,7 +797,7 @@
         "actions": {
           "clarification_request": "يتم إرسال طلب توضيح إلى المُبلغ أو الفريق المسؤول.",
           "missing_evidence": "يتم جمع الأدلة أو السياق المفقود.",
-          "loop_back": "تعود الحالة إلى التقييم للتسجيل النهائي وتحسين CAPA."
+          "loop_back": "تعود الحالة إلى التقييم للتسجيل النهائي وتحسين الإجراءات التصحيحية والوقائية."
         }
       }
     }

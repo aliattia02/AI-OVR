@@ -1,9 +1,15 @@
-"""Import facilities CSV into MongoDB with upsert behavior.
+"""Import facilities CSV into MongoDB.
 
-Supports the original Arabic-only CSV as well as the updated CSV that includes
-English name columns (Facility_Type_EN, Administration_EN, Facility_Name_EN).
-The English fields are written via $set so existing documents are updated in-place
-without touching patient_link_uuid or created_at.
+Supports the updated CSV that includes English name columns
+(Facility_Type_EN, Administration_EN, Facility_Name_EN).
+
+Usage
+-----
+Normal upsert (safe for production — preserves patient_link_uuid and created_at):
+    python import_facilities.py path/to/Facilities_fixed.csv
+
+Drop and re-import (use when you want a clean slate, e.g. during development):
+    python import_facilities.py path/to/Facilities_fixed.csv --drop
 """
 
 from __future__ import annotations
@@ -50,7 +56,12 @@ def _pick(row: dict[str, str], keys: tuple[str, ...]) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Import facilities from CSV.")
-    parser.add_argument("csv_path", help="Absolute or relative path to Facilities.csv")
+    parser.add_argument("csv_path", help="Absolute or relative path to Facilities_fixed.csv")
+    parser.add_argument(
+        "--drop",
+        action="store_true",
+        help="Drop the facilities collection before importing (development only).",
+    )
     args = parser.parse_args()
 
     csv_path = Path(args.csv_path)
@@ -68,38 +79,42 @@ def main() -> None:
 
     with MongoClient(mongo_url) as client:
         facilities = client[db_name]["facilities"]
+
+        if args.drop:
+            facilities.drop()
+            print("⚠️  Dropped existing facilities collection.")
+
         with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
             reader = csv.DictReader(handle)
             for row in reader:
-                governorate = _pick(row, ("governorate", "المحافظة"))
+                governorate   = _pick(row, ("governorate", "المحافظة"))
                 administration = _pick(row, ("administration", "الإدارة", "الادارة"))
-                facility_name = _pick(row, ("facility_name", "facility", "اسم المنشأة", "اسم المنشاه"))
-                facility_type = _normalise_facility_type(
+                facility_name  = _pick(row, ("facility_name", "facility", "اسم المنشأة", "اسم المنشاه"))
+                facility_type  = _normalise_facility_type(
                     _pick(row, ("facility_type", "type", "نوع المنشأة", "نوع المنشاه"))
                 )
 
-                # English name columns (present in updated CSV, blank-safe)
-                facility_type_en = _pick(row, ("facility_type_en",))
-                administration_en = _pick(row, ("administration_en",))
-                facility_name_en = _pick(row, ("facility_name_en",))
+                # English name columns
+                facility_type_en   = _pick(row, ("facility_type_en",))
+                administration_en  = _pick(row, ("administration_en",))
+                facility_name_en   = _pick(row, ("facility_name_en",))
 
                 if not governorate or not facility_name:
                     continue
 
                 set_fields: dict = {
-                    "governorate": governorate,
+                    "governorate":    governorate,
                     "administration": administration,
-                    "facility_name": facility_name,
-                    "facility_type": facility_type,
+                    "facility_name":  facility_name,
+                    "facility_type":  facility_type,
                 }
 
-                # Only write EN fields when the CSV actually provides them
                 if facility_type_en:
-                    set_fields["facility_type_en"] = facility_type_en
+                    set_fields["facility_type_en"]  = facility_type_en
                 if administration_en:
                     set_fields["administration_en"] = administration_en
                 if facility_name_en:
-                    set_fields["facility_name_en"] = facility_name_en
+                    set_fields["facility_name_en"]  = facility_name_en
 
                 result = facilities.update_one(
                     {"governorate": governorate, "facility_name": facility_name},
@@ -118,8 +133,8 @@ def main() -> None:
                 elif result.modified_count:
                     updated_count += 1
 
-    print(f"New documents inserted : {upserted_count}")
-    print(f"Existing documents updated: {updated_count}")
+    print(f"✅ New documents inserted : {upserted_count}")
+    print(f"✅ Existing documents updated: {updated_count}")
 
 
 if __name__ == "__main__":

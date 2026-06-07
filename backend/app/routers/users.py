@@ -59,16 +59,79 @@ class TierUserResult(BaseModel):
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def _slugify(value: str) -> str:
-    """Strip characters that are unsafe in usernames/email local-parts.
+# ---------------------------------------------------------------------------
+# Abbreviation table — multi-word compound phrases first (longest match wins),
+# single-word fallbacks second.  Both are applied case-insensitively so the
+# source data's capitalisation doesn't matter.
+# ---------------------------------------------------------------------------
+_ABBREV_PHRASES: list[tuple[str, str]] = [
+    # ── Compound phrases ────────────────────────────────────────────────────
+    (r"\bFamily\s+Medicine\s+Center\b",  "FMC"),
+    (r"\bFamily\s+Medicine\s+Unit\b",    "FMU"),
+    (r"\bFamily\s+Medicine\b",           "FM"),
+    (r"\bCentral\s+Hospital\b",          "CH"),
+    (r"\bGeneral\s+Hospital\b",          "GH"),
+    (r"\bSpecialized\s+Hospital\b",      "SH"),
+    (r"\bDistrict\s+Hospital\b",         "DH"),
+    (r"\bMedical\s+Complex\b",           "MC"),
+    (r"\bMaternity\s+and\s+Childhood\b", "MCH"),
+    (r"\bInternational\s+Hospital\b",    "IH"),
+    (r"\bOphthalmology\s+Hospital\b",    "OH"),
+    (r"\bHealth\s+Center\b",             "HC"),
+    (r"\bHealth\s+Unit\b",               "HU"),
+    (r"\bHealth\s+Insurance\b",          "HI"),
+    # ── Single-word fallbacks ────────────────────────────────────────────────
+    (r"\bHospital\b",        "Hosp"),
+    (r"\bCentral\b",         "Ctrl"),
+    (r"\bGeneral\b",         "Gen"),
+    (r"\bSpecialized\b",     "Spec"),
+    (r"\bDistrict\b",        "Dist"),
+    (r"\bMedical\b",         "Med"),
+    (r"\bComplex\b",         "Cplx"),
+    (r"\bInternational\b",   "Intl"),
+    (r"\bOphthalmology\b",   "Ophth"),
+    (r"\bRehabilitation\b",  "Rehab"),
+    (r"\bRheumatology\b",    "Rheum"),
+    (r"\bEmergency\b",       "Emrg"),
+    (r"\bSurgery\b",         "Surg"),
+    (r"\bMaternity\b",       "Mat"),
+    (r"\bChildhood\b",       "Chld"),
+    (r"\bCenter\b",          "Ctr"),
+    (r"\bInsurance\b",       "Ins"),
+    (r"\band\b",             ""),    # strip bare connector
+]
 
-    Keeps alphanumeric characters and underscores; replaces spaces and hyphens
-    with underscores; removes everything else.
+_COMPILED_ABBREVS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(pat, re.IGNORECASE), repl)
+    for pat, repl in _ABBREV_PHRASES
+]
+
+
+def _abbreviate(value: str) -> str:
+    """Apply standard abbreviations to common words in facility names.
+
+    Compound phrases (e.g. "Central Hospital" → "CH") are evaluated before
+    single-word fallbacks so a matched phrase is never double-abbreviated.
+    The bare connector "and" is removed; multiple spaces are then collapsed.
     """
-    value = value.strip()
+    for pattern, replacement in _COMPILED_ABBREVS:
+        value = pattern.sub(replacement, value)
+    return re.sub(r"\s{2,}", " ", value).strip()
+
+
+def _slugify(value: str) -> str:
+    """Abbreviate, slugify, and lowercase a facility name for use in usernames/emails.
+
+    Steps:
+      1. Apply abbreviations (``_abbreviate``) to shorten common words.
+      2. Replace spaces and hyphens with underscores.
+      3. Strip characters that are unsafe in username/email local-parts.
+      4. Lowercase the result so comparisons are case-insensitive by construction.
+    """
+    value = _abbreviate(value)
     value = re.sub(r"[\s\-]+", "_", value)
     value = re.sub(r"[^\w]", "", value)       # \w = [a-zA-Z0-9_]
-    return value
+    return value.lower()
 
 
 async def _resolve_actor_id(db: AsyncIOMotorDatabase, current_user: dict[str, Any]) -> str:
@@ -208,7 +271,11 @@ async def provision_facility_users(
         username = f"{name_slug}_{email_suffix}"
         email    = f"{username}@{EMAIL_DOMAIN}"
 
-        existing_user = await db["users"].find_one({"username": username})
+        # Username is always generated lowercase by _slugify; the regex option
+        # also catches any legacy mixed-case records from before this policy.
+        existing_user = await db["users"].find_one(
+            {"username": {"$regex": f"^{re.escape(username)}$", "$options": "i"}}
+        )
         if existing_user:
             results[result_key] = {
                 "username": username,
@@ -278,7 +345,14 @@ async def provision_tier_user(
             detail="Use POST /users/provision/facility/{facility_id} for facility-level roles",
         )
 
-    existing_user = await db["users"].find_one({"username": body.username})
+    # Normalise username to lowercase so comparisons are case-insensitive by
+    # construction.  The regex option also catches legacy mixed-case records.
+    username = body.username.strip().lower()
+    email    = body.email.strip().lower() if body.email else None
+
+    existing_user = await db["users"].find_one(
+        {"username": {"$regex": f"^{re.escape(username)}$", "$options": "i"}}
+    )
     if existing_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
 
@@ -305,9 +379,9 @@ async def provision_tier_user(
             {
                 "_id": str(uuid.uuid4()),
                 "user_id": app_user_id,       # required by auth.py login handler
-                "username": body.username,
+                "username": username,          # stored lowercase
                 "full_name": body.full_name,
-                "email": body.email,
+                "email": email,               # stored lowercase (or None)
                 "hashed_password": hash_password(temp_pw),
                 "role": body.role.value,
                 "tier": tier_int,             # UserInDB.tier is int
@@ -329,7 +403,7 @@ async def provision_tier_user(
         ) from exc
 
     return TierUserResult(
-        username=body.username,
+        username=username,
         role=body.role.value,
         temp_password=temp_pw,
         must_change_password=True,

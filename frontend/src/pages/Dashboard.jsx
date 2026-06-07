@@ -1,4 +1,4 @@
-import AnalyticsDashboard from '../components/analytics/AnalyticsDashboard';
+import IncidentReportsPage from '../pages/IncidentReportsPage';
 import { useAuth } from '../context/AuthContext';
 
 // Analytics endpoints require tier ≥ 3.  Staff (tier 1-2) must not trigger
@@ -35,7 +35,7 @@ export default function Dashboard() {
   return (
     <section style={{ display: 'grid', gap: 12 }}>
       <h1 style={{ margin: 0, color: '#111827' }}>Dashboard</h1>
-      {tier >= ANALYTICS_MIN_TIER ? <AnalyticsDashboard /> : <StaffWelcome />}
+      {tier >= ANALYTICS_MIN_TIER ? <IncidentReportsPage /> : <StaffWelcome />}
     </section>
   );
 }

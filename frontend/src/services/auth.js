@@ -49,7 +49,11 @@ export async function restoreSession() {
     setToken(accessToken);
     return await getMe();
   } catch (error) {
-    if (error?.response?.status !== 401 && typeof console !== 'undefined' && typeof console.warn === 'function') {
+    const status = error?.response?.status;
+    const isTimeout = error?.code === 'ECONNABORTED' || error?.code === 'ERR_NETWORK';
+    // 401 = no valid session (expected). Timeout/network = backend not ready.
+    // Both are silent; anything else is worth a warning.
+    if (status !== 401 && !isTimeout && typeof console?.warn === 'function') {
       console.warn('Session restore failed unexpectedly.', error);
     }
     setToken(null);

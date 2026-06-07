@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import os
 import secrets
 import string
@@ -53,8 +55,35 @@ def _unauthorized_exception() -> HTTPException:
     )
 
 
+# ── Refresh-token hashing ─────────────────────────────────────────────────────
+#
+# Refresh tokens are long, randomly-generated JWTs — not user-chosen passwords.
+# bcrypt is deliberately slow and truncates input at 72 bytes, making it both
+# a performance bottleneck and a correctness hazard for token storage.
+# HMAC-SHA256 keyed with JWT_SECRET is cryptographically appropriate here:
+# it is fast (microseconds vs. hundreds of milliseconds for bcrypt), produces
+# a fixed-length digest, and provides the same collision-resistance guarantee
+# that matters for opaque token lookup.
+
+def _hash_refresh_token(token: str) -> str:
+    """Return a constant-time HMAC-SHA256 hex digest of a refresh token."""
+    return hmac.new(
+        JWT_SECRET.encode(),
+        token.encode(),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def _verify_refresh_token_hash(token: str, stored_hash: str) -> bool:
+    """Compare a refresh token against its stored HMAC digest in constant time."""
+    expected = _hash_refresh_token(token)
+    return hmac.compare_digest(expected, stored_hash)
+
+
+# ── Password hashing (bcrypt — correct for user passwords) ───────────────────
+
 def hash_password(plain: str) -> str:
-    """Hash a plain-text password (or token) using bcrypt."""
+    """Hash a plain-text password using bcrypt."""
     return pwd_context.hash(plain)
 
 
@@ -65,6 +94,8 @@ def verify_password(plain: str, hashed: str) -> bool:
     except (UnknownHashError, ValueError, TypeError):
         return False
 
+
+# ── Temp-password generators ──────────────────────────────────────────────────
 
 def generate_temporary_password(length: int = 12) -> str:
     """Generate a temporary password with mixed-case letters and digits."""
@@ -113,6 +144,8 @@ def build_login_response(access_token: str, user_doc: dict[str, Any]) -> dict[st
     }
 
 
+# ── JWT helpers ───────────────────────────────────────────────────────────────
+
 def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
     """Create a JWT access token containing user scope claims."""
     now = datetime.now(tz=timezone.utc)
@@ -136,7 +169,11 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = 
 
 
 def create_refresh_token(user_id: str) -> str:
-    """Create a refresh token for the given user."""
+    """Create a refresh token for the given user.
+
+    Every token includes a ``jti`` (JWT ID) UUID so that storage and lookup
+    use a targeted MongoDB positional query rather than a full-array scan.
+    """
     now = datetime.now(tz=timezone.utc)
     payload = {
         "user_id": user_id,
@@ -156,8 +193,13 @@ def decode_token(token: str) -> dict[str, Any]:
         raise _unauthorized_exception() from exc
 
 
+# ── User authentication ───────────────────────────────────────────────────────
+
 async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase) -> UserInDB | None:
     """Authenticate a user by email/password and update last_login on success."""
+    # Normalise to lowercase so login works regardless of how the user typed
+    # their email (e.g. "User@UHIC.OVR" == "user@uhic.ovr").
+    email = email.strip().lower()
     user_doc = await db["users"].find_one({"email": email})
     if not user_doc:
         return None
@@ -174,6 +216,8 @@ async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase)
     user_doc.pop("_id", None)
     return UserInDB.model_construct(**user_doc)
 
+
+# ── Password change ───────────────────────────────────────────────────────────
 
 async def change_user_password(
     user_id: str,
@@ -242,6 +286,8 @@ async def change_password(
     return {"message": "Password changed successfully"}
 
 
+# ── Current-user dependency ───────────────────────────────────────────────────
+
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncIOMotorDatabase = Depends(get_database),
@@ -265,16 +311,22 @@ async def get_current_user(
     return claims
 
 
+# ── Refresh-token storage (HMAC-SHA256, jti-indexed) ─────────────────────────
+
 async def store_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMotorDatabase) -> None:
-    """Store a hashed refresh token in the user's refresh_tokens array."""
+    """Store an HMAC-SHA256 digest of a refresh token in the user's refresh_tokens array.
+
+    Uses HMAC-SHA256 (not bcrypt) because refresh tokens are long random JWTs —
+    not user-chosen secrets — so the slow key-stretching of bcrypt is unnecessary
+    and its 72-byte truncation would silently weaken the hash.
+    """
     claims = decode_token(refresh_token)
     if claims.get("token_type") != "refresh" or claims.get("user_id") != user_id:
         raise _unauthorized_exception()
 
-    hashed_token = hash_password(refresh_token)
     token_entry = {
-        "jti": claims.get("jti"),
-        "token_hash": hashed_token,
+        "jti": claims["jti"],
+        "token_hash": _hash_refresh_token(refresh_token),
         "created_at": datetime.now(tz=timezone.utc),
     }
     await db["users"].update_one(
@@ -284,97 +336,82 @@ async def store_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMotor
 
 
 async def verify_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMotorDatabase) -> bool:
-    """Return True if the provided refresh token matches any stored hashed token."""
+    """Return True if the refresh token's HMAC digest matches the stored entry for its jti.
+
+    Lookup is O(1) via the jti index — no full-array scan, no per-entry bcrypt.
+    Tokens without a jti are rejected outright (all tokens issued by
+    create_refresh_token always carry a jti UUID).
+    """
     try:
         claims = decode_token(refresh_token)
     except HTTPException:
         return False
+
     if claims.get("token_type") != "refresh":
         return False
 
     token_jti = claims.get("jti")
-    if token_jti:
-        user_doc = await db["users"].find_one(
-            {"user_id": user_id, "refresh_tokens.jti": token_jti},
-            {"_id": 0, "refresh_tokens.$": 1},
-        )
-        if not user_doc:
-            return False
-        stored_tokens = user_doc.get("refresh_tokens", [])
-        if not stored_tokens:
-            return False
-        token_entry = stored_tokens[0]
-        if not isinstance(token_entry, dict):
-            return False
-        stored_hash = token_entry.get("token_hash")
-        return isinstance(stored_hash, str) and verify_password(refresh_token, stored_hash)
+    if not token_jti:
+        # Tokens issued by this service always have a jti.
+        # Reject anything that lacks one to avoid legacy slow-path attacks.
+        return False
 
-    user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 0, "refresh_tokens": 1})
+    user_doc = await db["users"].find_one(
+        {"user_id": user_id, "refresh_tokens.jti": token_jti},
+        {"_id": 0, "refresh_tokens.$": 1},
+    )
     if not user_doc:
         return False
-    for stored in user_doc.get("refresh_tokens", []):
-        if not isinstance(stored, dict):
-            continue
-        stored_hash = stored.get("token_hash")
-        if isinstance(stored_hash, str) and verify_password(refresh_token, stored_hash):
-            return True
-    return False
+
+    stored_tokens = user_doc.get("refresh_tokens", [])
+    if not stored_tokens or not isinstance(stored_tokens[0], dict):
+        return False
+
+    stored_hash = stored_tokens[0].get("token_hash")
+    return isinstance(stored_hash, str) and _verify_refresh_token_hash(refresh_token, stored_hash)
 
 
 async def invalidate_refresh_token(user_id: str, refresh_token: str, db: AsyncIOMotorDatabase) -> bool:
-    """Invalidate a refresh token by removing its matching hashed entry from storage."""
+    """Remove a refresh token's stored entry by jti after verifying its HMAC digest.
+
+    Uses the same jti-indexed lookup as verify_refresh_token — O(1), no scan.
+    """
     try:
         claims = decode_token(refresh_token)
     except HTTPException:
         return False
+
     if claims.get("token_type") != "refresh":
         return False
 
     token_jti = claims.get("jti")
-    if token_jti:
-        user_doc = await db["users"].find_one(
-            {"user_id": user_id, "refresh_tokens.jti": token_jti},
-            {"_id": 0, "refresh_tokens.$": 1},
-        )
-        if not user_doc:
-            return False
-        stored_tokens = user_doc.get("refresh_tokens", [])
-        if not stored_tokens:
-            return False
-        token_entry = stored_tokens[0]
-        if not isinstance(token_entry, dict):
-            return False
-        stored_hash = token_entry.get("token_hash")
-        if not isinstance(stored_hash, str) or not verify_password(refresh_token, stored_hash):
-            return False
-        result = await db["users"].update_one(
-            {"user_id": user_id},
-            {"$pull": {"refresh_tokens": {"jti": token_jti}}},
-        )
-        return result.modified_count > 0
+    if not token_jti:
+        return False
 
-    user_doc = await db["users"].find_one({"user_id": user_id}, {"_id": 0, "refresh_tokens": 1})
+    # Fetch and verify the stored hash before removing.
+    user_doc = await db["users"].find_one(
+        {"user_id": user_id, "refresh_tokens.jti": token_jti},
+        {"_id": 0, "refresh_tokens.$": 1},
+    )
     if not user_doc:
         return False
-    remaining: list[dict[str, Any]] = []
-    match_found = False
-    for stored in user_doc.get("refresh_tokens", []):
-        if not isinstance(stored, dict):
-            continue
-        stored_hash = stored.get("token_hash")
-        if isinstance(stored_hash, str) and verify_password(refresh_token, stored_hash):
-            match_found = True
-            continue
-        remaining.append(stored)
 
-    if not match_found:
+    stored_tokens = user_doc.get("refresh_tokens", [])
+    if not stored_tokens or not isinstance(stored_tokens[0], dict):
         return False
-    await db["users"].update_one(
-        {"user_id": user_id},
-        {"$set": {"refresh_tokens": remaining}},
-    )
-    return True
 
+    stored_hash = stored_tokens[0].get("token_hash")
+    if not isinstance(stored_hash, str) or not _verify_refresh_token_hash(refresh_token, stored_hash):
+        return False
+
+    result = await db["users"].update_one(
+        {"user_id": user_id},
+        {"$pull": {"refresh_tokens": {"jti": token_jti}}},
+    )
+    return result.modified_count > 0
+
+
+# ── MFA helpers ───────────────────────────────────────────────────────────────
 
 MFA_ISSUER = "eOVR"
 

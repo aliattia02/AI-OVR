@@ -7,12 +7,15 @@ from datetime import datetime, timezone
 from app.utils.enums import Probability, Severity, UserRole
 
 # ── Risk matrix ───────────────────────────────────────────────────────────────
-# Rows = Severity (Major, Moderate, Minor)
-# Cols = Probability (High, Medium, Low)
+# GAHAR SAC 4×4 matrix — scores 1–3 (matches frontend RiskMatrix.jsx)
+# Rows = Severity (Catastrophic → Minor)
+# Cols = Probability (Frequent → Remote)
+# SAC 3 = Critical  |  SAC 2 = Intermediate  |  SAC 1 = Low
 _RISK_MATRIX: dict[Severity, dict[Probability, int]] = {
-    Severity.Major:    {Probability.High: 9, Probability.Medium: 6, Probability.Low: 3},
-    Severity.Moderate: {Probability.High: 6, Probability.Medium: 4, Probability.Low: 2},
-    Severity.Minor:    {Probability.High: 3, Probability.Medium: 2, Probability.Low: 1},
+    Severity.Catastrophic: {Probability.Frequent: 3, Probability.Occasional: 3, Probability.Uncommon: 3, Probability.Remote: 3},
+    Severity.Major:        {Probability.Frequent: 3, Probability.Occasional: 2, Probability.Uncommon: 2, Probability.Remote: 2},
+    Severity.Moderate:     {Probability.Frequent: 2, Probability.Occasional: 1, Probability.Uncommon: 1, Probability.Remote: 1},
+    Severity.Minor:        {Probability.Frequent: 1, Probability.Occasional: 1, Probability.Uncommon: 1, Probability.Remote: 1},
 }
 
 
@@ -30,20 +33,23 @@ def generate_incident_id(count: int) -> str:
 
 
 def compute_risk_score(severity: Severity, probability: Probability) -> int:
-    """Look up the risk score for a given severity/probability combination.
+    """Look up the SAC risk score for a given severity/probability combination.
 
-    Uses a 3×3 matrix::
+    Uses the GAHAR SAC 4×4 matrix (scores 1–3, matching frontend RiskMatrix.jsx)::
 
-        Major/High=9,    Major/Medium=6,    Major/Low=3
-        Moderate/High=6, Moderate/Medium=4, Moderate/Low=2
-        Minor/High=3,    Minor/Medium=2,    Minor/Low=1
+        Catastrophic / Frequent=3, Occasional=3, Uncommon=3, Remote=3
+        Major        / Frequent=3, Occasional=2, Uncommon=2, Remote=2
+        Moderate     / Frequent=2, Occasional=1, Uncommon=1, Remote=1
+        Minor        / Frequent=1, Occasional=1, Uncommon=1, Remote=1
+
+    SAC 3 = Critical  |  SAC 2 = Intermediate  |  SAC 1 = Low
 
     Args:
-        severity:    Clinical severity of the incident.
-        probability: Likelihood of recurrence.
+        severity:    Clinical severity of the incident (GAHAR 4-level scale).
+        probability: Likelihood of recurrence (GAHAR 4-level scale).
 
     Returns:
-        Integer risk score in the range 1–9.
+        Integer SAC risk score in the range 1–3.
     """
     return _RISK_MATRIX[Severity(severity)][Probability(probability)]
 

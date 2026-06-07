@@ -79,7 +79,8 @@ function LanguageSwitcher() {
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate         = useNavigate();
-  const { t }            = useTranslation();
+  const { t, i18n }      = useTranslation();
+  const isRTL            = (i18n.resolvedLanguage || i18n.language || 'en').startsWith('ar');
   const [open, setOpen]  = useState(false);
   const menuRef          = useRef(null);
   const name             = displayName(user);
@@ -108,6 +109,7 @@ export default function Navbar() {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        flexDirection: isRTL ? "row-reverse" : "row",
         padding: "0 20px",
         flexShrink: 0,
         borderBottom: `1px solid ${C.navyMid}`,
@@ -196,7 +198,7 @@ export default function Navbar() {
               style={{
                 position: "absolute",
                 top: "calc(100% + 6px)",
-                right: 0,
+                ...(isRTL ? { left: 0 } : { right: 0 }),
                 minWidth: 200,
                 background: "#fff",
                 border: `1px solid ${C.g200}`,
@@ -206,7 +208,7 @@ export default function Navbar() {
                 animation: "eovr-dropdown-in 0.12s ease",
               }}
             >
-              <div style={{ padding: "12px 14px 10px", borderBottom: `1px solid ${C.g100}` }}>
+              <div style={{ padding: "12px 14px 10px", borderBottom: `1px solid ${C.g100}`, textAlign: isRTL ? "right" : "left" }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: C.navy }}>{name}</div>
                 {user?.email && (
                   <div style={{ fontSize: 12, color: C.g400, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -219,12 +221,14 @@ export default function Navbar() {
                   icon={<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1a3 3 0 100 6 3 3 0 000-6zM2 11.5C2 9.6 4.5 8 7.5 8s5.5 1.6 5.5 3.5V13h-11v-1.5z" fill="currentColor" /></svg>}
                   label={t("auth.change_password.title")}
                   onClick={handleChangePassword}
+                  isRTL={isRTL}
                 />
                 <DropdownItem
                   icon={<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M6 2H3a1 1 0 00-1 1v9a1 1 0 001 1h3M10 10l3-2.5L10 5M13 7.5H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                   label={t("nav.sign_out")}
                   onClick={handleSignOut}
                   danger
+                  isRTL={isRTL}
                 />
               </div>
             </div>
@@ -242,7 +246,7 @@ export default function Navbar() {
   );
 }
 
-function DropdownItem({ icon, label, onClick, danger = false }) {
+function DropdownItem({ icon, label, onClick, danger = false, isRTL = false }) {
   const [hovered, setHovered] = useState(false);
   const color   = danger ? "#DC2626" : "#1F2937";
   const hoverBg = danger ? "#FEF2F2" : "#F3F4F6";
@@ -253,11 +257,14 @@ function DropdownItem({ icon, label, onClick, danger = false }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         display: "flex", alignItems: "center", gap: 10,
+        flexDirection: isRTL ? "row-reverse" : "row",
         width: "100%", padding: "8px 14px",
         background: hovered ? hoverBg : "transparent",
         border: "none", cursor: "pointer",
         fontFamily: "inherit", fontSize: 13, fontWeight: 500,
-        color, textAlign: "left", transition: "background 0.1s",
+        color, textAlign: isRTL ? "right" : "left",
+        direction: isRTL ? "rtl" : "ltr",
+        transition: "background 0.1s",
       }}
     >
       <span style={{ color, opacity: 0.85, flexShrink: 0 }}>{icon}</span>

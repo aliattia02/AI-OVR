@@ -18,6 +18,9 @@ export function setToken(token) {
   _token = token;
   if (token) {
     _lastActivityAt = getNow();
+    // Reset the redirect flag so future 401s can trigger a redirect again
+    // (e.g. after a successful re-login following a session expiry).
+    _redirectingToLogin = false;
   }
   syncIdleTimer();
 }
@@ -133,6 +136,9 @@ async function triggerIdleLogout() {
 const api = axios.create({
   baseURL: '/api',
   withCredentials: true, // ensures the refresh cookie is sent automatically
+  // Prevent the spinner from hanging forever if the backend is unreachable
+  // or the DB hangs on a query (e.g. during startup / connection pool exhaustion).
+  timeout: 10_000,
 });
 
 api.interceptors.request.use((config) => {

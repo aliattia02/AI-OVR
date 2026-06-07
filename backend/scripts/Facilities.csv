@@ -1,349 +1,349 @@
 ﻿Governorate,Facility_Type,Administration,Facility_Name,Facility_Type_EN,Administration_EN,Facility_Name_EN
-Aswan,مركز,إدارة اسوان,ابو الريش بحري,Markaz,Idaret_Aswan,Abu_ElReesh_Bahri
-Aswan,مركز,إدارة كوم امبو,اقليت,Markaz,Idaret_Kom_Ombo,Eqleet
-Aswan,مركز,ادارة ادفو غرب,البصيلية بحرى,Markaz,Idaret_Edfu_Gharb,ElBaseeliya_Bahri
-Aswan,مركز,ادارة دراو,الحضرى دراو,Markaz,Idaret_Daraw,ElHadry_Daraw
-Aswan,مركز,ادارة نصر النوبة,الدكه,Markaz,Idaret_Nasr_ElNoba,ElDaka
-Aswan,مركز,إدارة اسوان,السيل,Markaz,Idaret_Aswan,ElSeil
-Aswan,مركز,ادارة ادفو غرب,الصعايده قبلي,Markaz,Idaret_Edfu_Gharb,ElSaaida_Qebli
-Aswan,مركز,ادارة ادفو شرق,المحاميد,Markaz,Idaret_Edfu_Shark,ElMahameed
-Aswan,مركز,إدارة كوم امبو,المنشية الجديدة,Markaz,Idaret_Kom_Ombo,ElMenshia_ElGedida
-Aswan,مركز,ادارة نصر النوبة,بلانه,Markaz,Idaret_Nasr_ElNoba,Belana
-Aswan,مركز,ادارة دراو,بنبان قبلى,Markaz,Idaret_Daraw,Benban_Qebly
-Aswan,مركز,ادارة ادفو غرب,حاجر البصيلية,Markaz,Idaret_Edfu_Gharb,Hager_ElBaseeliya
-Aswan,مركز,ادارة ادفو غرب,رعاية طفل ادفو,Markaz,Idaret_Edfu_Gharb,Reaya_Tefl_Edfu
-Aswan,مركز,إدارة كوم امبو,رعاية طفل كوم امبو,Markaz,Idaret_Kom_Ombo,Reaya_Tefl_Kom_Ombo
-Aswan,مركز,إدارة كوم امبو,سلو بحري,Markaz,Idaret_Kom_Ombo,Sulo_Bahri
-Aswan,مركز,إدارة اسوان,صحة اول,Markaz,Idaret_Aswan,Seha_Awal
-Aswan,مستشفى,ادارة نصر النوبة,مستشفى ابو سمبل الدولي,Mostashfa,Idaret_Nasr_ElNoba,Mostashfa_Abu_Simbel_ElDawly
-Aswan,مستشفى,ادارة ادفو غرب,مستشفى ادفو العام,Mostashfa,Idaret_Edfu_Gharb,Mostashfa_Edfu_ElAam
-Aswan,مستشفى,إدارة اسوان,مستشفى اسوان التخصصي,Mostashfa,Idaret_Aswan,Mostashfa_Aswan_ElTakhassosi
-Aswan,مستشفى,إدارة اسوان,مستشفى التامين الصحي,Mostashfa,Idaret_Aswan,Mostashfa_Eltamyn_ElSehy
-Aswan,مستشفى,ادارة ادفو غرب,مستشفى السباعيه,Mostashfa,Idaret_Edfu_Gharb,Mostashfa_ElSabaeyah
-Aswan,مستشفى,إدارة اسوان,مستشفى حميات اسوان,Mostashfa,Idaret_Aswan,Mostashfa_Hamiyat_Aswan
-Aswan,مستشفى,ادارة دراو,مستشفى دراو المركزي,Mostashfa,Idaret_Daraw,Mostashfa_Daraw_ElMarkazi
-Aswan,مستشفى,إدارة اسوان,مستشفى رمد اسوان,Mostashfa,Idaret_Aswan,Mostashfa_Ramd_Aswan
-Aswan,مستشفى,إدارة كوم امبو,مستشفى كوم امبو المركزي,Mostashfa,Idaret_Kom_Ombo,Mostashfa_Kom_Ombo_ElMarkazi
-Aswan,مستشفى,ادارة نصر النوبة,مستشفى نصر النوبه,Mostashfa,Idaret_Nasr_ElNoba,Mostashfa_Nasr_ElNoba
-Aswan,مستشفى,إدارة اسوان,معهد اورام اسوان,Mostashfa,Idaret_Aswan,Maahad_Awram_Aswan
-Aswan,وحدة,ادارة نصر النوبة,ابريم,Wehda,Idaret_Nasr_ElNoba,Abreem
-Aswan,وحدة,إدارة اسوان,ابو الريش قبلي,Wehda,Idaret_Aswan,Abu_ElReesh_Qebli
-Aswan,وحدة,ادارة نصر النوبة,ابو سمبل,Wehda,Idaret_Nasr_ElNoba,Abu_Simbel
-Aswan,وحدة,إدارة اسوان,ابوسمبل,Wehda,Idaret_Aswan,AbuSimbel
-Aswan,وحدة,ادارة نصر النوبة,ادندان,Wehda,Idaret_Nasr_ElNoba,Adandan
-Aswan,وحدة,إدارة اسوان,اسوان الجديدة,Wehda,Idaret_Aswan,Aswan_ElGedida
-Aswan,وحدة,ادارة ادفو غرب,الاخصاص,Wehda,Idaret_Edfu_Gharb,ElAkhsas
-Aswan,وحدة,إدارة كوم امبو,الاسماعيلية,Wehda,Idaret_Kom_Ombo,ElIsmailia
-Aswan,وحدة,إدارة اسوان,الاعقاب الديسة,Wehda,Idaret_Aswan,ElAaqab_ElDeisa
-Aswan,وحدة,ادارة ادفو غرب,البصيلية قبلى,Wehda,Idaret_Edfu_Gharb,ElBaseeliya_Qebly
-Aswan,وحدة,إدارة كوم امبو,البياره,Wehda,Idaret_Kom_Ombo,ElBayara
-Aswan,وحدة,إدارة اسوان,الجزيرة,Wehda,Idaret_Aswan,ElGezira
-Aswan,وحدة,ادارة دراو,الجعافرة,Wehda,Idaret_Daraw,ElGaafara
-Aswan,وحدة,ادارة دراو,الحربياب,Wehda,Idaret_Daraw,ElHarbiab
-Aswan,وحدة,ادارة نصر النوبة,الحضري نصر النوبة,Wehda,Idaret_Nasr_ElNoba,ElHadry_Nasr_ElNoba
-Aswan,وحدة,ادارة نصر النوبة,الحكمه,Wehda,Idaret_Nasr_ElNoba,ElHekma
-Aswan,وحدة,إدارة اسوان,الخزان غرب,Wehda,Idaret_Aswan,ElKhazan_Gharb
-Aswan,وحدة,إدارة كوم امبو,الخور قبلي,Wehda,Idaret_Kom_Ombo,ElKhour_Qebli
-Aswan,وحدة,ادارة نصر النوبة,الدر و تنقالة,Wehda,Idaret_Nasr_ElNoba,ElDar_Wa_Tanqala
-Aswan,وحدة,ادارة ادفو شرق,الدقاديق,Wehda,Idaret_Edfu_Shark,ElDaqadaq
-Aswan,وحدة,ادارة ادفو شرق,الرديسية,Wehda,Idaret_Edfu_Shark,Elrdysya
-Aswan,وحدة,ادارة دراو,الرقبه,Wehda,Idaret_Daraw,ElRaqaba
-Aswan,وحدة,ادارة ادفو غرب,الرقيقيين,Wehda,Idaret_Edfu_Gharb,ElRaqiqeen
-Aswan,وحدة,ادارة ادفو غرب,الرمادي بحري,Wehda,Idaret_Edfu_Gharb,Elrmady_Bahri
-Aswan,وحدة,ادارة ادفو غرب,الرمادي قبلي,Wehda,Idaret_Edfu_Gharb,Elrmady_Qebli
-Aswan,وحدة,ادارة ادفو غرب,السباعية,Wehda,Idaret_Edfu_Gharb,ElSabaeyah
-Aswan,وحدة,إدارة اسوان,السد العالى,Wehda,Idaret_Aswan,ElSadd_ElAaly
-Aswan,وحدة,إدارة كوم امبو,السلسلة,Wehda,Idaret_Kom_Ombo,ElSelsela
-Aswan,وحدة,ادارة ادفو شرق,الشراونة قبلي,Wehda,Idaret_Edfu_Shark,Elshrawna_Qebli
-Aswan,وحدة,ادارة ادفو غرب,الشرفا,Wehda,Idaret_Edfu_Gharb,ElSharfa
-Aswan,وحدة,ادارة دراو,الشطب,Wehda,Idaret_Daraw,ElShatb
-Aswan,وحدة,إدارة اسوان,الشلال,Wehda,Idaret_Aswan,ElShalal
-Aswan,وحدة,ادارة ادفو غرب,الشهامة,Wehda,Idaret_Edfu_Gharb,ElShahama
-Aswan,وحدة,ادارة دراو,الشيخ ابراهيم,Wehda,Idaret_Daraw,ElSheikh_Ibrahim
-Aswan,وحدة,ادارة ادفو شرق,الشيخ على,Wehda,Idaret_Edfu_Shark,ElSheikh_Ala
-Aswan,وحدة,ادارة ادفو شرق,الشيخ مصطفي,Wehda,Idaret_Edfu_Shark,ElSheikh_Mostafa
-Aswan,وحدة,إدارة اسوان,الصداقة الجديدة,Wehda,Idaret_Aswan,ElSadaqa_ElGedida
-Aswan,وحدة,ادارة ادفو شرق,الطوناب,Wehda,Idaret_Edfu_Shark,ElTounab
-Aswan,وحدة,إدارة كوم امبو,العباسية,Wehda,Idaret_Kom_Ombo,ElAbasiya
-Aswan,وحدة,إدارة كوم امبو,العتم ور قبلى,Wehda,Idaret_Kom_Ombo,ElAtam_Wa_Qebly
-Aswan,وحدة,إدارة كوم امبو,العتمور المستجد,Wehda,Idaret_Kom_Ombo,ElAtamur_ElMostaged
-Aswan,وحدة,إدارة كوم امبو,العدوه,Wehda,Idaret_Kom_Ombo,ElAdawa
-Aswan,وحدة,ادارة ادفو شرق,العطواني,Wehda,Idaret_Edfu_Shark,ElAtawany
-Aswan,وحدة,ادارة ادفو غرب,العكارمية,Wehda,Idaret_Edfu_Gharb,ElAkarmia
-Aswan,وحدة,إدارة اسوان,العلاقي,Wehda,Idaret_Aswan,ElAlaqi
-Aswan,وحدة,ادارة نصر النوبة,العلاقي,Wehda,Idaret_Nasr_ElNoba,ElAlaqi
-Aswan,وحدة,إدارة كوم امبو,العليقات,Wehda,Idaret_Kom_Ombo,ElOlaiqat
-Aswan,وحدة,ادارة ادفو غرب,العوضلاب,Wehda,Idaret_Edfu_Gharb,ElAwdlab
-Aswan,وحدة,ادارة ادفو شرق,العوينية,Wehda,Idaret_Edfu_Shark,ElOwainiya
-Aswan,وحدة,ادارة ادفو غرب,الغنيمية,Wehda,Idaret_Edfu_Gharb,ElGhonaymia
-Aswan,وحدة,ادارة ادفو غرب,الغوالية,Wehda,Idaret_Edfu_Gharb,ElGhowaliya
-Aswan,وحدة,إدارة كوم امبو,الفوزة,Wehda,Idaret_Kom_Ombo,ElFouza
-Aswan,وحدة,ادارة دراو,القفطيه,Wehda,Idaret_Daraw,ElQaeftia
-Aswan,وحدة,إدارة كوم امبو,الكاجوج,Wehda,Idaret_Kom_Ombo,ElKagoug
-Aswan,وحدة,ادارة نصر النوبة,الكرامة,Wehda,Idaret_Nasr_ElNoba,ElKarama
-Aswan,وحدة,إدارة اسوان,الكرور,Wehda,Idaret_Aswan,ElKaror
-Aswan,وحدة,إدارة كوم امبو,الكفور,Wehda,Idaret_Kom_Ombo,ElKofour
-Aswan,وحدة,ادارة ادفو غرب,الكلح غرب,Wehda,Idaret_Edfu_Gharb,ElKalah_Gharb
-Aswan,وحدة,إدارة اسوان,الكوبانية,Wehda,Idaret_Aswan,ElKobaniya
-Aswan,وحدة,ادارة نصر النوبة,المالكي,Wehda,Idaret_Nasr_ElNoba,ElMaleki
-Aswan,وحدة,إدارة اسوان,المحمودية,Wehda,Idaret_Aswan,ElMahmoudiya
-Aswan,وحدة,ادارة ادفو غرب,المريناب,Wehda,Idaret_Edfu_Gharb,ElMarinab
-Aswan,وحدة,ادارة ادفو شرق,المفالسة,Wehda,Idaret_Edfu_Shark,ElMafalesa
-Aswan,وحدة,ادارة دراو,المنصورية بحرى,Wehda,Idaret_Daraw,Elmnswrya_Bahri
-Aswan,وحدة,ادارة ادفو شرق,النزل,Wehda,Idaret_Edfu_Shark,Elnzl
-Aswan,وحدة,ادارة ادفو غرب,الوقاداب,Wehda,Idaret_Edfu_Gharb,ElWaqadab
-Aswan,وحدة,ادارة نصر النوبة,توشكى غرب,Wehda,Idaret_Nasr_ElNoba,Toshky_Gharb
-Aswan,وحدة,إدارة اسوان,جزيرة اسوان,Wehda,Idaret_Aswan,Gezira_Aswan
-Aswan,وحدة,إدارة اسوان,جزيرة سهيل,Wehda,Idaret_Aswan,Gezira_Shyl
-Aswan,وحدة,إدارة كوم امبو,جعفر الصادق,Wehda,Idaret_Kom_Ombo,Gaafar_ElSadeq
-Aswan,وحدة,ادارة ادفو غرب,حاجر ابو خليفة,Wehda,Idaret_Edfu_Gharb,Hager_Abu_Khalifa
-Aswan,وحدة,ادارة ادفو غرب,حاجر البلاليص,Wehda,Idaret_Edfu_Gharb,Hager_ElBalelees
-Aswan,وحدة,إدارة كوم امبو,حجازه,Wehda,Idaret_Kom_Ombo,Hegaza
-Aswan,وحدة,ادارة نصر النوبة,خريت 1,Wehda,Idaret_Nasr_ElNoba,Khreet_1
-Aswan,وحدة,إدارة اسوان,خورعواضة الجديدة,Wehda,Idaret_Aswan,Khwr3wada_ElGedida
-Aswan,وحدة,ادارة نصر النوبة,دابود,Wehda,Idaret_Nasr_ElNoba,Daboud
-Aswan,وحدة,إدارة كوم امبو,سلوا قبلى,Wehda,Idaret_Kom_Ombo,Slwa_Qebly
-Aswan,وحدة,إدارة كوم امبو,عرب كيما,Wehda,Idaret_Kom_Ombo,Arab_Keema
-Aswan,وحدة,إدارة كوم امبو,عزبة العرب,Wehda,Idaret_Kom_Ombo,Ozba_ElArab
-Aswan,وحدة,ادارة ادفو غرب,عمرو بن العاص,Wehda,Idaret_Edfu_Gharb,Amr_Ibn_ElAas
-Aswan,وحدة,ادارة نصر النوبة,عنيبة,Wehda,Idaret_Nasr_ElNoba,Oneeba
-Aswan,وحدة,إدارة اسوان,غرب اسوان,Wehda,Idaret_Aswan,Gharb_Aswan
-Aswan,وحدة,إدارة كوم امبو,فارس 1,Wehda,Idaret_Kom_Ombo,Fares_1
-Aswan,وحدة,إدارة كوم امبو,فطيره,Wehda,Idaret_Kom_Ombo,Foteira
-Aswan,وحدة,ادارة نصر النوبة,قسطل,Wehda,Idaret_Nasr_ElNoba,Qastal
-Aswan,وحدة,ادارة نصر النوبة,قورتة ثالث,Wehda,Idaret_Nasr_ElNoba,Qourta_Taleta
-Aswan,وحدة,إدارة اسوان,كلابشة,Wehda,Idaret_Aswan,Kalabsha
-Aswan,وحدة,ادارة نصر النوبة,كلابشه,Wehda,Idaret_Nasr_ElNoba,Kalabsha
-Aswan,وحدة,إدارة اسوان,كيما,Wehda,Idaret_Aswan,Keema
-Aswan,وحدة,إدارة اسوان,منشية الخزان,Wehda,Idaret_Aswan,Menshia_ElKhazan
-Aswan,وحدة,إدارة كوم امبو,منشية الرغامه,Wehda,Idaret_Kom_Ombo,Menshia_Elrghamh
-Aswan,وحدة,إدارة كوم امبو,منيحة,Wehda,Idaret_Kom_Ombo,Muneha
-Aswan,وحدة,ادارة ادفو غرب,نجع هيكل,Wehda,Idaret_Edfu_Gharb,Nag_Hykl
-Aswan,وحدة,ادارة دراو,نجع ونس,Wehda,Idaret_Daraw,Nag_Wns
-Aswan,وحدة,إدارة اسوان,هيسا,Wehda,Idaret_Aswan,Heesa
-Aswan,وحدة,ادارة ادفو شرق,وادى عبادي,Wehda,Idaret_Edfu_Shark,Wady_Abadi
-Ismailia,مركز,إدارة القنطرة غرب,أبو خليفة,Markaz,Idaret_ElQantara_Gharb,Abu_Khalifa
-Ismailia,مركز,إدارة فايد,أبو سلطان,Markaz,Idaret_Fayed,Abu_Sultan
-Ismailia,مركز,إدارة أبو صوير,ابو صوير,Markaz,Idaret_Abu_Suweir,Abu_Suweir
-Ismailia,مركز,إدارة اسماعلية,اسرة الرحمة,Markaz,Idaret_Ismailia,Osra_ElRahma
-Ismailia,مركز,إدارة اسماعلية,الإسماعيلية الجديدة,Markaz,Idaret_Ismailia,ElIsmailia_ElGedida
-Ismailia,مركز,إدارة التل الكبير,التل الكبير,Markaz,Idaret_ElTal_ElKabir,ElTal_ElKabir
-Ismailia,مركز,إدارة اسماعلية,الشهداء,Markaz,Idaret_Ismailia,ElShohada
-Ismailia,مركز,إدارة اسماعلية,الشيخ زايد,Markaz,Idaret_Ismailia,ElSheikh_Zaied
-Ismailia,مركز,إدارة اسماعلية,العرايشة,Markaz,Idaret_Ismailia,ElAraisha
-Ismailia,مركز,إدارة القنطرة شرق,القنطرة شرق,Markaz,Idaret_ElQantara_Shark,ElQantara_Shark
-Ismailia,مركز,إدارة القنطرة غرب,القنطرة غرب,Markaz,Idaret_ElQantara_Gharb,ElQantara_Gharb
-Ismailia,مركز,إدارة القصاصين,المحسمة القديمة,Markaz,Idaret_ElQassasin,ElMahasma_ElQadima
-Ismailia,مركز,إدارة اسماعلية,المستقبل,Markaz,Idaret_Ismailia,ElMostaqbal
-Ismailia,مركز,إدارة أبو صوير,الواصفية,Markaz,Idaret_Abu_Suweir,ElWasfia
-Ismailia,مركز,إدارة اسماعلية,بدر,Markaz,Idaret_Ismailia,Bdr
-Ismailia,مركز,إدارة اسماعلية,حى السلام,Markaz,Idaret_Ismailia,Hay_ElSalam
-Ismailia,مركز,إدارة فايد,سرابيوم,Markaz,Idaret_Fayed,Srabywm
-Ismailia,مركز,إدارة فايد,فايد,Markaz,Idaret_Fayed,Fayed
-Ismailia,مركز,إدارة اسماعلية,نفيشة,Markaz,Idaret_Ismailia,Nfysha
-Ismailia,مستشفى,إدارة أبو صوير,ابو صوير المركزي,Mostashfa,Idaret_Abu_Suweir,Abu_Suweir_ElMarkazi
-Ismailia,مستشفى,إدارة القنطرة شرق,القنطرة شرق المركزي,Mostashfa,Idaret_ElQantara_Shark,ElQantara_Shark_ElMarkazi
-Ismailia,مستشفى,إدارة القنطرة غرب,القنطرة غرب المركزي,Mostashfa,Idaret_ElQantara_Gharb,ElQantara_Gharb_ElMarkazi
-Ismailia,مستشفى,إدارة اسماعلية,اورام الاسماعيلية,Mostashfa,Idaret_Ismailia,Awram_ElIsmailia
-Ismailia,مستشفى,إدارة القصاصين,جراحات اليوم الواحد بالقصاصين,Mostashfa,Idaret_ElQassasin,Gerahat_ElYom_ElWahed_BelQassasin
-Ismailia,مستشفى,إدارة اسماعلية,طوارئ ابو خليفة للجراحات المتخصصة,Mostashfa,Idaret_Ismailia,Tawary_Abu_Khalifa_LelGerahat_ElMotakhassesa
-Ismailia,مستشفى,إدارة فايد,فايد المركزي,Mostashfa,Idaret_Fayed,Fayed_ElMarkazi
-Ismailia,مستشفى,إدارة اسماعلية,مجمع الاسماعيلية الطبي,Mostashfa,Idaret_Ismailia,Magmaa_ElIsmailia_ElTebbi
-Ismailia,مستشفى,إدارة اسماعلية,مركز 30 يونيو الدولي,Mostashfa,Idaret_Ismailia,Markaz_30_Yunio_ElDawly
-Ismailia,مستشفى,إدارة اسماعلية,مركز اعادة التأهيل والروماتويد,Mostashfa,Idaret_Ismailia,Markaz_Eaadet_ElTaaheel_WElrwmatwyd
-Ismailia,مستشفى,إدارة التل الكبير,مستشفى التل الكبير المركزي,Mostashfa,Idaret_ElTal_ElKabir,Mostashfa_ElTal_ElKabir_ElMarkazi
-Ismailia,مستشفى,إدارة اسماعلية,مستشفى رمد الإسماعيلية,Mostashfa,Idaret_Ismailia,Mostashfa_Ramd_ElIsmailia
-Ismailia,وحدة,إدارة اسماعلية,أبو بلح,Wehda,Idaret_Ismailia,Abu_Balah
-Ismailia,وحدة,إدارة التل الكبير,أبو عاشور,Wehda,Idaret_ElTal_ElKabir,Abu_Ashour
-Ismailia,وحدة,إدارة اسماعلية,أبو عطوة,Wehda,Idaret_Ismailia,Abu_Atwa
-Ismailia,وحدة,إدارة أبو صوير,ابو صوير المحطة,Wehda,Idaret_Abu_Suweir,Abu_Suweir_ElMahatta
-Ismailia,وحدة,إدارة القنطرة غرب,ابوطفيله,Wehda,Idaret_ElQantara_Gharb,Abwtfylh
-Ismailia,وحدة,إدارة القنطرة شرق,الابطال,Wehda,Idaret_ElQantara_Shark,ElAbtaal
-Ismailia,وحدة,إدارة التل الكبير,البعلوة الكبرى,Wehda,Idaret_ElTal_ElKabir,ElBaaloua_ElKobra
-Ismailia,وحدة,إدارة القنطرة غرب,البياضية,Wehda,Idaret_ElQantara_Gharb,ElBayadiya
-Ismailia,وحدة,إدارة القنطرة شرق,التقدم,Wehda,Idaret_ElQantara_Shark,ElTaqadom
-Ismailia,وحدة,إدارة القنطرة غرب,الروضة,Wehda,Idaret_ElQantara_Gharb,Elrwda
-Ismailia,وحدة,إدارة القنطرة غرب,الرياح,Wehda,Idaret_ElQantara_Gharb,ElReah
-Ismailia,وحدة,إدارة أبو صوير,السبع أبار غرب,Wehda,Idaret_Abu_Suweir,ElSabaa_Abar_Gharb
-Ismailia,وحدة,إدارة أبو صوير,السبع ابار الشرقية,Wehda,Idaret_Abu_Suweir,ElSabaa_Abar_ElSharqiya
-Ismailia,وحدة,إدارة اسماعلية,السبع بنات,Wehda,Idaret_Ismailia,ElSabaa_Banat
-Ismailia,وحدة,إدارة فايد,السعيدية,Wehda,Idaret_Fayed,ElSaediya
-Ismailia,وحدة,إدارة التل الكبير,السلام و المحطة,Wehda,Idaret_ElTal_ElKabir,ElSalam_Wa_ElMahatta
-Ismailia,وحدة,إدارة القصاصين,السويدات,Wehda,Idaret_ElQassasin,ElSwedat
-Ismailia,وحدة,إدارة اسماعلية,الضبعية,Wehda,Idaret_Ismailia,ElDabiya
-Ismailia,وحدة,إدارة التل الكبير,الظاهرية,Wehda,Idaret_ElTal_ElKabir,ElZahria
-Ismailia,وحدة,إدارة القنطرة شرق,العبور,Wehda,Idaret_ElQantara_Shark,ElAbour
-Ismailia,وحدة,إدارة التل الكبير,العهدة,Wehda,Idaret_ElTal_ElKabir,ElAhda
-Ismailia,وحدة,إدارة القصاصين,القصاصين,Wehda,Idaret_ElQassasin,ElQassasin
-Ismailia,وحدة,إدارة القنطرة غرب,الكيلو 14,Wehda,Idaret_ElQantara_Gharb,ElKilo_14
-Ismailia,وحدة,إدارة اسماعلية,الكيلو 2,Wehda,Idaret_Ismailia,ElKilo_2
-Ismailia,وحدة,إدارة اسماعلية,الكيلو11,Wehda,Idaret_Ismailia,Elkylw11
-Ismailia,وحدة,إدارة أبو صوير,المحسمة الجديدة,Wehda,Idaret_Abu_Suweir,ElMahasma_ElGedida
-Ismailia,وحدة,إدارة أبو صوير,المنايف,Wehda,Idaret_Abu_Suweir,ElManaef
-Ismailia,وحدة,إدارة القصاصين,الهيش,Wehda,Idaret_ElQassasin,ElHeish
-Ismailia,وحدة,إدارة القصاصين,الوادى الأخضر,Wehda,Idaret_ElQassasin,ElWady_ElAkhdar
-Ismailia,وحدة,إدارة القصاصين,تل ثمود,Wehda,Idaret_ElQassasin,Tel_Thamoud
-Ismailia,وحدة,إدارة القنطرة شرق,جلبانه,Wehda,Idaret_ElQantara_Shark,Galbana
-Ismailia,وحدة,إدارة اسماعلية,عين غصين,Wehda,Idaret_Ismailia,Ein_Ghosein
-Ismailia,وحدة,إدارة فايد,فنارة,Wehda,Idaret_Fayed,Fanara
-Ismailia,وحدة,إدارة فايد,كسفريت,Wehda,Idaret_Fayed,Kasfrit
-Ismailia,وحدة,إدارة التل الكبير,وادى الملاك,Wehda,Idaret_ElTal_ElKabir,Wady_Elmlak
-Luxor,مركز,إدارة ارمنت,أرمنت الحيط,Markaz,Idaret_Armant,Armant_ElHeit
-Luxor,مركز,إدارة اسنا,أصفون,Markaz,Idaret_Esna,Asfwn
-Luxor,مركز,إدارة اسنا,إسنا,Markaz,Idaret_Esna,Esna
-Luxor,مركز,إدارة بندر,الاقصر,Markaz,Idaret_Bandar,ElAqsor
-Luxor,مركز,إدارة البياضية,البياضية,Markaz,Idaret_ElBayadiya,ElBayadiya
-Luxor,مركز,إدارة اسنا,الدير,Markaz,Idaret_Esna,Eldyr
-Luxor,مركز,إدارة الطود,الطود,Markaz,Idaret_ElToud,ElToud
-Luxor,مركز,إدارة بندر,العوامية,Markaz,Idaret_Bandar,ElAwamia
-Luxor,مركز,إدارة القرنة,القرنة,Markaz,Idaret_ElQurna,ElQurna
-Luxor,مركز,إدارة بندر,الكرنك الجديد,Markaz,Idaret_Bandar,ElKarnak_Elgdyd
-Luxor,مركز,إدارة الضبعية,امومه وطفوله الضبعية,Markaz,Idaret_ElDabiya,Omuma_WaTefoula_ElDabiya
-Luxor,مركز,إدارة الزينية,امومه وطفوله بالزينيه,Markaz,Idaret_ElZeniya,Omuma_WaTefoula_BelZeniya
-Luxor,مركز,إدارة الزينية,امومه وطفوله بالعشى,Markaz,Idaret_ElZeniya,Omuma_WaTefoula_BelAshy
-Luxor,مركز,إدارة اسنا,امومه وطفوله بالكيمان,Markaz,Idaret_Esna,Omuma_WaTefoula_BelKiman
-Luxor,مركز,إدارة ارمنت,حميات أرمنت,Markaz,Idaret_Armant,Hamiyat_Armant
-Luxor,مركز,إدارة بندر,منشأة العمارى,Markaz,Idaret_Bandar,Manshaa_ElOmary
-Luxor,مستشفى,إدارة بندر,مجمع الأقصر الدولى الطبي,Mostashfa,Idaret_Bandar,Magmaa_ElAqsor_ElDawly_ElTebbi
-Luxor,مستشفى,إدارة ارمنت,مستشفى أرمنت المركزى,Mostashfa,Idaret_Armant,Mostashfa_Armant_ElMarkazy
-Luxor,مستشفى,إدارة اسنا,مستشفى إسنا المركزى,Mostashfa,Idaret_Esna,Mostashfa_Esna_ElMarkazy
-Luxor,مستشفى,إدارة بندر,مستشفى الأقصر العام,Mostashfa,Idaret_Bandar,Mostashfa_ElAqsor_ElAam
-Luxor,مستشفى,إدارة البياضية,مستشفى البياضية المركزى,Mostashfa,Idaret_ElBayadiya,Mostashfa_ElBayadiya_ElMarkazy
-Luxor,مستشفى,إدارة الطود,مستشفى العديسات المركزى,Mostashfa,Idaret_ElToud,Mostashfa_El3dysat_ElMarkazy
-Luxor,وحدة,إدارة ارمنت,أرمنت الوبورات,Wehda,Idaret_Armant,Armant_Elwbwrat
-Luxor,وحدة,إدارة ارمنت,ابودغار,Wehda,Idaret_Armant,AbuDaghar
-Luxor,وحدة,إدارة القرنة,ال عثمان,Wehda,Idaret_ElQurna,El_Othman
-Luxor,وحدة,إدارة القرنة,الأقالتة,Wehda,Idaret_ElQurna,ElAqalta
-Luxor,وحدة,إدارة القرنة,البعيرات,Wehda,Idaret_ElQurna,ElBaeirat
-Luxor,وحدة,إدارة البياضية,البغدادي,Wehda,Idaret_ElBayadiya,ElBaghdady
-Luxor,وحدة,إدارة البياضية,الحبيل,Wehda,Idaret_ElBayadiya,ElHabeel
-Luxor,وحدة,إدارة اسنا,الحلة,Wehda,Idaret_Esna,ElHala
-Luxor,وحدة,إدارة اسنا,الحليلة,Wehda,Idaret_Esna,ElHoleila
-Luxor,وحدة,إدارة اسنا,الدبابية,Wehda,Idaret_Esna,ElDababiya
-Luxor,وحدة,إدارة اسنا,الدقيرة,Wehda,Idaret_Esna,ElDaqira
-Luxor,وحدة,إدارة ارمنت,الرزيقات بحري,Wehda,Idaret_Armant,ElRaziqat_Bahri
-Luxor,وحدة,إدارة ارمنت,الرزيقات قبلي,Wehda,Idaret_Armant,ElRaziqat_Qebli
-Luxor,وحدة,إدارة ارمنت,الرياينه,Wehda,Idaret_Armant,ElRayayna
-Luxor,وحدة,إدارة القرنة,الزمامي,Wehda,Idaret_ElQurna,ElZamamy
-Luxor,وحدة,إدارة بندر,الزناقطة,Wehda,Idaret_Bandar,ElZanaqeta
-Luxor,وحدة,إدارة اسنا,الزنيقة,Wehda,Idaret_Esna,ElZonaiqah
-Luxor,وحدة,إدارة اسنا,الشغب,Wehda,Idaret_Esna,ElShaghab
-Luxor,وحدة,إدارة بندر,الشيخ موسى,Wehda,Idaret_Bandar,ElSheikh_Moussa
-Luxor,وحدة,إدارة الطود,الضمان,Wehda,Idaret_ElToud,ElDaman
-Luxor,وحدة,إدارة الطود,العديسات قبلي,Wehda,Idaret_ElToud,El3dysat_Qebli
-Luxor,وحدة,إدارة اسنا,العضايمة,Wehda,Idaret_Esna,ElAdayma
-Luxor,وحدة,إدارة اسنا,الغريرة,Wehda,Idaret_Esna,ElGhoreera
-Luxor,وحدة,إدارة بندر,القباح غرب,Wehda,Idaret_Bandar,ElQobah_Gharb
-Luxor,وحدة,إدارة القرنة,القبلى قامولا,Wehda,Idaret_ElQurna,ElQebly_Qamola
-Luxor,وحدة,إدارة اسنا,القرايا,Wehda,Idaret_Esna,ElQaraya
-Luxor,وحدة,إدارة الزينية,المدامود,Wehda,Idaret_ElZeniya,ElMadamoud
-Luxor,وحدة,إدارة الطود,المريس,Wehda,Idaret_ElToud,ElMereis
-Luxor,وحدة,إدارة اسنا,النجوع بحري,Wehda,Idaret_Esna,ElNogoa_Bahri
-Luxor,وحدة,إدارة اسنا,النمسا,Wehda,Idaret_Esna,ElNemsa
-Luxor,وحدة,إدارة اسنا,الهنادي,Wehda,Idaret_Esna,ElHanady
-Luxor,وحدة,إدارة بندر,ب مستشفى الاقصر الدولى,Wehda,Idaret_Bandar,B_Mostashfa_ElAqsor_ElDawly
-Luxor,وحدة,إدارة اسنا,توماس,Wehda,Idaret_Esna,Thomas
-Luxor,وحدة,إدارة الطود,جزيرة أرمنت,Wehda,Idaret_ElToud,Gezira_Armant
-Luxor,وحدة,إدارة ارمنت,حاجر الرزيقات بحري,Wehda,Idaret_Armant,Hager_ElRaziqat_Bahri
-Luxor,وحدة,إدارة ارمنت,حاجرالمحاميد قبلي,Wehda,Idaret_Armant,7agrElm7amyd_Qebli
-Luxor,وحدة,إدارة اسنا,حي القرية,Wehda,Idaret_Esna,Hay_ElQarya
-Luxor,وحدة,إدارة اسنا,زرنيخ,Wehda,Idaret_Esna,Zarneekh
-Luxor,وحدة,إدارة الزينية,طيبة,Wehda,Idaret_ElZeniya,Thebes
-Luxor,وحدة,إدارة الطود,منشية النوبة,Wehda,Idaret_ElToud,Menshia_ElNoba
-Luxor,وحدة,إدارة اسنا,نجع أحمد سعيد,Wehda,Idaret_Esna,Nag_Ahmed_Saeed
-Luxor,وحدة,إدارة القرنة,نجع البركة,Wehda,Idaret_ElQurna,Nag_Elbrka
-Luxor,وحدة,إدارة بندر,نجع الخطباء,Wehda,Idaret_Bandar,Nag_Elkhtba2
-Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة الجوهرة,Markaz,Idaret_PortSaid,Markaz_Teb_Osra_ElGohara
-Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة الحي الإماراتي,Markaz,Idaret_PortSaid,Markaz_Teb_Osra_ElHay_ElEmirati
-Port_Said,مركز,حي العرب,مركز طب أسرة العرب,Markaz,Hay_ElArab,Markaz_Teb_Osra_ElArab
-Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة القابوطي,Markaz,Idaret_PortSaid,Markaz_Teb_Osra_ElQabouti
-Port_Said,مركز,حي المناخ,مركز طب أسرة المناخ,Markaz,Hay_ElManakh,Markaz_Teb_Osra_ElManakh
-Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة بلال بن رباح,Markaz,Idaret_PortSaid,Markaz_Teb_Osra_Belal_Ibn_Rebah
-Port_Said,مركز,حي الزهور,مركز طب أسرة تعاونيات الزهور,Markaz,Hay_ElZohour,Markaz_Teb_Osra_Taawoniyat_ElZohour
-Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة شرق النوادي,Markaz,Idaret_PortSaid,Markaz_Teb_Osra_Shark_ElNwady
-Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة علي بن أبي طالب,Markaz,Idaret_PortSaid,Markaz_Teb_Osra_Ali_Ibn_Aby_Taleb
-Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة محمد مشالي,Markaz,Idaret_PortSaid,Markaz_Teb_Osra_Mohamed_Meshaly
-Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة مصطفى كامل,Markaz,Idaret_PortSaid,Markaz_Teb_Osra_Mostafa_Kamel
-Port_Said,مستشفى,جنوب بورسعيد,مستشفى 30 يونيو,Mostashfa,Ganoub_PortSaid,Mostashfa_30_Yunio
-Port_Said,مستشفى,حي المناخ,مستشفى التضامن,Mostashfa,Hay_ElManakh,Mostashfa_Eltdamn
-Port_Said,مستشفى,مدينة بورفؤاد,مستشفى الحياة بورفؤاد,Mostashfa,Madinet_BorFouad,Mostashfa_ElHayat_BorFouad
-Port_Said,مستشفى,حي المناخ,مستشفى الرمد التخصصي,Mostashfa,Hay_ElManakh,Mostashfa_ElRamd_ElTakhassosi
-Port_Said,مستشفى,حي الزهور,مستشفى الزهور,Mostashfa,Hay_ElZohour,Mostashfa_ElZohour
-Port_Said,مستشفى,حي العرب,مستشفى المبرة,Mostashfa,Hay_ElArab,Mostashfa_Elmbra
-Port_Said,مستشفى,حي المناخ,مستشفى النساء والولادة,Mostashfa,Hay_ElManakh,Mostashfa_ElNesaa_WelWelada
-Port_Said,مستشفى,حي الزهور,مستشفى النصر التخصصي,Mostashfa,Hay_ElZohour,Mostashfa_ElNasr_ElTakhassosi
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة أم خلف,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_Om_Khalaf
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الإسراء,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_ElIsraa
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الصيدلانية سمر عبد الرحمن,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_ElSaydalaniya_Samar_Abd_ElRahman
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة العاشر من رمضان,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_ElAsher_Men_Ramadan
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الكاب,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_Elkab
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الكويت,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_Elkwyt
-Port_Said,وحدة,حي المناخ,وحدة طب أسرة المناخ,Wehda,Hay_ElManakh,Wehda_Teb_Osra_ElManakh
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الميسرة,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_Elmysra
-Port_Said,وحدة,مدينة بورفؤاد,وحدة طب أسرة بورفؤاد ثانِ,Wehda,Madinet_BorFouad,Wehda_Teb_Osra_BorFouad_Tany
-Port_Said,وحدة,حي الجنوب,وحدة طب أسرة جنوب البترول,Wehda,Hay_ElGanoub,Wehda_Teb_Osra_Ganoub_Elbtrwl
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة رضوان,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_Redwan
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة شادر عزام,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_Shader_Azzam
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة عثمان بن عفان,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_Othman_Ibn_Affan
-Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة عمر بن خطاب,Wehda,Idaret_PortSaid,Wehda_Teb_Osra_Omar_Ibn_Khtab
-South_Sinai,مركز,إدارة أبو زنيمة,أبو زنيمة,Markaz,Idaret_Abu_Zenima,Abu_Zenima
-South_Sinai,مركز,إدارة الطور,الامومة و الطفولة بالطور,Markaz,Idaret_ElTour,ElOmuma_Wa_ElTefoula_BelTour
-South_Sinai,مركز,إدارة شرم الشيخ,الرويسات,Markaz,Idaret_Sharm_ElSheikh,Elrwysat
-South_Sinai,مركز,إدارة الطور,الزهراء,Markaz,Idaret_ElTour,ElZahraa
-South_Sinai,مركز,إدارة نويبع,المزينة بنويبع,Markaz,Idaret_Nuweiba,ElMuzeina_BNuweiba
-South_Sinai,مركز,إدارة أبو رديس,بوادي فيران,Markaz,Idaret_Abu_Rudeis,BWadi_Fyran
-South_Sinai,مركز,إدارة دهب,دهب,Markaz,Idaret_Dahab,Dahab
-South_Sinai,مركز,إدارة راس سدر,رأس سدر,Markaz,Idaret_Ras_Sidr,Ras_Sidr
-South_Sinai,مستشفى,إدارة أبو رديس,أبو رديس المركزي,Mostashfa,Idaret_Abu_Rudeis,Abu_Rudeis_ElMarkazi
-South_Sinai,مستشفى,إدارة شرم الشيخ,شرم الشيخ الدولي,Mostashfa,Idaret_Sharm_ElSheikh,Sharm_ElSheikh_ElDawly
-South_Sinai,مستشفى,إدارة الطور,مستشفى الطور التعليمي,Mostashfa,Idaret_ElTour,Mostashfa_ElTour_ElTaleemi
-South_Sinai,مستشفى,إدارة دهب,مستشفى دهب المركزى,Mostashfa,Idaret_Dahab,Mostashfa_Dahab_ElMarkazy
-South_Sinai,مستشفى,إدارة راس سدر,مستشفى رأس سدر المركزي,Mostashfa,Idaret_Ras_Sidr,Mostashfa_Ras_Sidr_ElMarkazi
-South_Sinai,مستشفى,إدارة سانت كاترين,مستشفى سانت كاترين المركزي,Mostashfa,Idaret_Saint_Catherine,Mostashfa_Saint_Catherine_ElMarkazi
-South_Sinai,مستشفى,إدارة نويبع,مستشفى طابا المركزي,Mostashfa,Idaret_Nuweiba,Mostashfa_Taba_ElMarkazi
-South_Sinai,مستشفى,إدارة نويبع,مستشفى نويبع المركزي,Mostashfa,Idaret_Nuweiba,Mostashfa_Nuweiba_ElMarkazi
-South_Sinai,وحدة,إدارة الطور,الأسرة بالجبيل,Wehda,Idaret_ElTour,ElOsra_BelGubeil
-South_Sinai,وحدة,إدارة أبو زنيمة,الكيلو 9,Wehda,Idaret_Abu_Zenima,ElKilo_9
-South_Sinai,وحدة,إدارة نويبع,المراخ,Wehda,Idaret_Nuweiba,ElMarakh
-South_Sinai,وحدة,إدارة راس سدر,بأبو صويرة,Wehda,Idaret_Ras_Sidr,BAbu_Swyra
-South_Sinai,وحدة,إدارة سانت كاترين,بالاسباعية,Wehda,Idaret_Saint_Catherine,BelEsbaeia
-South_Sinai,وحدة,إدارة سانت كاترين,بالطرفة,Wehda,Idaret_Saint_Catherine,BelTarfa
-South_Sinai,وحدة,إدارة أبو رديس,بالعرايشية,Wehda,Idaret_Abu_Rudeis,BelAraishia
-South_Sinai,وحدة,إدارة راس سدر,برأس مسلة,Wehda,Idaret_Ras_Sidr,BRas_Msla
-South_Sinai,وحدة,إدارة الطور,بقرية الوادي,Wehda,Idaret_ElTour,BQarya_ElWadi
-South_Sinai,وحدة,إدارة أبو رديس,بوادي الطَر,Wehda,Idaret_Abu_Rudeis,BWadi_Eltَr
-South_Sinai,وحدة,إدارة شرم الشيخ,بوادي مندر,Wehda,Idaret_Sharm_ElSheikh,BWadi_Mndr
-South_Sinai,وحدة,إدارة أبو زنيمة,تال,Wehda,Idaret_Abu_Zenima,Tal
-South_Sinai,وحدة,إدارة نويبع,طابا,Wehda,Idaret_Nuweiba,Taba
-South_Sinai,وحدة,إدارة أبو زنيمة,غرندل,Wehda,Idaret_Abu_Zenima,Ghrendel
-Suez,مركز,إدارة الأربعين,الأربعين,Markaz,Idaret_ElArbaeen,ElArbaeen
-Suez,مركز,إدارة الأربعين,الإيمان,Markaz,Idaret_ElArbaeen,ElIman
-Suez,مركز,إدارة عتاقة,التوفيق,Markaz,Idaret_Ataka,ElTawfiq
-Suez,مركز,إدارة السويس,السويس الجديدة,Markaz,Idaret_ElSuez,ElSuez_ElGedida
-Suez,مركز,إدارة الجناين,الشروق,Markaz,Idaret_ElGanayen,ElShorouk
-Suez,مركز,إدارة فيصل,الصباح,Markaz,Idaret_Faisal,ElSabah
-Suez,مستشفى,إدارة السويس,المستشفى العام,Mostashfa,Idaret_ElSuez,ElMostashfa_ElAam
-Suez,مستشفى,إدارة السويس,مستشفي السويس للتأمين الصحى,Mostashfa,Idaret_ElSuez,Mostashfa_ElSuez_LelTamin_ElSehy
-Suez,مستشفى,إدارة السويس,مستشفي المجمع الطبى الجديد,Mostashfa,Idaret_ElSuez,Mostashfa_ElMagmaa_ElTebbi_Elgdyd
-Suez,مستشفى,إدارة السويس,مستشفي حميات السويس,Mostashfa,Idaret_ElSuez,Mostashfa_Hamiyat_ElSuez
-Suez,مستشفى,إدارة السويس,مستشفي صدر السويس,Mostashfa,Idaret_ElSuez,Mostashfa_Sadr_ElSuez
-Suez,وحدة,إدارة فيصل,24أكتوبر,Wehda,Idaret_Faisal,24_October
-Suez,وحدة,إدارة فيصل,الأمل,Wehda,Idaret_Faisal,ElAmal
-Suez,وحدة,إدارة فيصل,الرائد,Wehda,Idaret_Faisal,ElRaed
-Suez,وحدة,إدارة الأربعين,السادات,Wehda,Idaret_ElArbaeen,ElSadat
-Suez,وحدة,إدارة فيصل,السلام 1,Wehda,Idaret_Faisal,ElSalam_1
-Suez,وحدة,إدارة عتاقة,السلام 2,Wehda,Idaret_Ataka,ElSalam_2
-Suez,وحدة,إدارة السويس,السويس القديمة,Wehda,Idaret_ElSuez,ElSuez_ElQadima
-Suez,وحدة,إدارة الجناين,الشلوفة,Wehda,Idaret_ElGanayen,ElShalofa
-Suez,وحدة,إدارة عتاقة,الصفا,Wehda,Idaret_Ataka,ElSafa
-Suez,وحدة,إدارة الجناين,العمدة,Wehda,Idaret_ElGanayen,ElOmda
-Suez,وحدة,إدارة الأربعين,المحروسة,Wehda,Idaret_ElArbaeen,ElMahrosa
-Suez,وحدة,إدارة الأربعين,الهويس,Wehda,Idaret_ElArbaeen,ElHoweis
-Suez,وحدة,إدارة الجناين,جنيفة,Wehda,Idaret_ElGanayen,Goneifa
-Suez,وحدة,إدارة الجناين,شندورة,Wehda,Idaret_ElGanayen,Shendoura
-Suez,وحدة,إدارة عتاقة,عرب العامرين,Wehda,Idaret_Ataka,Arab_ElAmreen
-Suez,وحدة,إدارة عتاقة,عرب المعمل,Wehda,Idaret_Ataka,Arab_ElMaamal
-Suez,وحدة,إدارة فيصل,عمر بن الخطاب,Wehda,Idaret_Faisal,Omar_Ibn_ElKhattab
-Suez,وحدة,إدارة الجناين,قرية عامر,Wehda,Idaret_ElGanayen,Qarya_Amer
-Suez,وحدة,إدارة الجناين,كبريت,Wehda,Idaret_ElGanayen,Kabreet
-Suez,وحدة,إدارة فيصل,مبارك,Wehda,Idaret_Faisal,Mubarak
+Aswan,مركز,إدارة اسوان,ابو الريش بحري,Health Center,Aswan Administration,Abu El-Reesh North Health Center
+Aswan,مركز,إدارة كوم امبو,اقليت,Health Center,Kom Ombo Administration,Eqleet Health Center
+Aswan,مركز,ادارة ادفو غرب,البصيلية بحرى,Health Center,Edfu West Administration,El-Baseeliya North
+Aswan,مركز,ادارة دراو,الحضرى دراو,Health Center,Daraw Administration,El-Hadry Daraw
+Aswan,مركز,ادارة نصر النوبة,الدكه,Health Center,Nasr El-Noba Administration,El-Daka
+Aswan,مركز,إدارة اسوان,السيل,Health Center,Aswan Administration,El-Seil
+Aswan,مركز,ادارة ادفو غرب,الصعايده قبلي,Health Center,Edfu West Administration,El-Saaida South
+Aswan,مركز,ادارة ادفو شرق,المحاميد,Health Center,Edfu East Administration,El-Mahameed
+Aswan,مركز,إدارة كوم امبو,المنشية الجديدة,Health Center,Kom Ombo Administration,El-Menshia El-Gedida
+Aswan,مركز,ادارة نصر النوبة,بلانه,Health Center,Nasr El-Noba Administration,Belana
+Aswan,مركز,ادارة دراو,بنبان قبلى,Health Center,Daraw Administration,Benban South
+Aswan,مركز,ادارة ادفو غرب,حاجر البصيلية,Health Center,Edfu West Administration,Hajer El-Baseeliya
+Aswan,مركز,ادارة ادفو غرب,رعاية طفل ادفو,Health Center,Edfu West Administration,Edfu Child Care Center
+Aswan,مركز,إدارة كوم امبو,رعاية طفل كوم امبو,Health Center,Kom Ombo Administration,Kom Ombo Child Care Center
+Aswan,مركز,إدارة كوم امبو,سلو بحري,Health Center,Kom Ombo Administration,Sulo North
+Aswan,مركز,إدارة اسوان,صحة اول,Health Center,Aswan Administration,First Health Center
+Aswan,مستشفى,ادارة نصر النوبة,مستشفى ابو سمبل الدولي,Hospital,Nasr El-Noba Administration,Abu Simbel International Hospital
+Aswan,مستشفى,ادارة ادفو غرب,مستشفى ادفو العام,Hospital,Edfu West Administration,Edfu General Hospital
+Aswan,مستشفى,إدارة اسوان,مستشفى اسوان التخصصي,Hospital,Aswan Administration,Aswan Specialized Hospital
+Aswan,مستشفى,إدارة اسوان,مستشفى التامين الصحي,Hospital,Aswan Administration,Health Insurance Hospital
+Aswan,مستشفى,ادارة ادفو غرب,مستشفى السباعيه,Hospital,Edfu West Administration,El-Sabaeia Hospital
+Aswan,مستشفى,إدارة اسوان,مستشفى حميات اسوان,Hospital,Aswan Administration,Aswan Fever Hospital
+Aswan,مستشفى,ادارة دراو,مستشفى دراو المركزي,Hospital,Daraw Administration,Daraw Central Hospital
+Aswan,مستشفى,إدارة اسوان,مستشفى رمد اسوان,Hospital,Aswan Administration,Aswan Ophthalmology Hospital
+Aswan,مستشفى,إدارة كوم امبو,مستشفى كوم امبو المركزي,Hospital,Kom Ombo Administration,Kom Ombo Central Hospital
+Aswan,مستشفى,ادارة نصر النوبة,مستشفى نصر النوبه,Hospital,Nasr El-Noba Administration,Nasr El-Noba Hospital
+Aswan,مستشفى,إدارة اسوان,معهد اورام اسوان,Hospital,Aswan Administration,Aswan Oncology Institute
+Aswan,وحدة,ادارة نصر النوبة,ابريم,Health Unit,Nasr El-Noba Administration,Abreem
+Aswan,وحدة,إدارة اسوان,ابو الريش قبلي,Health Unit,Aswan Administration,Abu El-Reesh South
+Aswan,وحدة,ادارة نصر النوبة,ابو سمبل,Health Unit,Nasr El-Noba Administration,Abu Simbel
+Aswan,وحدة,إدارة اسوان,ابوسمبل,Health Unit,Aswan Administration,Abu Simbel
+Aswan,وحدة,ادارة نصر النوبة,ادندان,Health Unit,Nasr El-Noba Administration,Adandan
+Aswan,وحدة,إدارة اسوان,اسوان الجديدة,Health Unit,Aswan Administration,New Aswan
+Aswan,وحدة,ادارة ادفو غرب,الاخصاص,Health Unit,Edfu West Administration,El-Akhsas
+Aswan,وحدة,إدارة كوم امبو,الاسماعيلية,Health Unit,Kom Ombo Administration,El-Ismailia
+Aswan,وحدة,إدارة اسوان,الاعقاب الديسة,Health Unit,Aswan Administration,El-Aaqab El-Deisa
+Aswan,وحدة,ادارة ادفو غرب,البصيلية قبلى,Health Unit,Edfu West Administration,El-Baseeliya South
+Aswan,وحدة,إدارة كوم امبو,البياره,Health Unit,Kom Ombo Administration,El-Bayara
+Aswan,وحدة,إدارة اسوان,الجزيرة,Health Unit,Aswan Administration,El-Gezira
+Aswan,وحدة,ادارة دراو,الجعافرة,Health Unit,Daraw Administration,El-Gaafara
+Aswan,وحدة,ادارة دراو,الحربياب,Health Unit,Daraw Administration,El-Harbiab
+Aswan,وحدة,ادارة نصر النوبة,الحضري نصر النوبة,Health Unit,Nasr El-Noba Administration,El-Hadry Nasr El-Noba
+Aswan,وحدة,ادارة نصر النوبة,الحكمه,Health Unit,Nasr El-Noba Administration,El-Hikma
+Aswan,وحدة,إدارة اسوان,الخزان غرب,Health Unit,Aswan Administration,El-Khazan West
+Aswan,وحدة,إدارة كوم امبو,الخور قبلي,Health Unit,Kom Ombo Administration,El-Khour South
+Aswan,وحدة,ادارة نصر النوبة,الدر و تنقالة,Health Unit,Nasr El-Noba Administration,El-Dar and Tanqala
+Aswan,وحدة,ادارة ادفو شرق,الدقاديق,Health Unit,Edfu East Administration,El-Daqadaq
+Aswan,وحدة,ادارة ادفو شرق,الرديسية,Health Unit,Edfu East Administration,El-Rdisiya
+Aswan,وحدة,ادارة دراو,الرقبه,Health Unit,Daraw Administration,El-Raqaba
+Aswan,وحدة,ادارة ادفو غرب,الرقيقيين,Health Unit,Edfu West Administration,El-Raqiqeen
+Aswan,وحدة,ادارة ادفو غرب,الرمادي بحري,Health Unit,Edfu West Administration,El-Ramady North
+Aswan,وحدة,ادارة ادفو غرب,الرمادي قبلي,Health Unit,Edfu West Administration,El-Ramady South
+Aswan,وحدة,ادارة ادفو غرب,السباعية,Health Unit,Edfu West Administration,El-Sabaeia
+Aswan,وحدة,إدارة اسوان,السد العالى,Health Unit,Aswan Administration,High Dam
+Aswan,وحدة,إدارة كوم امبو,السلسلة,Health Unit,Kom Ombo Administration,El-Selsela
+Aswan,وحدة,ادارة ادفو شرق,الشراونة قبلي,Health Unit,Edfu East Administration,El-Shrawna South
+Aswan,وحدة,ادارة ادفو غرب,الشرفا,Health Unit,Edfu West Administration,El-Sharfa
+Aswan,وحدة,ادارة دراو,الشطب,Health Unit,Daraw Administration,El-Shatab
+Aswan,وحدة,إدارة اسوان,الشلال,Health Unit,Aswan Administration,El-Shalal
+Aswan,وحدة,ادارة ادفو غرب,الشهامة,Health Unit,Edfu West Administration,El-Shahama
+Aswan,وحدة,ادارة دراو,الشيخ ابراهيم,Health Unit,Daraw Administration,Sheikh Ibrahim
+Aswan,وحدة,ادارة ادفو شرق,الشيخ على,Health Unit,Edfu East Administration,Sheikh Ali
+Aswan,وحدة,ادارة ادفو شرق,الشيخ مصطفي,Health Unit,Edfu East Administration,Sheikh Mustafa
+Aswan,وحدة,إدارة اسوان,الصداقة الجديدة,Health Unit,Aswan Administration,El-Sadaqa El-Gedida
+Aswan,وحدة,ادارة ادفو شرق,الطوناب,Health Unit,Edfu East Administration,El-Tounab
+Aswan,وحدة,إدارة كوم امبو,العباسية,Health Unit,Kom Ombo Administration,El-Abasiya
+Aswan,وحدة,إدارة كوم امبو,العتم ور قبلى,Health Unit,Kom Ombo Administration,El-Atam Wa South
+Aswan,وحدة,إدارة كوم امبو,العتمور المستجد,Health Unit,Kom Ombo Administration,El-Atamur El-Mostaged
+Aswan,وحدة,إدارة كوم امبو,العدوه,Health Unit,Kom Ombo Administration,El-Adawa
+Aswan,وحدة,ادارة ادفو شرق,العطواني,Health Unit,Edfu East Administration,El-Atawani
+Aswan,وحدة,ادارة ادفو غرب,العكارمية,Health Unit,Edfu West Administration,El-Akarmia
+Aswan,وحدة,إدارة اسوان,العلاقي,Health Unit,Aswan Administration,El-Alaqi
+Aswan,وحدة,ادارة نصر النوبة,العلاقي,Health Unit,Nasr El-Noba Administration,El-Alaqi
+Aswan,وحدة,إدارة كوم امبو,العليقات,Health Unit,Kom Ombo Administration,El-Olaiqat
+Aswan,وحدة,ادارة ادفو غرب,العوضلاب,Health Unit,Edfu West Administration,El-Awdlab
+Aswan,وحدة,ادارة ادفو شرق,العوينية,Health Unit,Edfu East Administration,El-Owainiya
+Aswan,وحدة,ادارة ادفو غرب,الغنيمية,Health Unit,Edfu West Administration,El-Ghonaymia
+Aswan,وحدة,ادارة ادفو غرب,الغوالية,Health Unit,Edfu West Administration,El-Ghowaliya
+Aswan,وحدة,إدارة كوم امبو,الفوزة,Health Unit,Kom Ombo Administration,El-Fouza
+Aswan,وحدة,ادارة دراو,القفطيه,Health Unit,Daraw Administration,El-Qaftia
+Aswan,وحدة,إدارة كوم امبو,الكاجوج,Health Unit,Kom Ombo Administration,El-Kagoug
+Aswan,وحدة,ادارة نصر النوبة,الكرامة,Health Unit,Nasr El-Noba Administration,El-Karama
+Aswan,وحدة,إدارة اسوان,الكرور,Health Unit,Aswan Administration,El-Karor
+Aswan,وحدة,إدارة كوم امبو,الكفور,Health Unit,Kom Ombo Administration,El-Kofour
+Aswan,وحدة,ادارة ادفو غرب,الكلح غرب,Health Unit,Edfu West Administration,El-Kalah West
+Aswan,وحدة,إدارة اسوان,الكوبانية,Health Unit,Aswan Administration,El-Kobaniya
+Aswan,وحدة,ادارة نصر النوبة,المالكي,Health Unit,Nasr El-Noba Administration,El-Maleki
+Aswan,وحدة,إدارة اسوان,المحمودية,Health Unit,Aswan Administration,El-Mahmoudiya
+Aswan,وحدة,ادارة ادفو غرب,المريناب,Health Unit,Edfu West Administration,El-Marinab
+Aswan,وحدة,ادارة ادفو شرق,المفالسة,Health Unit,Edfu East Administration,El-Mafalesa
+Aswan,وحدة,ادارة دراو,المنصورية بحرى,Health Unit,Daraw Administration,El-Mansouriya North
+Aswan,وحدة,ادارة ادفو شرق,النزل,Health Unit,Edfu East Administration,El-Nazl
+Aswan,وحدة,ادارة ادفو غرب,الوقاداب,Health Unit,Edfu West Administration,El-Waqadab
+Aswan,وحدة,ادارة نصر النوبة,توشكى غرب,Health Unit,Nasr El-Noba Administration,Toshka West
+Aswan,وحدة,إدارة اسوان,جزيرة اسوان,Health Unit,Aswan Administration,Aswan Island
+Aswan,وحدة,إدارة اسوان,جزيرة سهيل,Health Unit,Aswan Administration,Seheil Island
+Aswan,وحدة,إدارة كوم امبو,جعفر الصادق,Health Unit,Kom Ombo Administration,Jaafar El-Sadeq
+Aswan,وحدة,ادارة ادفو غرب,حاجر ابو خليفة,Health Unit,Edfu West Administration,Hajer Abu Khalifa
+Aswan,وحدة,ادارة ادفو غرب,حاجر البلاليص,Health Unit,Edfu West Administration,Hajer El-Balalis
+Aswan,وحدة,إدارة كوم امبو,حجازه,Health Unit,Kom Ombo Administration,Hegaza
+Aswan,وحدة,ادارة نصر النوبة,خريت 1,Health Unit,Nasr El-Noba Administration,Khreit 1
+Aswan,وحدة,إدارة اسوان,خورعواضة الجديدة,Health Unit,Aswan Administration,Khor Awada El-Gedida
+Aswan,وحدة,ادارة نصر النوبة,دابود,Health Unit,Nasr El-Noba Administration,Daboud
+Aswan,وحدة,إدارة كوم امبو,سلوا قبلى,Health Unit,Kom Ombo Administration,Salwa South
+Aswan,وحدة,إدارة كوم امبو,عرب كيما,Health Unit,Kom Ombo Administration,Arab Kima
+Aswan,وحدة,إدارة كوم امبو,عزبة العرب,Health Unit,Kom Ombo Administration,Arab Village
+Aswan,وحدة,ادارة ادفو غرب,عمرو بن العاص,Health Unit,Edfu West Administration,Amr Ibn El-Aas
+Aswan,وحدة,ادارة نصر النوبة,عنيبة,Health Unit,Nasr El-Noba Administration,Oneeba
+Aswan,وحدة,إدارة اسوان,غرب اسوان,Health Unit,Aswan Administration,West Aswan
+Aswan,وحدة,إدارة كوم امبو,فارس 1,Health Unit,Kom Ombo Administration,Fares 1
+Aswan,وحدة,إدارة كوم امبو,فطيره,Health Unit,Kom Ombo Administration,Foteira
+Aswan,وحدة,ادارة نصر النوبة,قسطل,Health Unit,Nasr El-Noba Administration,Qastal
+Aswan,وحدة,ادارة نصر النوبة,قورتة ثالث,Health Unit,Nasr El-Noba Administration,Qourta Third
+Aswan,وحدة,إدارة اسوان,كلابشة,Health Unit,Aswan Administration,Kalabsha
+Aswan,وحدة,ادارة نصر النوبة,كلابشه,Health Unit,Nasr El-Noba Administration,Kalabsha
+Aswan,وحدة,إدارة اسوان,كيما,Health Unit,Aswan Administration,Kima
+Aswan,وحدة,إدارة اسوان,منشية الخزان,Health Unit,Aswan Administration,Manshia El-Khazan
+Aswan,وحدة,إدارة كوم امبو,منشية الرغامه,Health Unit,Kom Ombo Administration,Manshia El-Rghamah
+Aswan,وحدة,إدارة كوم امبو,منيحة,Health Unit,Kom Ombo Administration,Muneha
+Aswan,وحدة,ادارة ادفو غرب,نجع هيكل,Health Unit,Edfu West Administration,Nag Heikal
+Aswan,وحدة,ادارة دراو,نجع ونس,Health Unit,Daraw Administration,Nag Wanes
+Aswan,وحدة,إدارة اسوان,هيسا,Health Unit,Aswan Administration,Heesa
+Aswan,وحدة,ادارة ادفو شرق,وادى عبادي,Health Unit,Edfu East Administration,Wadi Abadi
+Ismailia,مركز,إدارة القنطرة غرب,أبو خليفة,Health Center,El-Qantara West Administration,Abu Khalifa
+Ismailia,مركز,إدارة فايد,أبو سلطان,Health Center,Fayed Administration,Abu Sultan
+Ismailia,مركز,إدارة أبو صوير,ابو صوير,Health Center,Abu Suweir Administration,Abu Suweir
+Ismailia,مركز,إدارة اسماعلية,اسرة الرحمة,Health Center,Ismailia Administration,El-Rahma Family
+Ismailia,مركز,إدارة اسماعلية,الإسماعيلية الجديدة,Health Center,Ismailia Administration,New Ismailia
+Ismailia,مركز,إدارة التل الكبير,التل الكبير,Health Center,El-Tal El-Kabir Administration,El-Tal El-Kabir
+Ismailia,مركز,إدارة اسماعلية,الشهداء,Health Center,Ismailia Administration,El-Shuhada
+Ismailia,مركز,إدارة اسماعلية,الشيخ زايد,Health Center,Ismailia Administration,Sheikh Zayed
+Ismailia,مركز,إدارة اسماعلية,العرايشة,Health Center,Ismailia Administration,El-Araisha
+Ismailia,مركز,إدارة القنطرة شرق,القنطرة شرق,Health Center,El-Qantara East Administration,El-Qantara East
+Ismailia,مركز,إدارة القنطرة غرب,القنطرة غرب,Health Center,El-Qantara West Administration,El-Qantara West
+Ismailia,مركز,إدارة القصاصين,المحسمة القديمة,Health Center,El-Qassasin Administration,El-Mahasma El-Qadima
+Ismailia,مركز,إدارة اسماعلية,المستقبل,Health Center,Ismailia Administration,El-Mostaqbal
+Ismailia,مركز,إدارة أبو صوير,الواصفية,Health Center,Abu Suweir Administration,El-Wasfia
+Ismailia,مركز,إدارة اسماعلية,بدر,Health Center,Ismailia Administration,Badr
+Ismailia,مركز,إدارة اسماعلية,حى السلام,Health Center,Ismailia Administration,El-Salam District
+Ismailia,مركز,إدارة فايد,سرابيوم,Health Center,Fayed Administration,Serapeum
+Ismailia,مركز,إدارة فايد,فايد,Health Center,Fayed Administration,Fayed
+Ismailia,مركز,إدارة اسماعلية,نفيشة,Health Center,Ismailia Administration,Nefisha
+Ismailia,مستشفى,إدارة أبو صوير,ابو صوير المركزي,Hospital,Abu Suweir Administration,Abu Suweir Central Hospital
+Ismailia,مستشفى,إدارة القنطرة شرق,القنطرة شرق المركزي,Hospital,El-Qantara East Administration,El-Qantara East Central Hospital
+Ismailia,مستشفى,إدارة القنطرة غرب,القنطرة غرب المركزي,Hospital,El-Qantara West Administration,El-Qantara West Central Hospital
+Ismailia,مستشفى,إدارة اسماعلية,اورام الاسماعيلية,Hospital,Ismailia Administration,Ismailia Oncology Hospital
+Ismailia,مستشفى,إدارة القصاصين,جراحات اليوم الواحد بالقصاصين,Hospital,El-Qassasin Administration,El-Qassasin Day Surgery Unit
+Ismailia,مستشفى,إدارة اسماعلية,طوارئ ابو خليفة للجراحات المتخصصة,Hospital,Ismailia Administration,Abu Khalifa Specialized Surgery Emergency
+Ismailia,مستشفى,إدارة فايد,فايد المركزي,Hospital,Fayed Administration,Fayed Central Hospital
+Ismailia,مستشفى,إدارة اسماعلية,مجمع الاسماعيلية الطبي,Hospital,Ismailia Administration,Ismailia Medical Complex
+Ismailia,مستشفى,إدارة اسماعلية,مركز 30 يونيو الدولي,Hospital,Ismailia Administration,30 June International Center
+Ismailia,مستشفى,إدارة اسماعلية,مركز اعادة التأهيل والروماتويد,Hospital,Ismailia Administration,Rehabilitation and Rheumatology Center
+Ismailia,مستشفى,إدارة التل الكبير,مستشفى التل الكبير المركزي,Hospital,El-Tal El-Kabir Administration,El-Tal El-Kabir Central Hospital
+Ismailia,مستشفى,إدارة اسماعلية,مستشفى رمد الإسماعيلية,Hospital,Ismailia Administration,Ismailia Ophthalmology Hospital
+Ismailia,وحدة,إدارة اسماعلية,أبو بلح,Health Unit,Ismailia Administration,Abu Balah
+Ismailia,وحدة,إدارة التل الكبير,أبو عاشور,Health Unit,El-Tal El-Kabir Administration,Abu Ashour
+Ismailia,وحدة,إدارة اسماعلية,أبو عطوة,Health Unit,Ismailia Administration,Abu Atwa
+Ismailia,وحدة,إدارة أبو صوير,ابو صوير المحطة,Health Unit,Abu Suweir Administration,Abu Suweir El-Mahatta
+Ismailia,وحدة,إدارة القنطرة غرب,ابوطفيله,Health Unit,El-Qantara West Administration,Abu Tafila
+Ismailia,وحدة,إدارة القنطرة شرق,الابطال,Health Unit,El-Qantara East Administration,El-Abtal
+Ismailia,وحدة,إدارة التل الكبير,البعلوة الكبرى,Health Unit,El-Tal El-Kabir Administration,El-Baaloua El-Kobra
+Ismailia,وحدة,إدارة القنطرة غرب,البياضية,Health Unit,El-Qantara West Administration,El-Bayadiya
+Ismailia,وحدة,إدارة القنطرة شرق,التقدم,Health Unit,El-Qantara East Administration,El-Taqadom
+Ismailia,وحدة,إدارة القنطرة غرب,الروضة,Health Unit,El-Qantara West Administration,El-Rawda
+Ismailia,وحدة,إدارة القنطرة غرب,الرياح,Health Unit,El-Qantara West Administration,El-Reah
+Ismailia,وحدة,إدارة أبو صوير,السبع أبار غرب,Health Unit,Abu Suweir Administration,El-Sabaa Abar West
+Ismailia,وحدة,إدارة أبو صوير,السبع ابار الشرقية,Health Unit,Abu Suweir Administration,El-Sabaa Abar East
+Ismailia,وحدة,إدارة اسماعلية,السبع بنات,Health Unit,Ismailia Administration,El-Sabaa Banat
+Ismailia,وحدة,إدارة فايد,السعيدية,Health Unit,Fayed Administration,El-Saediya
+Ismailia,وحدة,إدارة التل الكبير,السلام و المحطة,Health Unit,El-Tal El-Kabir Administration,El-Salam and El-Mahatta
+Ismailia,وحدة,إدارة القصاصين,السويدات,Health Unit,El-Qassasin Administration,El-Swedat
+Ismailia,وحدة,إدارة اسماعلية,الضبعية,Health Unit,Ismailia Administration,El-Dabiya
+Ismailia,وحدة,إدارة التل الكبير,الظاهرية,Health Unit,El-Tal El-Kabir Administration,El-Zahria
+Ismailia,وحدة,إدارة القنطرة شرق,العبور,Health Unit,El-Qantara East Administration,El-Abour
+Ismailia,وحدة,إدارة التل الكبير,العهدة,Health Unit,El-Tal El-Kabir Administration,El-Ahda
+Ismailia,وحدة,إدارة القصاصين,القصاصين,Health Unit,El-Qassasin Administration,El-Qassasin
+Ismailia,وحدة,إدارة القنطرة غرب,الكيلو 14,Health Unit,El-Qantara West Administration,Kilometer 14
+Ismailia,وحدة,إدارة اسماعلية,الكيلو 2,Health Unit,Ismailia Administration,Kilometer 2
+Ismailia,وحدة,إدارة اسماعلية,الكيلو11,Health Unit,Ismailia Administration,Kilometer 11
+Ismailia,وحدة,إدارة أبو صوير,المحسمة الجديدة,Health Unit,Abu Suweir Administration,El-Mahasma El-Gedida
+Ismailia,وحدة,إدارة أبو صوير,المنايف,Health Unit,Abu Suweir Administration,El-Manaef
+Ismailia,وحدة,إدارة القصاصين,الهيش,Health Unit,El-Qassasin Administration,El-Heish
+Ismailia,وحدة,إدارة القصاصين,الوادى الأخضر,Health Unit,El-Qassasin Administration,El-Wadi El-Akhdar
+Ismailia,وحدة,إدارة القصاصين,تل ثمود,Health Unit,El-Qassasin Administration,Tel Thamoud
+Ismailia,وحدة,إدارة القنطرة شرق,جلبانه,Health Unit,El-Qantara East Administration,Galbana
+Ismailia,وحدة,إدارة اسماعلية,عين غصين,Health Unit,Ismailia Administration,Ein Ghosein
+Ismailia,وحدة,إدارة فايد,فنارة,Health Unit,Fayed Administration,Fanara
+Ismailia,وحدة,إدارة فايد,كسفريت,Health Unit,Fayed Administration,Kasfrit
+Ismailia,وحدة,إدارة التل الكبير,وادى الملاك,Health Unit,El-Tal El-Kabir Administration,Wadi El-Malak
+Luxor,مركز,إدارة ارمنت,أرمنت الحيط,Health Center,Armant Administration,Armant El-Heit
+Luxor,مركز,إدارة اسنا,أصفون,Health Center,Esna Administration,Asfoun
+Luxor,مركز,إدارة اسنا,إسنا,Health Center,Esna Administration,Esna
+Luxor,مركز,إدارة بندر,الاقصر,Health Center,Bandar Administration,Luxor
+Luxor,مركز,إدارة البياضية,البياضية,Health Center,El-Bayadiya Administration,El-Bayadiya
+Luxor,مركز,إدارة اسنا,الدير,Health Center,Esna Administration,El-Deir
+Luxor,مركز,إدارة الطود,الطود,Health Center,El-Toud Administration,El-Toud
+Luxor,مركز,إدارة بندر,العوامية,Health Center,Bandar Administration,El-Awamia
+Luxor,مركز,إدارة القرنة,القرنة,Health Center,El-Qurna Administration,El-Qurna
+Luxor,مركز,إدارة بندر,الكرنك الجديد,Health Center,Bandar Administration,New Karnak
+Luxor,مركز,إدارة الضبعية,امومه وطفوله الضبعية,Health Center,El-Dabiya Administration,El-Dabiya Maternity and Childhood
+Luxor,مركز,إدارة الزينية,امومه وطفوله بالزينيه,Health Center,El-Zeniya Administration,El-Zeniya Maternity and Childhood
+Luxor,مركز,إدارة الزينية,امومه وطفوله بالعشى,Health Center,El-Zeniya Administration,El-Ashi Maternity and Childhood
+Luxor,مركز,إدارة اسنا,امومه وطفوله بالكيمان,Health Center,Esna Administration,El-Kiman Maternity and Childhood
+Luxor,مركز,إدارة ارمنت,حميات أرمنت,Health Center,Armant Administration,Armant Fever Hospital
+Luxor,مركز,إدارة بندر,منشأة العمارى,Health Center,Bandar Administration,El-Omary Facility
+Luxor,مستشفى,إدارة بندر,مجمع الأقصر الدولى الطبي,Hospital,Bandar Administration,Luxor International Medical Complex
+Luxor,مستشفى,إدارة ارمنت,مستشفى أرمنت المركزى,Hospital,Armant Administration,Armant Central Hospital
+Luxor,مستشفى,إدارة اسنا,مستشفى إسنا المركزى,Hospital,Esna Administration,Esna Central Hospital
+Luxor,مستشفى,إدارة بندر,مستشفى الأقصر العام,Hospital,Bandar Administration,Luxor General Hospital
+Luxor,مستشفى,إدارة البياضية,مستشفى البياضية المركزى,Hospital,El-Bayadiya Administration,El-Bayadiya Central Hospital
+Luxor,مستشفى,إدارة الطود,مستشفى العديسات المركزى,Hospital,El-Toud Administration,El-Adeisat Central Hospital
+Luxor,وحدة,إدارة ارمنت,أرمنت الوبورات,Health Unit,Armant Administration,Armant El-Waborat
+Luxor,وحدة,إدارة ارمنت,ابودغار,Health Unit,Armant Administration,Abu Daghar
+Luxor,وحدة,إدارة القرنة,ال عثمان,Health Unit,El-Qurna Administration,El-Othman
+Luxor,وحدة,إدارة القرنة,الأقالتة,Health Unit,El-Qurna Administration,El-Aqalta
+Luxor,وحدة,إدارة القرنة,البعيرات,Health Unit,El-Qurna Administration,El-Baeirat
+Luxor,وحدة,إدارة البياضية,البغدادي,Health Unit,El-Bayadiya Administration,El-Baghdady
+Luxor,وحدة,إدارة البياضية,الحبيل,Health Unit,El-Bayadiya Administration,El-Habeel
+Luxor,وحدة,إدارة اسنا,الحلة,Health Unit,Esna Administration,El-Hala
+Luxor,وحدة,إدارة اسنا,الحليلة,Health Unit,Esna Administration,El-Holeila
+Luxor,وحدة,إدارة اسنا,الدبابية,Health Unit,Esna Administration,El-Dababiya
+Luxor,وحدة,إدارة اسنا,الدقيرة,Health Unit,Esna Administration,El-Daqira
+Luxor,وحدة,إدارة ارمنت,الرزيقات بحري,Health Unit,Armant Administration,El-Raziqat North
+Luxor,وحدة,إدارة ارمنت,الرزيقات قبلي,Health Unit,Armant Administration,El-Raziqat South
+Luxor,وحدة,إدارة ارمنت,الرياينه,Health Unit,Armant Administration,El-Rayayna
+Luxor,وحدة,إدارة القرنة,الزمامي,Health Unit,El-Qurna Administration,El-Zamamy
+Luxor,وحدة,إدارة بندر,الزناقطة,Health Unit,Bandar Administration,El-Zanaqeta
+Luxor,وحدة,إدارة اسنا,الزنيقة,Health Unit,Esna Administration,El-Zonaiqah
+Luxor,وحدة,إدارة اسنا,الشغب,Health Unit,Esna Administration,El-Shaghab
+Luxor,وحدة,إدارة بندر,الشيخ موسى,Health Unit,Bandar Administration,Sheikh Moussa
+Luxor,وحدة,إدارة الطود,الضمان,Health Unit,El-Toud Administration,El-Daman
+Luxor,وحدة,إدارة الطود,العديسات قبلي,Health Unit,El-Toud Administration,El-Adeisat South
+Luxor,وحدة,إدارة اسنا,العضايمة,Health Unit,Esna Administration,El-Adayma
+Luxor,وحدة,إدارة اسنا,الغريرة,Health Unit,Esna Administration,El-Ghoreera
+Luxor,وحدة,إدارة بندر,القباح غرب,Health Unit,Bandar Administration,El-Qobah West
+Luxor,وحدة,إدارة القرنة,القبلى قامولا,Health Unit,El-Qurna Administration,El-Qebly Qamola
+Luxor,وحدة,إدارة اسنا,القرايا,Health Unit,Esna Administration,El-Qaraya
+Luxor,وحدة,إدارة الزينية,المدامود,Health Unit,El-Zeniya Administration,El-Madamoud
+Luxor,وحدة,إدارة الطود,المريس,Health Unit,El-Toud Administration,El-Mereis
+Luxor,وحدة,إدارة اسنا,النجوع بحري,Health Unit,Esna Administration,El-Nogou North
+Luxor,وحدة,إدارة اسنا,النمسا,Health Unit,Esna Administration,El-Nemsa
+Luxor,وحدة,إدارة اسنا,الهنادي,Health Unit,Esna Administration,El-Hanady
+Luxor,وحدة,إدارة بندر,ب مستشفى الاقصر الدولى,Health Unit,Bandar Administration,Luxor International Hospital B
+Luxor,وحدة,إدارة اسنا,توماس,Health Unit,Esna Administration,Thomas
+Luxor,وحدة,إدارة الطود,جزيرة أرمنت,Health Unit,El-Toud Administration,Armant Island
+Luxor,وحدة,إدارة ارمنت,حاجر الرزيقات بحري,Health Unit,Armant Administration,Hajer El-Raziqat North
+Luxor,وحدة,إدارة ارمنت,حاجرالمحاميد قبلي,Health Unit,Armant Administration,Hajer El-Mahameed South
+Luxor,وحدة,إدارة اسنا,حي القرية,Health Unit,Esna Administration,El-Qarya District
+Luxor,وحدة,إدارة اسنا,زرنيخ,Health Unit,Esna Administration,Zarneekh
+Luxor,وحدة,إدارة الزينية,طيبة,Health Unit,El-Zeniya Administration,Thebes
+Luxor,وحدة,إدارة الطود,منشية النوبة,Health Unit,El-Toud Administration,Manshia El-Noba
+Luxor,وحدة,إدارة اسنا,نجع أحمد سعيد,Health Unit,Esna Administration,Nag Ahmed Saeed
+Luxor,وحدة,إدارة القرنة,نجع البركة,Health Unit,El-Qurna Administration,Nag El-Baraka
+Luxor,وحدة,إدارة بندر,نجع الخطباء,Health Unit,Bandar Administration,Nag El-Khotabaa
+Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة الجوهرة,Health Center,Port Said Administration,El-Gohara Family Medicine Center
+Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة الحي الإماراتي,Health Center,Port Said Administration,Emirati District Family Medicine Center
+Port_Said,مركز,حي العرب,مركز طب أسرة العرب,Health Center,El-Arab District,El-Arab Family Medicine Center
+Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة القابوطي,Health Center,Port Said Administration,El-Qabouti Family Medicine Center
+Port_Said,مركز,حي المناخ,مركز طب أسرة المناخ,Health Center,El-Manakh District,El-Manakh Family Medicine Center
+Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة بلال بن رباح,Health Center,Port Said Administration,Bilal Ibn Rabah Family Medicine Center
+Port_Said,مركز,حي الزهور,مركز طب أسرة تعاونيات الزهور,Health Center,El-Zuhour District,El-Zuhour Cooperatives Family Medicine Center
+Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة شرق النوادي,Health Center,Port Said Administration,East El-Nawadi Family Medicine Center
+Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة علي بن أبي طالب,Health Center,Port Said Administration,Ali Ibn Abi Talib Family Medicine Center
+Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة محمد مشالي,Health Center,Port Said Administration,Mohamed Meshaly Family Medicine Center
+Port_Said,مركز,إدارة بورسعيد,مركز طب أسرة مصطفى كامل,Health Center,Port Said Administration,Mustafa Kamel Family Medicine Center
+Port_Said,مستشفى,جنوب بورسعيد,مستشفى 30 يونيو,Hospital,South Port Said,30 June Hospital
+Port_Said,مستشفى,حي المناخ,مستشفى التضامن,Hospital,El-Manakh District,El-Tadamon Hospital
+Port_Said,مستشفى,مدينة بورفؤاد,مستشفى الحياة بورفؤاد,Hospital,Port Fouad City,El-Hayat Port Fouad Hospital
+Port_Said,مستشفى,حي المناخ,مستشفى الرمد التخصصي,Hospital,El-Manakh District,Specialized Ophthalmology Hospital
+Port_Said,مستشفى,حي الزهور,مستشفى الزهور,Hospital,El-Zuhour District,El-Zuhour Hospital
+Port_Said,مستشفى,حي العرب,مستشفى المبرة,Hospital,El-Arab District,El-Mabarra Hospital
+Port_Said,مستشفى,حي المناخ,مستشفى النساء والولادة,Hospital,El-Manakh District,Women and Obstetrics Hospital
+Port_Said,مستشفى,حي الزهور,مستشفى النصر التخصصي,Hospital,El-Zuhour District,El-Nasr Specialized Hospital
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة أم خلف,Health Unit,Port Said Administration,Om Khalaf Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الإسراء,Health Unit,Port Said Administration,El-Israa Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الصيدلانية سمر عبد الرحمن,Health Unit,Port Said Administration,Samar Abd El-Rahman Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة العاشر من رمضان,Health Unit,Port Said Administration,10th of Ramadan Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الكاب,Health Unit,Port Said Administration,El-Kab Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الكويت,Health Unit,Port Said Administration,Kuwait Family Medicine Unit
+Port_Said,وحدة,حي المناخ,وحدة طب أسرة المناخ,Health Unit,El-Manakh District,El-Manakh Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة الميسرة,Health Unit,Port Said Administration,El-Maisara Family Medicine Unit
+Port_Said,وحدة,مدينة بورفؤاد,وحدة طب أسرة بورفؤاد ثانِ,Health Unit,Port Fouad City,Port Fouad Family Medicine Unit 2
+Port_Said,وحدة,حي الجنوب,وحدة طب أسرة جنوب البترول,Health Unit,South District,South Petroleum Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة رضوان,Health Unit,Port Said Administration,Redwan Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة شادر عزام,Health Unit,Port Said Administration,Shader Azzam Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة عثمان بن عفان,Health Unit,Port Said Administration,Othman Ibn Affan Family Medicine Unit
+Port_Said,وحدة,إدارة بورسعيد,وحدة طب أسرة عمر بن خطاب,Health Unit,Port Said Administration,Omar Ibn El-Khattab Family Medicine Unit
+South_Sinai,مركز,إدارة أبو زنيمة,أبو زنيمة,Health Center,Abu Zenima Administration,Abu Zenima
+South_Sinai,مركز,إدارة الطور,الامومة و الطفولة بالطور,Health Center,El-Tour Administration,El-Tour Maternity and Childhood
+South_Sinai,مركز,إدارة شرم الشيخ,الرويسات,Health Center,Sharm El-Sheikh Administration,El-Ruweisat
+South_Sinai,مركز,إدارة الطور,الزهراء,Health Center,El-Tour Administration,El-Zahraa
+South_Sinai,مركز,إدارة نويبع,المزينة بنويبع,Health Center,Nuweiba Administration,El-Muzeina Nuweiba
+South_Sinai,مركز,إدارة أبو رديس,وادي فيران,Health Center,Abu Rudeis Administration,Wadi Feiran
+South_Sinai,مركز,إدارة دهب,دهب,Health Center,Dahab Administration,Dahab
+South_Sinai,مركز,إدارة راس سدر,رأس سدر,Health Center,Ras Sidr Administration,Ras Sidr
+South_Sinai,مستشفى,إدارة أبو رديس,أبو رديس المركزي,Hospital,Abu Rudeis Administration,Abu Rudeis Central Hospital
+South_Sinai,مستشفى,إدارة شرم الشيخ,شرم الشيخ الدولي,Hospital,Sharm El-Sheikh Administration,Sharm El-Sheikh International Hospital
+South_Sinai,مستشفى,إدارة الطور,مستشفى الطور التعليمي,Hospital,El-Tour Administration,El-Tour Teaching Hospital
+South_Sinai,مستشفى,إدارة دهب,مستشفى دهب المركزى,Hospital,Dahab Administration,Dahab Central Hospital
+South_Sinai,مستشفى,إدارة راس سدر,مستشفى رأس سدر المركزي,Hospital,Ras Sidr Administration,Ras Sidr Central Hospital
+South_Sinai,مستشفى,إدارة سانت كاترين,مستشفى سانت كاترين المركزي,Hospital,Saint Catherine Administration,Saint Catherine Central Hospital
+South_Sinai,مستشفى,إدارة نويبع,مستشفى طابا المركزي,Hospital,Nuweiba Administration,Taba Central Hospital
+South_Sinai,مستشفى,إدارة نويبع,مستشفى نويبع المركزي,Hospital,Nuweiba Administration,Nuweiba Central Hospital
+South_Sinai,وحدة,إدارة الطور,الأسرة بالجبيل,Health Unit,El-Tour Administration,El-Jubeil Family
+South_Sinai,وحدة,إدارة أبو زنيمة,الكيلو 9,Health Unit,Abu Zenima Administration,Kilometer 9
+South_Sinai,وحدة,إدارة نويبع,المراخ,Health Unit,Nuweiba Administration,El-Marakh
+South_Sinai,وحدة,إدارة راس سدر,أبو صويرة,Health Unit,Ras Sidr Administration,Abu Sweira
+South_Sinai,وحدة,إدارة سانت كاترين,الاسباعية,Health Unit,Saint Catherine Administration,El-Esbaeia
+South_Sinai,وحدة,إدارة سانت كاترين,الطرفة,Health Unit,Saint Catherine Administration,El-Tarfa
+South_Sinai,وحدة,إدارة أبو رديس,العرايشية,Health Unit,Abu Rudeis Administration,El-Araishia
+South_Sinai,وحدة,إدارة راس سدر,رأس مسلة,Health Unit,Ras Sidr Administration,Ras Masala
+South_Sinai,وحدة,إدارة الطور,قرية الوادي,Health Unit,El-Tour Administration,El-Wadi Village
+South_Sinai,وحدة,إدارة أبو رديس,وادي الطَر,Health Unit,Abu Rudeis Administration,Wadi El-Tar
+South_Sinai,وحدة,إدارة شرم الشيخ,وادي مندر,Health Unit,Sharm El-Sheikh Administration,Wadi Mandar
+South_Sinai,وحدة,إدارة أبو زنيمة,تال,Health Unit,Abu Zenima Administration,Tal
+South_Sinai,وحدة,إدارة نويبع,طابا,Health Unit,Nuweiba Administration,Taba
+South_Sinai,وحدة,إدارة أبو زنيمة,غرندل,Health Unit,Abu Zenima Administration,Ghrendel
+Suez,مركز,إدارة الأربعين,الأربعين,Health Center,El-Arbaeen Administration,El-Arbaeen
+Suez,مركز,إدارة الأربعين,الإيمان,Health Center,El-Arbaeen Administration,El-Iman
+Suez,مركز,إدارة عتاقة,التوفيق,Health Center,Ataka Administration,El-Tawfiq
+Suez,مركز,إدارة السويس,السويس الجديدة,Health Center,Suez Administration,New Suez
+Suez,مركز,إدارة الجناين,الشروق,Health Center,El-Ganayen Administration,El-Shorouk
+Suez,مركز,إدارة فيصل,الصباح,Health Center,Faisal Administration,El-Sabah
+Suez,مستشفى,إدارة السويس,المستشفى العام,Hospital,Suez Administration,General Hospital
+Suez,مستشفى,إدارة السويس,مستشفي السويس للتأمين الصحى,Hospital,Suez Administration,Suez Health Insurance Hospital
+Suez,مستشفى,إدارة السويس,مستشفي المجمع الطبى الجديد,Hospital,Suez Administration,New Medical Complex Hospital
+Suez,مستشفى,إدارة السويس,مستشفي حميات السويس,Hospital,Suez Administration,Suez Fever Hospital
+Suez,مستشفى,إدارة السويس,مستشفي صدر السويس,Hospital,Suez Administration,Suez Chest Hospital
+Suez,وحدة,إدارة فيصل,24أكتوبر,Health Unit,Faisal Administration,24 October
+Suez,وحدة,إدارة فيصل,الأمل,Health Unit,Faisal Administration,El-Amal
+Suez,وحدة,إدارة فيصل,الرائد,Health Unit,Faisal Administration,El-Raed
+Suez,وحدة,إدارة الأربعين,السادات,Health Unit,El-Arbaeen Administration,El-Sadat
+Suez,وحدة,إدارة فيصل,السلام 1,Health Unit,Faisal Administration,El-Salam 1
+Suez,وحدة,إدارة عتاقة,السلام 2,Health Unit,Ataka Administration,El-Salam 2
+Suez,وحدة,إدارة السويس,السويس القديمة,Health Unit,Suez Administration,Old Suez
+Suez,وحدة,إدارة الجناين,الشلوفة,Health Unit,El-Ganayen Administration,El-Shalofa
+Suez,وحدة,إدارة عتاقة,الصفا,Health Unit,Ataka Administration,El-Safa
+Suez,وحدة,إدارة الجناين,العمدة,Health Unit,El-Ganayen Administration,El-Omda
+Suez,وحدة,إدارة الأربعين,المحروسة,Health Unit,El-Arbaeen Administration,El-Mahrosa
+Suez,وحدة,إدارة الأربعين,الهويس,Health Unit,El-Arbaeen Administration,El-Howeis
+Suez,وحدة,إدارة الجناين,جنيفة,Health Unit,El-Ganayen Administration,Goneifa
+Suez,وحدة,إدارة الجناين,شندورة,Health Unit,El-Ganayen Administration,Shendoura
+Suez,وحدة,إدارة عتاقة,عرب العامرين,Health Unit,Ataka Administration,Arab El-Amreen
+Suez,وحدة,إدارة عتاقة,عرب المعمل,Health Unit,Ataka Administration,Arab El-Maamal
+Suez,وحدة,إدارة فيصل,عمر بن الخطاب,Health Unit,Faisal Administration,Omar Ibn El-Khattab
+Suez,وحدة,إدارة الجناين,قرية عامر,Health Unit,El-Ganayen Administration,Amer Village
+Suez,وحدة,إدارة الجناين,كبريت,Health Unit,El-Ganayen Administration,Kabreet
+Suez,وحدة,إدارة فيصل,مبارك,Health Unit,Faisal Administration,Mubarak

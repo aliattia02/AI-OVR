@@ -12,7 +12,6 @@ const C = {
 
 const NAV_LINKS = [
   { label: "الرئيسية",       to: "/" },
-  { label: "تقارير الحوادث", to: "/public/incidents" },
   { label: "الإحصائيات",     to: "/public/statistics" },
   { label: "مكتبة القصص",    to: "/public/stories" },
   { label: "عن المنصة",      to: "/public/about" },

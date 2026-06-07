@@ -9,12 +9,16 @@
     "from": "From",
     "to": "To",
     "placeholder_dash": "—",
+    "yes": "Yes",
+    "no": "No",
     "submitting": "Submitting...",
     "tier_label": "Tier {{tier}}",
     "locked_label": "locked",
+    "exporting": "Exporting…",
     "disclaimer": "This report is used exclusively for quality improvement — not for legal proceedings. Reporter identity is protected.",
     "page_titles": {
       "dashboard": "Dashboard",
+      "incident_reports": "Incident Reports",
       "analytics": "Analytics"
     },
     "dashboard_welcome": {
@@ -50,6 +54,13 @@
       "port_said": "Port Said",
       "south_sinai": "South Sinai",
       "suez": "Suez"
+    },
+    "optional": "Optional",
+    "is_required": "is required",
+    "facility_types": {
+      "hospital": "Hospital",
+      "health_center": "Health Center",
+      "health_unit": "Health Unit"
     }
   },
   "auth": {
@@ -194,7 +205,20 @@
         "sentinel_event": "Sentinel Event",
         "no_harm": "No Harm",
         "unsafe_condition": "Unsafe Condition"
-      }
+      },
+      "search_placeholder": "Search by ID, description, person, facility…",
+      "filter_button": "Advanced Search",
+      "page_size": "{{n}} rows",
+      "all_governorates": "All Governorates",
+      "all_administrations": "All Administrations",
+      "all_types": "All Types",
+      "search_facility_placeholder": "Type to search…",
+      "all_statuses": "All Statuses",
+      "all_classifications": "All Classifications",
+      "all_event_types": "All Event Types",
+      "all_severities": "All Severities",
+      "results_count": "Showing {{count}} of {{total}} incidents",
+      "locked_label": "Locked"
     },
     "card": {
       "aria_incident_id": "Incident {{id}}",
@@ -226,6 +250,14 @@
       "generic_error": "An error occurred. Please try again.",
       "save": "Save",
       "saving": "Saving...",
+      "sections": {
+        "identity": "Identity",
+        "timing": "Timing",
+        "reporter": "Reporter & Involved",
+        "classification": "Classification",
+        "medication_safety": "Medication Safety",
+        "narratives": "Narratives"
+      },
       "fields": {
         "incident_id": "Incident ID",
         "status": "Status",
@@ -254,10 +286,29 @@
         "recommendations": "Recommendations",
         "notes": "Notes",
         "medical_file_number": "Medical File Number",
-        "action_status": "Action Status"
+        "action_status": "Action Status",
+        "event_discovery_method": "Discovery Method",
+        "medication_stage_of_error": "Stage of Error",
+        "medication_merp_category": "MERP Category"
       }
     },
     "new": {
+      "title": "New Incident Report",
+      "subtitle": "Complete all required sections below. Fields marked * are mandatory.",
+      "section_facility": "Facility & Location",
+      "section_occurrence": "Occurrence Details",
+      "section_reporter": "Reporter & People Involved",
+      "section_classification": "Classification & Risk Assessment",
+      "section_additional": "Additional Information",
+      "divider_facility_info": "Facility",
+      "divider_where_how": "Where & How",
+      "divider_department": "Department",
+      "divider_risk": "Risk Assessment",
+      "divider_patient": "Patient Record",
+      "description_hint": "Provide a clear and complete account of what happened, including the sequence of events.",
+      "description_placeholder": "Describe the incident…",
+      "required_fields_note": "Required fields must be completed before submitting.",
+      "facility_locked_hint": "Facility fields are pre-filled and locked to your account.",
       "facility_options_error": "Failed to load facility options.",
       "select_label": "Select {{label}}",
       "facility_type_label": "Facility Type",
@@ -274,6 +325,8 @@
       "select_classification": "Select classification",
       "select_event_type": "Select event type",
       "select_severity": "Select severity",
+      "select_probability_optional": "Select probability (optional)",
+      "probability_hint": "Initial estimate — Quality Admin can revise during evaluation.",
       "occurrence_location_telehealth": "Telehealth / Remote",
       "stored_encrypted": "Stored encrypted",
       "error_facility_type_required": "Facility type is required",
@@ -286,7 +339,14 @@
       "error_severity_required": "Severity is required",
       "error_submit": "Failed to submit incident.",
       "success_submit": "Incident submitted successfully.",
-      "submit": "Submit Incident"
+      "submit": "Submit Incident",
+      "event_discovery_method_label": "Event Discovery Method",
+      "select_discovery_method_optional": "Select method (optional)",
+      "medication_safety_subtitle": "Medication Safety Details",
+      "medication_stage_label": "Stage of Error",
+      "select_stage_optional": "Select stage (optional)",
+      "merp_category_label": "NCC MERP Classification",
+      "select_merp_optional": "Select category (optional)"
     },
     "status": {
       "label": "Status",
@@ -300,15 +360,17 @@
     },
     "severity": {
       "label": "Severity",
-      "minor": "Minor",
+      "catastrophic": "Catastrophic",
+      "major": "Major",
       "moderate": "Moderate",
-      "major": "Major"
+      "minor": "Minor"
     },
     "probability": {
       "label": "Probability",
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High"
+      "frequent": "Frequent",
+      "occasional": "Occasional",
+      "uncommon": "Uncommon",
+      "remote": "Remote"
     },
     "risk": {
       "label": "Risk",
@@ -316,17 +378,9 @@
       "risk_score_prefix": "Risk Score:",
       "risk_separator": " — ",
       "not_selected": "Not Selected",
-      "high_risk": "High Risk",
-      "medium_risk": "Medium Risk",
-      "low_risk": "Low Risk",
-      "critical": "Critical",
-      "high": "High",
-      "medium": "Medium",
-      "low": "Low",
-      "score_critical": "{{score}} · Critical",
-      "score_high": "{{score}} · High",
-      "score_medium": "{{score}} · Medium",
-      "score_low": "{{score}} · Low"
+      "sac3_critical": "Critical",
+      "sac2_intermediate": "Intermediate",
+      "sac1_low": "Low"
     },
     "event_type": {
       "label": "Event Type",
@@ -341,14 +395,80 @@
     "classification": {
       "label": "Error Classification",
       "column_label": "Classification",
-      "medication": "Medication",
-      "administrative": "Administrative",
-      "clinical": "Clinical",
-      "equipment": "Equipment",
-      "infection_control": "Infection Control",
-      "falls": "Falls",
-      "documentation": "Documentation",
-      "behavior": "Behavior"
+      "patientsafety": "Patient Safety",
+      "medicationsafety": "Medication Safety",
+      "infectionprevention": "Infection Prevention & Control",
+      "bloodtransfusion": "Blood Transfusion",
+      "laboratory": "Laboratory",
+      "radiologydiagnostic": "Radiology & Diagnostic",
+      "medicalequipment": "Medical Equipment",
+      "facilityenvironmental": "Facility & Environmental Safety",
+      "occupationalhealthstaff": "Occupational Health & Staff Safety",
+      "security": "Security",
+      "informationtechnology": "Information Technology",
+      "administrativeprocess": "Administrative Process",
+      "patientexperiencecomplaints": "Patient Experience & Complaints",
+      "firedisaster": "Fire & Disaster"
+    },
+    "reporter_role": {
+      "nurse": "Nurse",
+      "physician": "Physician",
+      "pharmacist": "Pharmacist",
+      "lab_technician": "Lab Technician",
+      "radiology_technician": "Radiology Technician",
+      "administrative_staff": "Administrative Staff",
+      "other": "Other"
+    },
+    "discovery_method": {
+      "selfreported": "Self Reported",
+      "supervisorreported": "Supervisor Reported",
+      "patientcomplaint": "Patient Complaint",
+      "auditfinding": "Audit Finding",
+      "incidentinvestigation": "Incident Investigation",
+      "other": "Other"
+    },
+    "medication_stage": {
+      "prescribing": "Prescribing",
+      "transcribing": "Transcribing",
+      "dispensing": "Dispensing",
+      "preparation": "Preparation",
+      "administration": "Administration",
+      "monitoring": "Monitoring"
+    },
+    "merp_category": {
+      "a": "A — Circumstances capable of causing error (no error occurred)",
+      "b": "B — Error occurred but did not reach the patient",
+      "c": "C — Error reached patient, no harm",
+      "d": "D — Error reached patient, monitoring required to confirm no harm",
+      "e": "E — Temporary harm, intervention required",
+      "f": "F — Temporary harm, initial or prolonged hospitalisation required",
+      "g": "G — Permanent patient harm",
+      "h": "H — Life-sustaining intervention required",
+      "i": "I — Patient death"
+    },
+    "occurrence_location": {
+      "emergency_room": "Emergency Room",
+      "icu": "Intensive Care Unit (ICU)",
+      "operating_room": "Operating Room",
+      "recovery_room": "Recovery Room",
+      "inpatient_ward": "Inpatient Ward",
+      "outpatient_clinic": "Outpatient Clinic",
+      "radiology": "Radiology Department",
+      "laboratory": "Laboratory",
+      "pharmacy": "Pharmacy",
+      "maternity_ward": "Maternity Ward",
+      "pediatric_ward": "Pediatric Ward",
+      "cardiac_care": "Cardiac Care Unit",
+      "corridor": "Corridor / Common Area",
+      "examination_room": "Examination Room",
+      "treatment_room": "Treatment Room",
+      "waiting_area": "Waiting Area",
+      "reception": "Reception",
+      "nursing_station": "Nursing Station",
+      "patient_room": "Patient Room",
+      "procedure_room": "Procedure Room",
+      "administrative_area": "Administrative Area",
+      "telehealth_remote": "Telehealth / Remote"
     },
     "action": {
       "panel_title": "CAPA",
@@ -378,10 +498,24 @@
       "applied_notice": "AI Classification Applied: {{classification}} — pending Quality Admin review.",
       "error_save_feedback": "Failed to save AI feedback."
     },
-    "jci": {
-      "panel_title": "JCI & Disclosure",
+    "final": {
+      "panel_title": "Final Report",
+      "submit": "Submit",
+      "error_submit": "Failed to submit final report."
+    },
+    "gahar": {
+      "panel_title": "GAHAR Compliance",
       "disclosure_info_title": "Disclosure Information",
-      "compliance_title": "JCI Compliance",
+      "compliance_title": "GAHAR Compliance",
+      "fields": {
+        "section": "GAHAR Section",
+        "gsr_code": "GSR Code",
+        "standard_code": "Standard Code",
+        "compliance_status": "Compliance Status",
+        "evidence": "Evidence",
+        "gap_analysis": "Gap Analysis",
+        "action_plan": "Action Plan"
+      },
       "disclosure_fields": {
         "disclosure_date": "Disclosure Date",
         "disclosure_method": "Disclosure Method",
@@ -391,46 +525,80 @@
         "workplace_violence": "Workplace Violence",
         "merp_category": "MERP Category"
       },
-      "chapter_label": "JCI Chapter",
-      "compliance_status_label": "Compliance Status",
-      "select_chapter": "— Select chapter —",
+      "select_section": "— Select section —",
       "select_status": "— Select status —",
-      "standard_label": "Standard",
-      "standard_placeholder": "e.g. IPSG.1",
-      "measurable_element_label": "Measurable Element",
-      "measurable_element_placeholder": "e.g. ME 1",
+      "section_label": "GAHAR Section",
+      "compliance_status_label": "Compliance Status",
+      "gsr_code_label": "GSR Code",
+      "standard_code_label": "Standard Code",
       "evidence_label": "Evidence",
       "gap_analysis_label": "Gap Analysis",
       "action_plan_label": "Action Plan",
-      "save_jci": "Save JCI",
-      "error_save": "Failed to save JCI fields.",
-      "chapters": {
-        "ipsg": "IPSG",
-        "acc": "ACC",
-        "pfr": "PFR",
-        "aop": "AOP",
-        "cop": "COP",
-        "asc": "ASC",
-        "mmu": "MMU",
-        "pfe": "PFE",
-        "qps": "QPS",
-        "pci": "PCI",
-        "gld": "GLD",
-        "fms": "FMS",
-        "sqe": "SQE",
-        "mci": "MCI"
+      "gsr_code_placeholder": "e.g. GSR.01",
+      "standard_code_placeholder": "e.g. ACT.03",
+      "sections": {
+        "pcc": "Patient-Centeredness Culture",
+        "act": "Access, Continuity & Transition",
+        "icd": "Integrated Care Delivery",
+        "css": "Critical & Special Care Services",
+        "das": "Diagnostic & Ancillary Services",
+        "sas": "Surgery, Anesthesia & Sedation",
+        "mms": "Medication Management & Safety",
+        "efs": "Environmental & Facility Safety",
+        "ipc": "Infection Prevention & Control",
+        "ogm": "Organization Governance & Management",
+        "cai": "Community Assessment & Involvement",
+        "wfm": "Workforce Management",
+        "imt": "Information Management & Technology",
+        "qpi": "Quality & Performance Improvement"
       },
       "compliance_statuses": {
         "met": "Met",
         "partially_met": "Partially Met",
         "not_met": "Not Met",
         "not_applicable": "Not Applicable"
-      }
+      },
+      "disclosure_methods": {
+        "verbal": "Verbal",
+        "written": "Written",
+        "not_yet": "Not Yet Disclosed"
+      },
+      "vulnerable_types": {
+        "pediatric": "Pediatric",
+        "elderly": "Elderly",
+        "mental_health": "Mental Health",
+        "end_of_life": "End of Life",
+        "other": "Other"
+      },
+      "save_gahar": "Save GAHAR",
+      "save_button": "Save GAHAR",
+      "saving": "Saving…",
+      "error_save": "Failed to save GAHAR fields.",
+      "locked_message": "GAHAR compliance data is restricted to Quality Admins and Top Management."
     },
-    "final": {
-      "panel_title": "Final Report",
-      "submit": "Submit",
-      "error_submit": "Failed to submit final report."
+    "public_reports": {
+      "page_heading": "Transparent Record of Patient Safety Incidents",
+      "category_breakdown_title": "Incident Distribution by Classification",
+      "filtered_badge": "✓ Filtered",
+      "data_note": "* Figures reflect actual reported data",
+      "principles": {
+        "confidentiality_title": "Full Confidentiality",
+        "confidentiality_desc": "Reporter identity is never disclosed",
+        "fast_response_title": "Fast Response",
+        "fast_response_desc": "Follow-up within 24 hours",
+        "actionable_data_title": "Actionable Data",
+        "actionable_data_desc": "To identify patterns and prevent recurrence"
+      },
+      "categories": {
+        "medication_errors":     "Medication Errors",
+        "clinical_errors":       "Clinical Errors",
+        "administrative":        "Administrative",
+        "equipment":             "Equipment",
+        "hospital_infection":    "Hospital Infection",
+        "patient_falls":         "Patient Falls",
+        "documentation_errors":  "Documentation Errors",
+        "behavioral":            "Behavioral"
+      }
     }
   },
   "analytics": {
@@ -463,7 +631,8 @@
       "all_types": "All types",
       "your_facility": "Your facility",
       "no_facilities": "No facilities",
-      "all_facilities": "All facilities"
+      "all_facilities": "All facilities",
+      "all_classifications": "All Classifications"
     }
   },
   "patient": {
@@ -501,6 +670,7 @@
       "qr_codes": "QR Codes"
     },
     "common": {
+      "exporting": "Exporting…",
       "copy": "Copy",
       "copied": "✓ Copied",
       "show": "Show",

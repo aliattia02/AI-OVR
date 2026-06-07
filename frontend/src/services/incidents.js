@@ -2,11 +2,16 @@ import api from './api';
 
 export const incidentService = {
   async getAll(params = {}) {
+    const { skip = 0, limit = 20, ...filters } = params;
+
+    // Drop empty-string / null / undefined filter values so they don't reach
+    // the backend as empty query params (e.g. ?governorate= causes 422 errors)
+    const activeFilters = Object.fromEntries(
+      Object.entries(filters).filter(([, v]) => v !== '' && v !== null && v !== undefined),
+    );
+
     const { data } = await api.get('/incidents/', {
-      params: {
-        skip: params.skip ?? 0,
-        limit: params.limit ?? 20,
-      },
+      params: { skip, limit, ...activeFilters },
     });
     return data;
   },
@@ -46,8 +51,9 @@ export const incidentService = {
     return data;
   },
 
-  async saveJCIFields(id, payload) {
-    const { data } = await api.patch(`/incidents/${id}/jci-fields`, payload);
+  // GAHAR migration: replaces saveJCIFields / /jci-fields endpoint
+  async saveGAHARFields(id, payload) {
+    const { data } = await api.patch(`/incidents/${id}/gahar-fields`, payload);
     return data;
   },
 
