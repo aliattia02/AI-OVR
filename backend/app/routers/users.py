@@ -52,7 +52,11 @@ class TierUserRequest(BaseModel):
 
 class TierUserResult(BaseModel):
     username: str
+    full_name: str
     role: str
+    email: Optional[str] = None
+    governorate: Optional[str] = None
+    administration: Optional[str] = None
     temp_password: str
     must_change_password: bool
 
@@ -364,9 +368,9 @@ async def provision_tier_user(
         UserRole.top_management: "national",
     }
     tier_int_map = {
-        UserRole.governorate_manager: 3,
-        UserRole.administration_manager: 2,
-        UserRole.top_management: 4,
+        UserRole.governorate_manager: 4,
+        UserRole.administration_manager: 3,
+        UserRole.top_management: 5,
     }
     tier = tier_map[body.role]
     tier_int = tier_int_map[body.role]
@@ -404,7 +408,11 @@ async def provision_tier_user(
 
     return TierUserResult(
         username=username,
+        full_name=body.full_name,
         role=body.role.value,
+        email=email,
+        governorate=body.governorate,
+        administration=body.administration,
         temp_password=temp_pw,
         must_change_password=True,
     )
