@@ -365,7 +365,7 @@ function TierResultCard({ result }) {
           <CredRow label="Full name" value={result.full_name} />
           <CredRow label="Username" value={result.username} mono />
           {result.email && <CredRow label="Email" value={result.email} />}
-          {result.governorate && <CredRow label="Governorate" value={result.governorate} />}
+          {result.governorate && <CredRow label="Governorate" value={result.governorate.replace(/_/g, ' ')} />}
           {result.administration && <CredRow label="Administration" value={result.administration} />}
           <CredRow label="Temp password" value={result.temp_password} mono password={!alreadySet} />
         </div>
@@ -389,6 +389,17 @@ function FacilitySelector({ facilities, onSelect }) {
     [facilities]
   );
 
+  // Arabic administration name → English label (sourced from facility_name_en migration).
+  const adminEnMap = useMemo(() => {
+    const map = {};
+    facilities.forEach((f) => {
+      if (f.administration && f.administration_en) {
+        map[f.administration] = f.administration_en;
+      }
+    });
+    return map;
+  }, [facilities]);
+
   const administrations = useMemo(() => {
     if (!selectedGov) return [];
     return [...new Set(
@@ -400,7 +411,9 @@ function FacilitySelector({ facilities, onSelect }) {
     if (!selectedAdmin) return [];
     return facilities
       .filter((f) => f.governorate === selectedGov && f.administration === selectedAdmin)
-      .sort((a, b) => a.facility_name.localeCompare(b.facility_name));
+      .sort((a, b) =>
+        (a.facility_name_en || a.facility_name).localeCompare(b.facility_name_en || b.facility_name)
+      );
   }, [facilities, selectedGov, selectedAdmin]);
 
   const handleGovChange = (e) => {
@@ -429,8 +442,9 @@ function FacilitySelector({ facilities, onSelect }) {
         <label style={styles.label}>Governorate</label>
         <select value={selectedGov} onChange={handleGovChange} style={styles.select}>
           <option value="">— Select governorate —</option>
+          {/* value stays as the raw DB key; label removes underscores for readability */}
           {governorates.map((gov) => (
-            <option key={gov} value={gov}>{gov}</option>
+            <option key={gov} value={gov}>{gov.replace(/_/g, ' ')}</option>
           ))}
         </select>
       </div>
@@ -444,8 +458,9 @@ function FacilitySelector({ facilities, onSelect }) {
           style={{ ...styles.select, ...(!selectedGov ? styles.selectDisabled : {}) }}
         >
           <option value="">— Select administration —</option>
+          {/* value = Arabic canonical; label = EN from migration, falls back to Arabic */}
           {administrations.map((admin) => (
-            <option key={admin} value={admin}>{admin}</option>
+            <option key={admin} value={admin}>{adminEnMap[admin] || admin}</option>
           ))}
         </select>
       </div>
@@ -459,16 +474,20 @@ function FacilitySelector({ facilities, onSelect }) {
           style={{ ...styles.select, ...(!selectedAdmin ? styles.selectDisabled : {}) }}
         >
           <option value="">— Select facility —</option>
+          {/* facility_id is the submitted value; EN name shown, Arabic as fallback */}
           {units.map((f) => (
-            <option key={f.facility_id} value={f.facility_id}>{f.facility_name}</option>
+            <option key={f.facility_id} value={f.facility_id}>
+              {f.facility_name_en || f.facility_name}
+            </option>
           ))}
         </select>
       </div>
 
       {selectedFacility && (
         <div style={styles.selectedFacility}>
-          ✓ <strong>{selectedFacility.facility_name}</strong> · {selectedFacility.administration} ·{' '}
-          {selectedFacility.governorate}
+          ✓ <strong>{selectedFacility.facility_name_en || selectedFacility.facility_name}</strong>{' '}
+          · {adminEnMap[selectedFacility.administration] || selectedFacility.administration}{' '}
+          · {selectedFacility.governorate.replace(/_/g, ' ')}
           <br />
           <span style={{ fontFamily: 'monospace', fontSize: 12 }}>ID: {selectedFacility.facility_id}</span>
         </div>
@@ -487,6 +506,17 @@ function GovAdminSelector({ facilities, role, governorate, administration, onCha
     [facilities]
   );
 
+  // Arabic administration name → English label
+  const adminEnMap = useMemo(() => {
+    const map = {};
+    facilities.forEach((f) => {
+      if (f.administration && f.administration_en) {
+        map[f.administration] = f.administration_en;
+      }
+    });
+    return map;
+  }, [facilities]);
+
   const administrations = useMemo(() => {
     if (!governorate) return [];
     return [...new Set(
@@ -504,8 +534,9 @@ function GovAdminSelector({ facilities, role, governorate, administration, onCha
           style={styles.select}
         >
           <option value="">— Select governorate —</option>
+          {/* value = raw DB key; label strips underscores */}
           {governorates.map((gov) => (
-            <option key={gov} value={gov}>{gov}</option>
+            <option key={gov} value={gov}>{gov.replace(/_/g, ' ')}</option>
           ))}
         </select>
       </div>
@@ -520,8 +551,9 @@ function GovAdminSelector({ facilities, role, governorate, administration, onCha
             style={{ ...styles.select, ...(!governorate ? styles.selectDisabled : {}) }}
           >
             <option value="">— Select administration —</option>
+            {/* value = Arabic canonical (submitted to backend); label = EN */}
             {administrations.map((admin) => (
-              <option key={admin} value={admin}>{admin}</option>
+              <option key={admin} value={admin}>{adminEnMap[admin] || admin}</option>
             ))}
           </select>
         </div>
@@ -789,6 +821,9 @@ function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
     if (!q) return facilities;
     return facilities.filter(
       (f) =>
+        // Search both Arabic and English name/admin fields so either language finds the facility.
+        (f.facility_name_en || '').toLowerCase().includes(q) ||
+        (f.administration_en || '').toLowerCase().includes(q) ||
         f.facility_name.toLowerCase().includes(q) ||
         f.administration.toLowerCase().includes(q) ||
         f.governorate.toLowerCase().includes(q),
@@ -862,10 +897,10 @@ function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
                 >
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--color-text-primary)' }}>
-                      {f.facility_name}
+                      {f.facility_name_en || f.facility_name}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 2 }}>
-                      {f.administration} · {f.governorate}
+                      {f.administration_en || f.administration} · {f.governorate.replace(/_/g, ' ')}
                     </div>
                   </div>
                   <span

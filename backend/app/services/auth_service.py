@@ -196,12 +196,27 @@ def decode_token(token: str) -> dict[str, Any]:
 # ── User authentication ───────────────────────────────────────────────────────
 
 async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase) -> UserInDB | None:
-    """Authenticate a user by email/password and update last_login on success."""
+    """Authenticate a user by email/password and update last_login on success.
+
+    Lookup order:
+      1. Exact match on the ``email`` field (normalised to lowercase).
+      2. Fallback to ``username`` field — handles accounts provisioned without
+         an email address (e.g. top-management tier users whose email was left
+         blank during provisioning and stored as null).
+    """
     # Normalise to lowercase so login works regardless of how the user typed
     # their email (e.g. "User@UHIC.OVR" == "user@uhic.ovr").
-    email = email.strip().lower()
-    user_doc = await db["users"].find_one({"email": email})
+    normalized = email.strip().lower()
+
+    user_doc = await db["users"].find_one({"email": normalized})
     if not user_doc:
+        # Fallback: provisioned accounts may have email=null; allow login via username.
+        user_doc = await db["users"].find_one({"username": normalized})
+    if not user_doc:
+        return None
+
+    # Reject inactive accounts early — consistent with every other auth gate.
+    if not user_doc.get("is_active", False):
         return None
 
     hashed_password = user_doc.get("hashed_password", "")

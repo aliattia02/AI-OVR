@@ -24,9 +24,14 @@ REFRESH_MAX_AGE_SECONDS = auth_service.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
 
 
 class LoginRequest(BaseModel):
-    """Payload for email/password login."""
+    """Payload for email/password login.
 
-    email: EmailStr
+    ``email`` accepts either a valid email address or a plain username so that
+    accounts provisioned without an email (stored as null) can still log in via
+    their username field.
+    """
+
+    email: str
     password: str
 
 
@@ -36,6 +41,7 @@ class LoginResponse(BaseModel):
     access_token: str
     token_type: str
     user: UserResponse
+    must_change_password: bool = False
 
 
 class AccessTokenResponse(BaseModel):
@@ -198,7 +204,12 @@ async def login(
         tier=user.tier,
         is_active=user.is_active,
     )
-    return LoginResponse(access_token=access_token, token_type="bearer", user=user_response)
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=user_response,
+        must_change_password=user.must_change_password,
+    )
 
 
 @router.post("/mfa/setup", response_model=MFASetupResponse)
@@ -278,6 +289,7 @@ async def mfa_verify(
         access_token=access_token,
         token_type="bearer",
         user=_to_user_response(user_doc),
+        must_change_password=user_doc.get("must_change_password", False),
     )
 
 
