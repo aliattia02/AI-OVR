@@ -272,7 +272,10 @@ async def provision_facility_users(
 
     results: dict[str, dict[str, str]] = {}
     for result_key, email_suffix, role_enum in role_configs:
-        username = f"{name_slug}_{email_suffix}"
+        # Lowercase the full username so mixed-case suffixes like "QC" don't
+        # produce credentials that authenticate_user (which normalises input to
+        # lowercase before querying) can never match.  Mirrors provision_tier_user.
+        username = f"{name_slug}_{email_suffix}".lower()
         email    = f"{username}@{EMAIL_DOMAIN}"
 
         # Username is always generated lowercase by _slugify; the regex option

@@ -208,10 +208,25 @@ async def authenticate_user(email: str, password: str, db: AsyncIOMotorDatabase)
     # their email (e.g. "User@UHIC.OVR" == "user@uhic.ovr").
     normalized = email.strip().lower()
 
+    # Primary: exact match on the normalised (lowercase) value.
     user_doc = await db["users"].find_one({"email": normalized})
+    if not user_doc:
+        # Case-insensitive fallback: handles legacy records provisioned before
+        # the lowercase-enforcement fix (e.g. stored as "el_nasr_sh_QC@uhic.ovr").
+        # strength=2 is a MongoDB collation level that ignores case only.
+        user_doc = await db["users"].find_one(
+            {"email": normalized},
+            collation={"locale": "en", "strength": 2},
+        )
     if not user_doc:
         # Fallback: provisioned accounts may have email=null; allow login via username.
         user_doc = await db["users"].find_one({"username": normalized})
+    if not user_doc:
+        # Case-insensitive username fallback for the same legacy-record reason.
+        user_doc = await db["users"].find_one(
+            {"username": normalized},
+            collation={"locale": "en", "strength": 2},
+        )
     if not user_doc:
         return None
 
