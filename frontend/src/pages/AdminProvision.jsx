@@ -939,12 +939,15 @@ function QRCodesTab({ facilities, facilitiesLoading, facilitiesError }) {
 
 // ─── Tab bar ─────────────────────────────────────────────────────────────────
 
-function TabBar({ active, onChange }) {
-  const tabs = [
+function TabBar({ active, onChange, canProvisionUsers }) {
+  const allTabs = [
     { id: 'provision', label: 'Provisioning' },
     { id: 'users',     label: 'Users' },
     { id: 'qr-codes',  label: 'QR Codes' },
   ];
+  // Only admins on the provisioning allowlist (checked server-side via
+  // user.can_provision_users) see the tab that creates new accounts.
+  const tabs = canProvisionUsers ? allTabs : allTabs.filter((tab) => tab.id !== 'provision');
   return (
     <div
       style={{
@@ -988,7 +991,9 @@ function TabBar({ active, onChange }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function AdminProvision() {
-  const [activeTab, setActiveTab] = useState('provision');
+  const { user } = useAuth();
+  const canProvisionUsers = Boolean(user?.can_provision_users);
+  const [activeTab, setActiveTab] = useState(canProvisionUsers ? 'provision' : 'users');
 
   // Shared facility data — loaded once, consumed by both provisioning sections
   const [facilities, setFacilities] = useState([]);
@@ -1085,10 +1090,12 @@ export default function AdminProvision() {
     <div style={styles.page}>
       <h1 style={styles.title}>User provisioning</h1>
       <p style={styles.note}>
-        Top management only. Temporary passwords are shown once — copy them immediately.
+        {canProvisionUsers
+          ? 'Temporary passwords are shown once — copy them immediately.'
+          : 'Provisioning new accounts is restricted to specific admins. You can still view existing users and QR codes below.'}
       </p>
 
-      <TabBar active={activeTab} onChange={setActiveTab} />
+      <TabBar active={activeTab} onChange={setActiveTab} canProvisionUsers={canProvisionUsers} />
 
       {/* ── Users tab ──────────────────────────────────────────────────── */}
       {activeTab === 'users' && <UsersTab />}
@@ -1103,7 +1110,7 @@ export default function AdminProvision() {
       )}
 
       {/* ── Provisioning tab ───────────────────────────────────────────── */}
-      {activeTab === 'provision' && (
+      {activeTab === 'provision' && canProvisionUsers && (
         <>
           {facilitiesError && <div style={styles.error}>{facilitiesError}</div>}
 

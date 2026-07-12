@@ -29,6 +29,19 @@ optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=
 USER_PROVISIONING_ALLOWLIST: frozenset[str] = frozenset({"admin", "test"})
 
 
+def is_provisioning_allowed(username: str | None) -> bool:
+    """Return True if ``username`` is on USER_PROVISIONING_ALLOWLIST.
+
+    Single source of truth for the "can this account create/provision new
+    users" check — used both by require_user_provisioner (backend
+    enforcement) and by auth.py (to expose a can_provision_users flag to the
+    frontend so the UI can hide the Provisioning tab for everyone else).
+    """
+    if not username:
+        return False
+    return username.strip().lower() in USER_PROVISIONING_ALLOWLIST
+
+
 def require_role(*allowed_roles: UserRole):
     """Require an authenticated user whose role is in the allowed role set."""
 
@@ -65,8 +78,8 @@ def require_user_provisioner():
     ) -> dict[str, Any]:
         user_id = claims.get("user_id")
         user_doc = await db["users"].find_one({"user_id": user_id}, {"username": 1})
-        username = (user_doc or {}).get("username", "")
-        if not username or username.strip().lower() not in USER_PROVISIONING_ALLOWLIST:
+        username = (user_doc or {}).get("username")
+        if not is_provisioning_allowed(username):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You are not authorized to create or provision users.",

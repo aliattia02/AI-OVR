@@ -6,11 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/users.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/users.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/.expo/dev/logs/export.log" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/.expo/dev/logs/export.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminProvision.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminProvision.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/IncidentReportsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/IncidentReportsPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -125,7 +124,7 @@
       <workItem from="1783500568087" duration="2675000" />
       <workItem from="1783503967081" duration="1623000" />
       <workItem from="1783622688203" duration="459000" />
-      <workItem from="1783855588997" duration="3374000" />
+      <workItem from="1783855588997" duration="4695000" />
     </task>
     <servers />
   </component>

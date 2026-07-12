@@ -84,3 +84,4 @@ class UserResponse(BaseModel):
     governorate: Optional[str] = None
     tier: int
     is_active: bool
+    can_provision_users: bool = False

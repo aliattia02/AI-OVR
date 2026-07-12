@@ -11,7 +11,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel, EmailStr, constr
 
 from app.db.database import get_database
-from app.middleware.auth_middleware import require_role
+from app.middleware.auth_middleware import is_provisioning_allowed, require_role
 from app.models.user import UserResponse
 from app.services import auth_service
 from app.services.auth_service import generate_mfa_secret, get_totp_uri, verify_totp
@@ -132,6 +132,7 @@ def _to_user_response(user_doc: dict[str, Any]) -> UserResponse:
         governorate=user_doc.get("governorate"),
         tier=user_doc["tier"],
         is_active=user_doc.get("is_active", True),
+        can_provision_users=is_provisioning_allowed(user_doc.get("username")),
     )
 
 
@@ -201,6 +202,13 @@ async def login(
     # can be None at runtime for provisioned accounts.  Use getattr with a
     # sentinel to stay safe — None is now accepted by the Optional fields in
     # UserResponse.
+    #
+    # "username" is NOT a declared field on UserInDB, so model_construct
+    # silently drops it — getattr(user, "username", ...) would always miss.
+    # Fetch it directly so can_provision_users is computed correctly.
+    username_doc = await db["users"].find_one({"user_id": user.user_id}, {"username": 1})
+    username = (username_doc or {}).get("username")
+
     user_response = UserResponse(
         user_id=user.user_id,
         email=getattr(user, "email", None),
@@ -211,6 +219,7 @@ async def login(
         governorate=getattr(user, "governorate", None),
         tier=user.tier,
         is_active=user.is_active,
+        can_provision_users=is_provisioning_allowed(username),
     )
     return LoginResponse(
         access_token=access_token,
