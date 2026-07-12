@@ -259,19 +259,35 @@ function SectionTitle({ children }) {
 // ── Main component ─────────────────────────────────────────────────────────
 
 export default function IncidentReportsPage() {
-  const { tier, user } = useAuth();
+  const { tier, role, user } = useAuth();
   const { isRTL }      = useDirection();
   const { t }          = useTranslation();
 
   const isFacilityScoped   = tier === 2;
   const lockedFacilityName = isFacilityScoped ? (user?.facility_name ?? '') : null;
 
+  // Governorate managers are scoped to their own governorate; administration
+  // managers to their own administration — same pattern as facility scoping
+  // above, mirrored in DashboardFilterBar via lockedGovernorate / lockedAdministration.
+  const isGovernorateScoped    = role === 'governorate_manager';
+  const lockedGovernorate      = isGovernorateScoped ? (user?.governorate ?? '') : null;
+  const isAdministrationScoped = role === 'administration_manager';
+  const lockedAdministration   = isAdministrationScoped ? (user?.administration ?? '') : null;
+
   const [filters, setFilters] = useState(EMPTY_FILTERS);
 
-  const effectiveFilters = useMemo(
-    () => isFacilityScoped ? { ...filters, facility_name: lockedFacilityName } : filters,
-    [filters, isFacilityScoped, lockedFacilityName],
-  );
+  const effectiveFilters = useMemo(() => {
+    let next = filters;
+    if (isFacilityScoped) next = { ...next, facility_name: lockedFacilityName };
+    if (isGovernorateScoped) next = { ...next, governorate: lockedGovernorate };
+    if (isAdministrationScoped) next = { ...next, administration: lockedAdministration };
+    return next;
+  }, [
+    filters,
+    isFacilityScoped, lockedFacilityName,
+    isGovernorateScoped, lockedGovernorate,
+    isAdministrationScoped, lockedAdministration,
+  ]);
 
   // ── Analytics (KPIs + trend chart + severity pie) ──────────────────────
   const {
@@ -476,6 +492,8 @@ export default function IncidentReportsPage() {
           onFiltersChange={setFilters}
           isLoading={backgroundFetching}
           lockedFacilityName={lockedFacilityName}
+          lockedGovernorate={lockedGovernorate}
+          lockedAdministration={lockedAdministration}
         />
       </div>
 

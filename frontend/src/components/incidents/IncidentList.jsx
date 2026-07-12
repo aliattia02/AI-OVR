@@ -399,6 +399,18 @@ export default function IncidentList({ onIncidentClick, role }) {
 
   const isFacilityScoped = tier === 2;
 
+  // Governorate/administration managers are scoped the same way facility-tier
+  // users are above: their own value replaces the free dropdown with a locked
+  // chip, and — unlike the facility case, which relies entirely on the backend
+  // already scoping /incidents/ to that facility — we also apply the lock
+  // client-side below (see filteredIncidents) since this component fetches
+  // by page/pageSize only, with no server-side governorate/administration
+  // query params to lean on.
+  const isGovernorateScoped    = role === 'governorate_manager';
+  const isAdministrationScoped = role === 'administration_manager';
+  const lockGovernorate    = isFacilityScoped || isGovernorateScoped;
+  const lockAdministration = isFacilityScoped || isAdministrationScoped;
+
   const [page,     setPage]     = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
@@ -415,17 +427,24 @@ export default function IncidentList({ onIncidentClick, role }) {
   const rawResults = Array.isArray(data) ? data : [];
   const hasNextPage = rawResults.length >= pageSize;
 
+  // The value actually used to filter — NOT the raw dropdown state, which
+  // stays 'all' for locked fields since the locked chip has no onChange.
+  // Declared here (after `filters` state, before administrationOptions/
+  // filteredIncidents use them) so the lock is a real restriction, not cosmetic.
+  const effectiveGovernorate    = lockGovernorate    ? (user?.governorate ?? '')    : filters.governorate;
+  const effectiveAdministration = lockAdministration ? (user?.administration ?? '') : filters.administration;
+
   const governorateOptions = useMemo(
     () => [...new Set(rawResults.map(r => r.governorate).filter(Boolean))].sort(),
     [rawResults],
   );
 
   const administrationOptions = useMemo(() => {
-    const source = filters.governorate !== 'all'
-      ? rawResults.filter(r => r.governorate === filters.governorate)
+    const source = effectiveGovernorate !== 'all'
+      ? rawResults.filter(r => r.governorate === effectiveGovernorate)
       : rawResults;
     return [...new Set(source.map(r => r.administration).filter(Boolean))].sort();
-  }, [rawResults, filters.governorate]);
+  }, [rawResults, effectiveGovernorate]);
 
   const facilityTypeOptions = useMemo(
     () => [...new Set(rawResults.map(r => r.facility_type).filter(Boolean))].sort(),
@@ -467,6 +486,10 @@ export default function IncidentList({ onIncidentClick, role }) {
   );
 
   // ── Client-side filtering ──────────────────────────────────────────────────
+  // For governorate/administration-scoped roles, effectiveGovernorate /
+  // effectiveAdministration (declared above) are used instead of the raw
+  // filters.governorate / filters.administration so the lock actually
+  // restricts data rather than being cosmetic.
   const filteredIncidents = useMemo(() => {
     const q   = filters.query.trim().toLowerCase();
     const cFr = filters.creationFrom   ? new Date(filters.creationFrom)                    : null;
@@ -480,8 +503,8 @@ export default function IncidentList({ onIncidentClick, role }) {
           .map(v => String(v || '').toLowerCase()).join(' ');
         if (!haystack.includes(q)) return false;
       }
-      if (filters.governorate !== 'all' && inc.governorate !== filters.governorate) return false;
-      if (filters.administration !== 'all' && inc.administration !== filters.administration) return false;
+      if (effectiveGovernorate !== 'all' && inc.governorate !== effectiveGovernorate) return false;
+      if (effectiveAdministration !== 'all' && inc.administration !== effectiveAdministration) return false;
       if (filters.facilityType !== 'all' && inc.facility_type !== filters.facilityType) return false;
       if (filters.facilityName.trim() && !String(inc.facility_name || '').toLowerCase().includes(filters.facilityName.trim().toLowerCase())) return false;
       if (filters.status !== 'all' && inc.status !== filters.status) return false;
@@ -503,7 +526,7 @@ export default function IncidentList({ onIncidentClick, role }) {
       }
       return true;
     });
-  }, [rawResults, filters]);
+  }, [rawResults, filters, effectiveGovernorate, effectiveAdministration]);
 
   // ── Sorting ────────────────────────────────────────────────────────────────
   const sortedIncidents = useMemo(() => {
@@ -696,16 +719,15 @@ export default function IncidentList({ onIncidentClick, role }) {
             gap: 12,
           }}
         >
-          {isFacilityScoped ? (
-            <>
-              <LockedFilterChip label={t('incidents.detail.fields.governorate')} value={user?.governorate} lockedLabel={t('incidents.list.locked_label')} placeholder={placeholderDash} />
-              <LockedFilterChip label={t('incidents.detail.fields.administration')} value={user?.administration} lockedLabel={t('incidents.list.locked_label')} placeholder={placeholderDash} />
-            </>
+          {lockGovernorate ? (
+            <LockedFilterChip label={t('incidents.detail.fields.governorate')} value={user?.governorate} lockedLabel={t('incidents.list.locked_label')} placeholder={placeholderDash} />
           ) : (
-            <>
-              <FilterSelect label={t('incidents.detail.fields.governorate')} value={filters.governorate} onChange={v => setFilter('governorate', v)} options={governorateOptions} isRTL={isRTL} allLabel={t('incidents.list.all_governorates')} />
-              <FilterSelect label={t('incidents.detail.fields.administration')} value={filters.administration} onChange={v => setFilter('administration', v)} options={administrationOptions} isRTL={isRTL} allLabel={t('incidents.list.all_administrations')} />
-            </>
+            <FilterSelect label={t('incidents.detail.fields.governorate')} value={filters.governorate} onChange={v => setFilter('governorate', v)} options={governorateOptions} isRTL={isRTL} allLabel={t('incidents.list.all_governorates')} />
+          )}
+          {lockAdministration ? (
+            <LockedFilterChip label={t('incidents.detail.fields.administration')} value={user?.administration} lockedLabel={t('incidents.list.locked_label')} placeholder={placeholderDash} />
+          ) : (
+            <FilterSelect label={t('incidents.detail.fields.administration')} value={filters.administration} onChange={v => setFilter('administration', v)} options={administrationOptions} isRTL={isRTL} allLabel={t('incidents.list.all_administrations')} />
           )}
 
           <FilterSelect label={t('incidents.new.facility_type_label')} value={filters.facilityType} onChange={v => setFilter('facilityType', v)} options={facilityTypeOptions} isRTL={isRTL} allLabel={t('incidents.list.all_types')} />
