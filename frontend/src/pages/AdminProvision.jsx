@@ -1162,14 +1162,18 @@ export default function AdminProvision() {
               </div>
 
               <div style={styles.row}>
-                <label htmlFor="email" style={styles.label}>Email (optional)</label>
+                <label htmlFor="email" style={styles.label}>Email</label>
                 <input
                   id="email"
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="Leave blank to auto-generate from username"
                   style={styles.input}
                 />
+                <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 4 }}>
+                  If left blank, an email is generated automatically from the username — every account needs one to log in.
+                </div>
               </div>
 
               <div style={styles.row}>

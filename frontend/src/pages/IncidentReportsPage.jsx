@@ -120,7 +120,7 @@ function toMap(items = []) {
 
 // ── Sub-components ─────────────────────────────────────────────────────────
 
-function HeroKPI({ label, value, accent = 'rgba(255,255,255,0.9)' }) {
+function HeroKPI({ label, labelAr, value, accent = 'rgba(255,255,255,0.9)' }) {
   return (
     <div
       style={{
@@ -132,15 +132,28 @@ function HeroKPI({ label, value, accent = 'rgba(255,255,255,0.9)' }) {
         borderRadius:  14,
         background:    'rgba(255,255,255,0.08)',
         border:        '1px solid rgba(255,255,255,0.15)',
-        minWidth:      100,
+        minWidth:      110,
       }}
     >
       <span style={{ fontSize: 28, fontWeight: 900, color: accent, letterSpacing: '-0.03em', lineHeight: 1 }}>
         {value}
       </span>
-      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600, textAlign: 'center' }}>
+      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', fontWeight: 600, textAlign: 'center' }}>
         {label}
       </span>
+      {labelAr && (
+        <span style={{
+          fontSize:   10,
+          color:      'rgba(255,255,255,0.40)',
+          fontWeight: 500,
+          textAlign:  'center',
+          direction:  'rtl',
+          fontFamily: '"Segoe UI", Tahoma, Arial, sans-serif',
+          marginTop:  1,
+        }}>
+          {labelAr}
+        </span>
+      )}
     </div>
   );
 }
@@ -475,8 +488,24 @@ export default function IncidentReportsPage() {
           marginBottom: 16,
           position:     'relative',
           overflow:     'hidden',
+          textAlign:    'center',
         }}
       >
+        {/* Decorative glow — left */}
+        <div
+          aria-hidden
+          style={{
+            position:      'absolute',
+            top:           -80,
+            left:          -80,
+            width:         320,
+            height:        320,
+            borderRadius:  '50%',
+            background:    'radial-gradient(circle, rgba(11,125,107,0.22) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }}
+        />
+        {/* Decorative glow — right */}
         <div
           aria-hidden
           style={{
@@ -486,32 +515,45 @@ export default function IncidentReportsPage() {
             width:         320,
             height:        320,
             borderRadius:  '50%',
-            background:    'radial-gradient(circle, rgba(11,125,107,0.22) 0%, transparent 70%)',
+            background:    'radial-gradient(circle, rgba(11,125,107,0.18) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
         />
 
+        {/* ── Bilingual badge ── */}
         <div
           style={{
-            display:      'inline-flex',
-            alignItems:   'center',
-            gap:          8,
-            padding:      '4px 13px',
-            borderRadius: 999,
-            background:   'rgba(11,125,107,0.22)',
-            border:       '1px solid rgba(11,125,107,0.45)',
-            marginBottom: 14,
+            display:        'inline-flex',
+            alignItems:     'center',
+            gap:            10,
+            padding:        '4px 16px',
+            borderRadius:   999,
+            background:     'rgba(11,125,107,0.22)',
+            border:         '1px solid rgba(11,125,107,0.45)',
+            marginBottom:   18,
           }}
         >
           <span style={{ fontSize: 11, fontWeight: 700, color: '#7FDDCA', letterSpacing: '0.04em' }}>
             {t('common.page_titles.incident_reports')}
           </span>
+          <span style={{ fontSize: 11, color: 'rgba(127,221,202,0.40)', fontWeight: 400 }}>·</span>
+          <span style={{
+            fontSize:   11,
+            fontWeight: 700,
+            color:      '#7FDDCA',
+            letterSpacing: '0.02em',
+            direction:  'rtl',
+            fontFamily: '"Segoe UI", Tahoma, Arial, sans-serif',
+          }}>
+            تقارير الحوادث
+          </span>
         </div>
 
+        {/* ── Bilingual heading ── */}
         <h1
           style={{
-            margin:        '0 0 10px',
-            fontSize:      'clamp(22px, 3vw, 32px)',
+            margin:        '0 0 6px',
+            fontSize:      'clamp(20px, 2.8vw, 30px)',
             fontWeight:    900,
             color:         C.white,
             letterSpacing: '-0.025em',
@@ -522,13 +564,40 @@ export default function IncidentReportsPage() {
           {t('incidents.public_reports.page_heading')}
         </h1>
 
-        <p style={{ margin: '0 0 24px', fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>
-        </p>
+        <h2
+          style={{
+            margin:        '0 0 28px',
+            fontSize:      'clamp(16px, 2vw, 22px)',
+            fontWeight:    700,
+            color:         'rgba(255,255,255,0.50)',
+            letterSpacing: '0.01em',
+            fontFamily:    '"Segoe UI", Tahoma, Arial, sans-serif',
+            lineHeight:    1.4,
+            direction:     'rtl',
+          }}
+        >
+          سجل شفاف لحوادث سلامة المرضى
+        </h2>
 
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <HeroKPI label={t('analytics.kpi.total_incidents')} value={totalIncidents} />
-          <HeroKPI label={t('analytics.kpi.open')}             value={openIncidents}  accent="#FCD34D" />
-          <HeroKPI label={t('analytics.kpi.high_risk_major')}  value={highRisk}       accent="#FCA5A5" />
+        {/* ── KPI row — centered, bilingual labels ── */}
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <HeroKPI
+            label={t('analytics.kpi.total_incidents')}
+            labelAr="إجمالي الحوادث"
+            value={totalIncidents}
+          />
+          <HeroKPI
+            label={t('analytics.kpi.open')}
+            labelAr="مفتوح"
+            value={openIncidents}
+            accent="#FCD34D"
+          />
+          <HeroKPI
+            label={t('analytics.kpi.high_risk_major')}
+            labelAr="خطر عالٍ (كبير)"
+            value={highRisk}
+            accent="#FCA5A5"
+          />
         </div>
       </div>
 

@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 
 from app.db.database import get_database
-from app.middleware.auth_middleware import require_role
+from app.middleware.auth_middleware import require_role, require_user_provisioner
 from app.models.user import UserCreate, UserResponse
 from app.services import auth_service
 from app.services.auth_service import generate_temp_password, hash_password
@@ -197,7 +197,7 @@ async def list_users(
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
     payload: UserCreate,
-    claims: dict[str, Any] = Depends(require_role(UserRole.top_management)),
+    claims: dict[str, Any] = Depends(require_user_provisioner()),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> UserResponse:
     _ = claims
@@ -238,7 +238,7 @@ async def deactivate_user(
 @router.post("/provision/facility/{facility_id}", response_model=FacilityProvisionResult)
 async def provision_facility_users(
     facility_id: str,
-    current_user: dict[str, Any] = Depends(require_role(UserRole.top_management)),
+    current_user: dict[str, Any] = Depends(require_user_provisioner()),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> FacilityProvisionResult:
     # Resolve actor — never raises; falls back gracefully so provision is never
@@ -343,7 +343,7 @@ async def provision_facility_users(
 @router.post("/provision/tier", response_model=TierUserResult)
 async def provision_tier_user(
     body: TierUserRequest,
-    current_user: dict[str, Any] = Depends(require_role(UserRole.top_management)),
+    current_user: dict[str, Any] = Depends(require_user_provisioner()),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> TierUserResult:
     if body.role in {UserRole.staff, UserRole.quality_admin}:
@@ -355,7 +355,13 @@ async def provision_tier_user(
     # Normalise username to lowercase so comparisons are case-insensitive by
     # construction.  The regex option also catches legacy mixed-case records.
     username = body.username.strip().lower()
-    email    = body.email.strip().lower() if body.email else None
+
+    # Email is important for login (it's the label shown on the login screen,
+    # and the primary lookup field in authenticate_user). Previously this was
+    # left as None when the admin didn't type one in, silently falling back to
+    # username-only login. Auto-generate one the same way provision_facility
+    # does, so every provisioned account always has a working login email.
+    email = body.email.strip().lower() if body.email else f"{username}@{EMAIL_DOMAIN}"
 
     existing_user = await db["users"].find_one(
         {"username": {"$regex": f"^{re.escape(username)}$", "$options": "i"}}
@@ -388,7 +394,7 @@ async def provision_tier_user(
                 "user_id": app_user_id,       # required by auth.py login handler
                 "username": username,          # stored lowercase
                 "full_name": body.full_name,
-                "email": email,               # stored lowercase (or None)
+                "email": email,               # always set now — see comment above
                 "hashed_password": hash_password(temp_pw),
                 "role": body.role.value,
                 "tier": tier_int,             # UserInDB.tier is int
