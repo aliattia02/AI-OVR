@@ -75,8 +75,15 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
         color: '#FFFFFF',
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100vh',
+        height: 'calc(100vh - 52px)',
+        maxHeight: 'calc(100vh - 52px)',
+        position: 'fixed',
+        top: 52,
+        ...(isRTL ? { right: 0 } : { left: 0 }),
+        zIndex: 90,
+        overflowY: 'auto',
         padding: '16px 12px',
+        boxSizing: 'border-box',
         direction: isRTL ? 'rtl' : 'ltr',
       }}
     >
@@ -195,14 +202,14 @@ export default function Sidebar({ onNavigate, currentView, onSignOut }) {
         <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>
           by{' '}
           <a
-            href="https://medlytico.com"
+            href="https://clidatech.com"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontWeight: 600 }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}
           >
-            medlytico.com
+            clidatech.com
           </a>
         </div>
       </div>

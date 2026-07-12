@@ -81,7 +81,7 @@ function Card({ title, value, sub }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function AnalyticsDashboard() {
-  const { tier, user } = useAuth();
+  const { tier, role, user } = useAuth();
   const { isRTL } = useDirection(); // RTL
   const { t } = useTranslation();
 
@@ -90,19 +90,43 @@ export default function AnalyticsDashboard() {
   const isFacilityScoped = tier === 2;
   const lockedFacilityName = isFacilityScoped ? (user?.facility_name ?? '') : null;
 
+  // Governorate managers are scoped to their own governorate only.
+  // Their governorate is locked into every filter object sent to the backend,
+  // the same way facility_name is locked for tier-2 users above. Administration
+  // and facility_name stay freely selectable — DashboardFilterBar already
+  // cascades those options from filters.governorate, so locking governorate
+  // here automatically restricts them too.
+  const isGovernorateScoped = role === 'governorate_manager';
+  const lockedGovernorate = isGovernorateScoped ? (user?.governorate ?? '') : null;
+
+  // Administration managers are scoped to their own administration only.
+  // Their administration is locked the same way — facility_name still cascades
+  // freely from filters.administration, so locking this alone is enough to
+  // restrict it to facilities within their administration.
+  const isAdministrationScoped = role === 'administration_manager';
+  const lockedAdministration = isAdministrationScoped ? (user?.administration ?? '') : null;
+
   // ── Filter state ───────────────────────────────────────────────────────────
   // Lifted here so a single source of truth feeds the filter bar, all hooks,
   // and the CompareView (which fetches its own data).
   const [filters, setFilters] = useState(EMPTY_FILTERS);
 
-  // For tier-2 users, always override facility_name with their own facility
+  // For tier-2 users, always override facility_name with their own facility;
+  // for governorate managers, always override governorate with their own;
+  // for administration managers, always override administration with their own —
   // before the filters reach the hooks or the filter bar.
-  const effectiveFilters = useMemo(
-    () => isFacilityScoped
-      ? { ...filters, facility_name: lockedFacilityName }
-      : filters,
-    [filters, isFacilityScoped, lockedFacilityName],
-  );
+  const effectiveFilters = useMemo(() => {
+    let next = filters;
+    if (isFacilityScoped) next = { ...next, facility_name: lockedFacilityName };
+    if (isGovernorateScoped) next = { ...next, governorate: lockedGovernorate };
+    if (isAdministrationScoped) next = { ...next, administration: lockedAdministration };
+    return next;
+  }, [
+    filters,
+    isFacilityScoped, lockedFacilityName,
+    isGovernorateScoped, lockedGovernorate,
+    isAdministrationScoped, lockedAdministration,
+  ]);
 
   // ── Data hooks — re-fetch whenever filters change ─────────────────────────
   const {
@@ -197,6 +221,8 @@ export default function AnalyticsDashboard() {
         onFiltersChange={setFilters}
         isLoading={backgroundFetching}
         lockedFacilityName={lockedFacilityName}
+        lockedGovernorate={lockedGovernorate}
+        lockedAdministration={lockedAdministration}
       />
 
       {/* ── KPI cards ────────────────────────────────────────────────────── */}

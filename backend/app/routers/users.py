@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 
 from app.db.database import get_database
-from app.middleware.auth_middleware import require_role, require_user_provisioner
+from app.middleware.auth_middleware import USER_PROVISIONING_ALLOWLIST, require_role, require_user_provisioner
 from app.models.user import UserCreate, UserResponse
 from app.services import auth_service
 from app.services.auth_service import generate_temp_password, hash_password
@@ -183,9 +183,15 @@ async def list_users(
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> list[UserResponse]:
     _ = claims
+    # Hide the hardcoded provisioning-allowlist accounts (e.g. "admin", "test")
+    # from the user-management list — they're internal/system accounts, not
+    # regular provisioned users, and shouldn't show up (or be deactivatable)
+    # from this UI.
+    hidden_pattern = "^(" + "|".join(re.escape(name) for name in USER_PROVISIONING_ALLOWLIST) + ")$"
+    query = {"username": {"$not": {"$regex": hidden_pattern, "$options": "i"}}}
     cursor = (
         db["users"]
-        .find({}, {"_id": 0, "hashed_password": 0, "password": 0, "refresh_tokens": 0})
+        .find(query, {"_id": 0, "hashed_password": 0, "password": 0, "refresh_tokens": 0})
         .sort("created_at", -1)
         .skip(skip)
         .limit(limit)
@@ -225,7 +231,7 @@ async def create_user(
 @router.patch("/{user_id}/deactivate", response_model=MessageResponse)
 async def deactivate_user(
     user_id: str,
-    claims: dict[str, Any] = Depends(require_role(UserRole.top_management)),
+    claims: dict[str, Any] = Depends(require_user_provisioner()),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> MessageResponse:
     _ = claims
@@ -233,6 +239,19 @@ async def deactivate_user(
     if result.matched_count == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return MessageResponse(message="User deactivated")
+
+
+@router.patch("/{user_id}/reactivate", response_model=MessageResponse)
+async def reactivate_user(
+    user_id: str,
+    claims: dict[str, Any] = Depends(require_user_provisioner()),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> MessageResponse:
+    _ = claims
+    result = await db["users"].update_one({"user_id": user_id}, {"$set": {"is_active": True}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return MessageResponse(message="User reactivated")
 
 
 @router.post("/provision/facility/{facility_id}", response_model=FacilityProvisionResult)

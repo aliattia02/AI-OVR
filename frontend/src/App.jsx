@@ -80,6 +80,9 @@ function AppLayout() {
     navigate('/login', { replace: true });
   };
 
+  const isRTL = i18n.language === 'ar';
+  const SIDEBAR_WIDTH = 210;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar />
@@ -89,7 +92,15 @@ function AppLayout() {
           onNavigate={(view) => navigate(PATH_BY_VIEW[view] || '/dashboard')}
           onSignOut={handleSignOut}
         />
-        <main style={{ flex: 1, overflow: 'auto', padding: 16 }}>
+        <main
+          style={{
+            flex: 1,
+            overflow: 'auto',
+            padding: 16,
+            marginLeft: isRTL ? 0 : SIDEBAR_WIDTH,
+            marginRight: isRTL ? SIDEBAR_WIDTH : 0,
+          }}
+        >
           <Outlet />
         </main>
       </div>

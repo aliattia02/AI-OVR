@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fetchFacilitiesFull, provisionFacility, provisionTierUser } from '../services/admin';
+import { deactivateUser, fetchFacilitiesFull, provisionFacility, provisionTierUser, reactivateUser } from '../services/admin';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import QRCodeView from '../components/patient/QRCodeView';
@@ -620,6 +620,10 @@ function UsersTab() {
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [pendingId, setPendingId] = useState(null);
+  const [actionError, setActionError] = useState('');
+
+  const canDeactivate = Boolean(user?.can_provision_users);
 
   useEffect(() => {
     // Wait until AuthContext has confirmed the session and token is set.
@@ -633,6 +637,27 @@ function UsersTab() {
       .catch(() => setError('Failed to load users. Check your connection or permissions.'))
       .finally(() => setLoading(false));
   }, [user]);
+
+  const handleToggleActive = async (u) => {
+    setActionError('');
+    setPendingId(u.user_id);
+    try {
+      if (u.is_active) {
+        await deactivateUser(u.user_id);
+      } else {
+        await reactivateUser(u.user_id);
+      }
+      setUsers((prev) =>
+        prev.map((entry) =>
+          entry.user_id === u.user_id ? { ...entry, is_active: !entry.is_active } : entry
+        )
+      );
+    } catch (err) {
+      setActionError(err?.response?.data?.detail || 'Failed to update user status.');
+    } finally {
+      setPendingId(null);
+    }
+  };
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -710,6 +735,8 @@ function UsersTab() {
         {filtered.length} of {users.length} user{users.length !== 1 ? 's' : ''}
       </div>
 
+      {actionError && <div style={{ ...styles.error, marginBottom: 10 }}>{actionError}</div>}
+
       {/* ── List ── */}
       {filtered.length === 0 ? (
         <div
@@ -759,7 +786,34 @@ function UsersTab() {
                     {u.email || '—'}
                   </div>
                 </div>
-                <StatusDot active={u.is_active} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                  <StatusDot active={u.is_active} />
+                  {canDeactivate && (
+                    <button
+                      onClick={() => handleToggleActive(u)}
+                      disabled={pendingId === u.user_id}
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: '3px 9px',
+                        borderRadius: 6,
+                        border: `1px solid ${u.is_active ? '#FCA5A5' : 'var(--color-border-primary)'}`,
+                        background: u.is_active ? '#FEF2F2' : 'var(--color-surface-primary)',
+                        color: u.is_active ? '#B91C1C' : 'var(--color-text-primary)',
+                        cursor: pendingId === u.user_id ? 'not-allowed' : 'pointer',
+                        opacity: pendingId === u.user_id ? 0.6 : 1,
+                        fontFamily: 'inherit',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {pendingId === u.user_id
+                        ? 'Working…'
+                        : u.is_active
+                          ? 'Deactivate'
+                          : 'Reactivate'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Meta row: role + tier + location */}

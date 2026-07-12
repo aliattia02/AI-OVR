@@ -5,11 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5949d76a-3f9e-467c-91cf-0e949665c5cc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.expo/dev/logs/export.log" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/.expo/dev/logs/export.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminProvision.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminProvision.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/analytics/AnalyticsDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/analytics/AnalyticsDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/analytics/DashboardFilterBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/analytics/DashboardFilterBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/public/FooterSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/public/FooterSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/shared/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/shared/Sidebar.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,7 +126,7 @@
       <workItem from="1783500568087" duration="2675000" />
       <workItem from="1783503967081" duration="1623000" />
       <workItem from="1783622688203" duration="459000" />
-      <workItem from="1783855588997" duration="4695000" />
+      <workItem from="1783855588997" duration="9361000" />
     </task>
     <servers />
   </component>

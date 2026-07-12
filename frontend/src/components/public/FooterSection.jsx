@@ -78,14 +78,14 @@ export default function FooterSection() {
         <div style={{ marginTop: 6, textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.4)" }}>
           Designed by{" "}
           <a
-            href="https://medlytico.com"
+            href="https://clidatech.com"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: "rgba(255,255,255,0.6)", textDecoration: "none", fontWeight: 600 }}
             onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
           >
-            medlytico.com
+            clidatech.com
           </a>
         </div>
       </div>

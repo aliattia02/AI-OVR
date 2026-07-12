@@ -143,7 +143,7 @@ function DateRange({ label, from, to, onFromChange, onToChange, fromLabel, toLab
  * @param {Function} props.onFiltersChange Called with the new filters object on any change.
  * @param {boolean}  [props.isLoading]    When true, shows a subtle loading pulse on the bar.
  */
-export default function DashboardFilterBar({ filters, onFiltersChange, isLoading = false, lockedFacilityName = null }) {
+export default function DashboardFilterBar({ filters, onFiltersChange, isLoading = false, lockedFacilityName = null, lockedGovernorate = null, lockedAdministration = null }) {
   const { data: cascading, isLoading: cascadingLoading } = useCascadingFacilities();
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
@@ -326,40 +326,100 @@ export default function DashboardFilterBar({ filters, onFiltersChange, isLoading
         alignItems: 'end',
       }}>
 
-        {/* Governorate */}
+        {/* Governorate — locked for governorate managers */}
         <FilterGroup label={t('common.fields.governorate')}>
-          <select
-            value={filters.governorate}
-            onChange={e => set('governorate', e.target.value)}
-            disabled={cascadingLoading}
-            style={selectStyle(!!filters.governorate, isAr)}
-            onFocus={e => { e.target.style.borderColor = C.brand; }}
-            onBlur={e => { e.target.style.borderColor = C.border; }}
-          >
-            <option value="">{t('analytics.filters.all_governorates')}</option>
-            {governorateOptions.map(g => (
-              <option key={g} value={g}>{t(`common.governorates.${g.toLowerCase()}`, g.replace(/_/g, ' '))}</option>
-            ))}
-          </select>
+          {lockedGovernorate !== null ? (
+            <div style={{
+              border: `1px solid ${C.border}`,
+              borderRadius: 7,
+              padding: '7px 10px',
+              fontSize: 13,
+              color: C.textMid,
+              backgroundColor: C.bgAlt,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              minWidth: 0,
+            }}>
+              <span style={{
+                fontSize: 10,
+                backgroundColor: C.brandLight,
+                color: C.brand,
+                borderRadius: 4,
+                padding: '1px 5px',
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+              }}>
+                {t('analytics.filters.your_governorate', { defaultValue: 'Your governorate' })}
+              </span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {isAr ? lockedGovernorate : t(`common.governorates.${lockedGovernorate.toLowerCase()}`, lockedGovernorate.replace(/_/g, ' '))}
+              </span>
+            </div>
+          ) : (
+            <select
+              value={filters.governorate}
+              onChange={e => set('governorate', e.target.value)}
+              disabled={cascadingLoading}
+              style={selectStyle(!!filters.governorate, isAr)}
+              onFocus={e => { e.target.style.borderColor = C.brand; }}
+              onBlur={e => { e.target.style.borderColor = C.border; }}
+            >
+              <option value="">{t('analytics.filters.all_governorates')}</option>
+              {governorateOptions.map(g => (
+                <option key={g} value={g}>{t(`common.governorates.${g.toLowerCase()}`, g.replace(/_/g, ' '))}</option>
+              ))}
+            </select>
+          )}
         </FilterGroup>
 
-        {/* Administration — cascades from Governorate */}
+        {/* Administration — cascades from Governorate, locked for administration managers */}
         <FilterGroup label={t('common.fields.administration')}>
-          <select
-            value={filters.administration}
-            onChange={e => set('administration', e.target.value)}
-            disabled={cascadingLoading || administrationOptions.length === 0}
-            style={selectStyle(!!filters.administration, isAr)}
-            onFocus={e => { e.target.style.borderColor = C.brand; }}
-            onBlur={e => { e.target.style.borderColor = C.border; }}
-          >
-            <option value="">{t('analytics.filters.all_administrations')}</option>
-            {administrationOptions.map(a => (
-              // value = Arabic canonical (what the backend filters on)
-              // label = English from administrations_en, falls back to Arabic
-              <option key={a} value={a}>{isAr ? a : (adminEnMap[a] || a)}</option>
-            ))}
-          </select>
+          {lockedAdministration !== null ? (
+            <div style={{
+              border: `1px solid ${C.border}`,
+              borderRadius: 7,
+              padding: '7px 10px',
+              fontSize: 13,
+              color: C.textMid,
+              backgroundColor: C.bgAlt,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              minWidth: 0,
+            }}>
+              <span style={{
+                fontSize: 10,
+                backgroundColor: C.brandLight,
+                color: C.brand,
+                borderRadius: 4,
+                padding: '1px 5px',
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+              }}>
+                {t('analytics.filters.your_administration', { defaultValue: 'Your administration' })}
+              </span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {isAr ? lockedAdministration : (adminEnMap[lockedAdministration] || lockedAdministration)}
+              </span>
+            </div>
+          ) : (
+            <select
+              value={filters.administration}
+              onChange={e => set('administration', e.target.value)}
+              disabled={cascadingLoading || administrationOptions.length === 0}
+              style={selectStyle(!!filters.administration, isAr)}
+              onFocus={e => { e.target.style.borderColor = C.brand; }}
+              onBlur={e => { e.target.style.borderColor = C.border; }}
+            >
+              <option value="">{t('analytics.filters.all_administrations')}</option>
+              {administrationOptions.map(a => (
+                // value = Arabic canonical (what the backend filters on)
+                // label = English from administrations_en, falls back to Arabic
+                <option key={a} value={a}>{isAr ? a : (adminEnMap[a] || a)}</option>
+              ))}
+            </select>
+          )}
         </FilterGroup>
 
         {/* Facility Type — sourced from database via cascading endpoint */}

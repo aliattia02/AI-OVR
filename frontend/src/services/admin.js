@@ -20,6 +20,22 @@ export const provisionTierUser = async (payload) => {
   return data;
 };
 
+export const deactivateUser = async (userId) => {
+  if (!userId) {
+    throw new Error('userId is required');
+  }
+  const { data } = await api.patch(`/users/${userId}/deactivate`);
+  return data;
+};
+
+export const reactivateUser = async (userId) => {
+  if (!userId) {
+    throw new Error('userId is required');
+  }
+  const { data } = await api.patch(`/users/${userId}/reactivate`);
+  return data;
+};
+
 export const fetchFacilitiesFull = async () => {
   const { data } = await api.get('/facilities/full');
   return data; // FacilityResponse[] — includes facility_id, governorate, administration, facility_name
