@@ -147,28 +147,126 @@ function escapeCSV(val, placeholder) {
   return s;
 }
 
-const buildCSVColumns = (t) => [
-  { key: 'incident_id',          label: t('incidents.detail.fields.incident_id') },
-  { key: 'status',               label: t('incidents.status.label') },
-  { key: 'severity',             label: t('incidents.severity.label') },
-  { key: 'error_classification', label: t('incidents.classification.column_label') },
-  { key: 'event_type',           label: t('incidents.event_type.label') },
-  { key: 'facility_name',        label: t('common.fields.facility') },
-  { key: 'facility_type',        label: t('incidents.new.facility_type_label') },
-  { key: 'governorate',          label: t('incidents.detail.fields.governorate') },
-  { key: 'administration',       label: t('incidents.detail.fields.administration') },
-  { key: 'involved_person',      label: t('incidents.list.person_involved_label') },
-  { key: 'reporter_role',        label: t('incidents.new.reporter_role_label') },
-  { key: 'occurrence_date',      label: t('incidents.detail.fields.occurrence_date') },
-  { key: 'registration_date',    label: t('common.fields.creation_date') },
-  { key: 'risk_score',           label: t('incidents.risk.risk_score_label') },
-  { key: 'description',          label: t('incidents.detail.fields.description') },
-];
+// Resolves a dotted path (e.g. 'ai_metadata.auto_classification') against a
+// row object. Returns undefined if any segment along the way is missing —
+// safe for legacy incidents that predate a given sub-field.
+function getPath(obj, path) {
+  return path.split('.').reduce(
+    (acc, part) => (acc && typeof acc === 'object' ? acc[part] : undefined),
+    obj,
+  );
+}
+
+function joinList(val) {
+  return Array.isArray(val) ? val.filter(v => v != null && v !== '').join('; ') : val;
+}
+
+function countList(val) {
+  return Array.isArray(val) ? val.length : 0;
+}
+
+function makeYesNo(t) {
+  return (val) => {
+    if (typeof val !== 'boolean') return val;
+    return val ? t('common.yes', { defaultValue: 'Yes' }) : t('common.no', { defaultValue: 'No' });
+  };
+}
+
+// Full export column set — every meaningful field on the incident document.
+// Deliberately excludes ai_metadata.embedding_vector (a 1536-number vector,
+// not useful in a spreadsheet) and ai_metadata.embedding_id (internal only).
+// Mirrors backend/app/routers/exports.py's EXCEL_EXPORT_COLUMNS so the CSV
+// and XLSX exports carry the same information.
+const buildCSVColumns = (t) => {
+  const yesNo = makeYesNo(t);
+  return [
+    // ── Core ──────────────────────────────────────────────────────────────
+    { key: 'incident_id',          label: t('incidents.detail.fields.incident_id') },
+    { key: 'status',               label: t('incidents.status.label') },
+    { key: 'severity',             label: t('incidents.severity.label') },
+    { key: 'probability',          label: t('incidents.detail.fields.probability') },
+    { key: 'risk_score',           label: t('incidents.risk.risk_score_label') },
+    { key: 'error_classification', label: t('incidents.classification.column_label') },
+    { key: 'specific_error',       label: t('incidents.detail.fields.specific_error') },
+    { key: 'event_type',           label: t('incidents.event_type.label') },
+    { key: 'event_discovery_method', label: t('incidents.detail.fields.event_discovery_method') },
+    { key: 'facility_name',        label: t('common.fields.facility') },
+    { key: 'facility_type',        label: t('incidents.new.facility_type_label') },
+    { key: 'governorate',          label: t('incidents.detail.fields.governorate') },
+    { key: 'administration',       label: t('incidents.detail.fields.administration') },
+    { key: 'occurrence_date',      label: t('incidents.detail.fields.occurrence_date') },
+    { key: 'occurrence_time',      label: t('incidents.detail.fields.occurrence_time') },
+    { key: 'occurrence_location',  label: t('incidents.detail.fields.occurrence_location') },
+    { key: 'registration_date',    label: t('common.fields.creation_date') },
+    { key: 'report_date',          label: t('incidents.detail.fields.report_date') },
+    { key: 'report_time',          label: t('incidents.detail.fields.report_time') },
+    { key: 'reporter_type',        label: t('incidents.detail.fields.reporter_type') },
+    { key: 'reporter_role',        label: t('incidents.new.reporter_role_label') },
+    { key: 'reporter_user_id',     label: t('incidents.detail.fields.reporter_user_id', { defaultValue: 'Reporter User ID' }) },
+    { key: 'involved_person',      label: t('incidents.list.person_involved_label') },
+    { key: 'reporting_department', label: t('incidents.detail.fields.reporting_department') },
+    { key: 'responsible_manager',  label: t('incidents.detail.fields.responsible_manager') },
+    { key: 'description',          label: t('incidents.detail.fields.description') },
+    { key: 'recommendations',      label: t('incidents.detail.fields.recommendations') },
+    { key: 'notes',                label: t('incidents.detail.fields.notes') },
+    { key: 'medical_file_number',  label: t('incidents.detail.fields.medical_file_number') },
+    { key: 'medication_stage_of_error', label: t('incidents.detail.fields.medication_stage_of_error') },
+    { key: 'medication_merp_category',  label: t('incidents.detail.fields.medication_merp_category') },
+    { key: 'medication_error_merp_category', label: t('incidents.gahar.disclosure_fields.merp_category') },
+
+    // ── Disclosure ────────────────────────────────────────────────────────
+    { key: 'disclosure_date',            label: t('incidents.gahar.disclosure_fields.disclosure_date') },
+    { key: 'disclosure_method',          label: t('incidents.gahar.disclosure_fields.disclosure_method') },
+    { key: 'disclosure_responsible',     label: t('incidents.gahar.disclosure_fields.responsible_person') },
+    { key: 'vulnerable_patient',         label: t('incidents.gahar.disclosure_fields.vulnerable_patient'), format: yesNo },
+    { key: 'vulnerable_population_type', label: t('incidents.gahar.disclosure_fields.vulnerable_population_type') },
+    { key: 'workplace_violence',         label: t('incidents.gahar.disclosure_fields.workplace_violence'), format: yesNo },
+
+    // ── Actions / CAPA ────────────────────────────────────────────────────
+    { key: 'corrective_action', label: t('incidents.action.corrective_action') },
+    { key: 'preventive_action', label: t('incidents.action.preventive_action') },
+    { key: 'action_date',       label: t('incidents.action.action_date') },
+    { key: 'action_time',       label: t('incidents.action.action_time') },
+    { key: 'action_status',     label: t('incidents.detail.fields.action_status') },
+    { key: 'final_report',      label: t('incidents.final.panel_title', { defaultValue: 'Final Report' }) },
+
+    // ── GAHAR compliance ──────────────────────────────────────────────────
+    { key: 'gahar_section',            label: t('incidents.gahar.section_label') },
+    { key: 'gahar_gsr_code',           label: t('incidents.gahar.gsr_code_label') },
+    { key: 'gahar_standard_code',      label: t('incidents.gahar.standard_code_label') },
+    { key: 'gahar_compliance_status',  label: t('incidents.gahar.compliance_status_label') },
+    { key: 'gahar_evidence',           label: t('incidents.gahar.evidence_label') },
+    { key: 'gahar_gap_analysis',       label: t('incidents.gahar.gap_analysis_label') },
+    { key: 'gahar_action_plan',        label: t('incidents.gahar.action_plan_label') },
+
+    // ── AI metadata ───────────────────────────────────────────────────────
+    { key: 'ai_metadata.auto_classification',   label: t('incidents.list.ai_suggested_classification', { defaultValue: 'AI Suggested Classification' }) },
+    { key: 'ai_metadata.auto_event_type',        label: t('incidents.list.ai_suggested_event_type', { defaultValue: 'AI Suggested Event Type' }) },
+    { key: 'ai_metadata.classification_score',   label: t('incidents.list.ai_classification_confidence', { defaultValue: 'AI Classification Confidence' }) },
+    { key: 'ai_metadata.ai_risk_score',          label: t('incidents.list.ai_risk_score', { defaultValue: 'AI Risk Score' }) },
+    { key: 'ai_metadata.signal_flags',           label: t('incidents.list.ai_signal_flags', { defaultValue: 'AI Signal Flags' }), format: joinList },
+    { key: 'ai_metadata.similar_incident_ids',   label: t('incidents.list.ai_similar_incidents', { defaultValue: 'Similar Incident IDs' }), format: joinList },
+    { key: 'ai_metadata.model_version',          label: t('incidents.list.ai_model_version', { defaultValue: 'AI Model Version' }) },
+    { key: 'ai_metadata.processed_at',            label: t('incidents.list.ai_processed_at', { defaultValue: 'AI Processed At' }) },
+    { key: 'ai_metadata.human_reviewed',         label: t('incidents.list.ai_human_reviewed', { defaultValue: 'AI Human Reviewed' }), format: yesNo },
+    { key: 'ai_metadata.feedback.human_chose',   label: t('incidents.list.ai_feedback_human_chose', { defaultValue: 'AI Feedback: Human Chose' }) },
+    { key: 'ai_metadata.feedback.reviewer_id',   label: t('incidents.list.ai_feedback_reviewer_id', { defaultValue: 'AI Feedback: Reviewer ID' }) },
+    { key: 'ai_metadata.feedback.reviewed_at',   label: t('incidents.list.ai_feedback_reviewed_at', { defaultValue: 'AI Feedback: Reviewed At' }) },
+
+    // ── Meta ──────────────────────────────────────────────────────────────
+    { key: 'attachments', label: t('incidents.list.attachments_count', { defaultValue: 'Attachments Count' }), format: countList },
+    { key: 'audit_trail',  label: t('incidents.list.audit_trail_count', { defaultValue: 'Audit Trail Entries' }), format: countList },
+  ];
+};
 
 function downloadCSV(rows, columns, placeholder) {
   const header = columns.map(c => c.label).join(',');
   const body = rows.map(r =>
-    columns.map(c => escapeCSV(r[c.key], placeholder)).join(',')
+    columns.map(c => {
+      const raw = getPath(r, c.key);
+      const val = c.format ? c.format(raw) : raw;
+      return escapeCSV(val, placeholder);
+    }).join(',')
   ).join('\n');
   const blob = new Blob([`\uFEFF${header}\n${body}`], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
